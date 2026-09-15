@@ -33,7 +33,7 @@ from tax_gps.policy.activation import ActivatedRulePack
 from tax_gps.policy.models import RuleSource
 from tax_gps.profile.models import UserProfile
 
-ENGINE_VERSION = "tax-gps-core/0.1.0"
+ENGINE_VERSION = "tax-gps-core/0.1.1"
 
 
 def _step(
@@ -50,8 +50,23 @@ def _step(
 
 
 def _sources(rule_ids_used: tuple[str, ...], pack: ActivatedRulePack) -> tuple[RuleSource, ...]:
-    source_ids = {pack.pack.rule(rule_id).source_id for rule_id in rule_ids_used}
-    return tuple(source for source in pack.pack.sources if source.source_id in source_ids)
+    """Resolve applied-rule sources in first-reference order.
+
+    Each rule contributes its primary source followed by supplementary sources in Rule Pack
+    order. ``seen`` is used only for membership checks; serialized order never depends on set
+    iteration.
+    """
+    sources_by_id = {source.source_id: source for source in pack.pack.sources}
+    seen: set[str] = set()
+    ordered: list[RuleSource] = []
+    for rule_id in rule_ids_used:
+        rule = pack.pack.rule(rule_id)
+        source_ids = (cast(str, rule.source_id), *rule.supplementary_source_ids)
+        for source_id in source_ids:
+            if source_id not in seen:
+                ordered.append(sources_by_id[source_id])
+                seen.add(source_id)
+    return tuple(ordered)
 
 
 def calculate_tax(

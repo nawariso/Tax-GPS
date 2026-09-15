@@ -37,7 +37,7 @@ The runtime has **no third-party dependencies**; only the standard library is us
 ## Setup
 
 ```console
-uv sync
+uv sync --locked
 ```
 
 ## Usage
@@ -103,17 +103,27 @@ authority, or an official provider. Blogs, social media, SEO pages, and AI outpu
 
 ## Verification
 
+Local verification uses the same locked dependency resolution and quality gates as
+`.github/workflows/ci.yml` (Python 3.12 in CI):
+
 ```console
+uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy --strict
 uv run pytest --cov=tax_gps --cov-branch --cov-report=term-missing -q
 uv run pytest -m mandatory -q     # specification section 12 acceptance tests
 uv run pytest -m boundary -q      # PIT bracket boundaries
 uv run pytest -m golden -q        # personas G01-G03 and fixtures
 uv run pytest -m negative -q      # invalid input, unsupported income, inactive policy
 uv run pytest -m replay -q        # deterministic hash and replay
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy
 uv build
 ```
 
 Coverage is gated at 100% statements and branches.
+
+Engine and package version `0.1.1` expands calculation provenance to include every applied
+rule's primary source followed by supplementary sources in Rule Pack order, deduplicated at
+first reference. Because sources are part of canonical material output, hashes differ from
+`0.1.0`; new `0.1.1` calculations and replay remain deterministic. Historical snapshots require
+the matching `0.1.0` engine artifact.

@@ -66,14 +66,16 @@ and extended in place.
 Final verification commands:
 
 ```console
+uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy --strict
 uv run pytest --cov=tax_gps --cov-branch --cov-report=term-missing -q
 uv run pytest -m mandatory -q
 uv run pytest -m golden -q
 uv run pytest -m negative -q
 uv run pytest -m replay -q
 uv run pytest -m boundary -q
-uv run ruff check .
-uv run mypy
 uv build
 ```
 
@@ -190,10 +192,14 @@ These are deliberately not resolved by invented rules:
    parent aged 60 or over with assessable income not exceeding 30,000 THB. The requirement keeps
    eligibility separate from amount, so those conditions remain caller-asserted inputs and are
    never inferred.
+9. **DEFERRED — taxpayer structural validation:** profile models currently permit semantic
+   duplicates such as repeated parent roles or child order values. Richer family identity and
+   structural validation belong to the next taxpayer-profile/existing-rights requirement and are
+   deliberately not implemented by the TGPS-P1-001B provenance/CI hardening change.
 
 ## 10. BPMN / DMN impact
 
-`NO MODEL CHANGE`.
+`NO BUSINESS PROCESS CHANGE`.
 
 Boundaries remain aligned with Tax State Calculation, Existing Rights Discovery, Rule Governance,
 Audit/Replay, Policy Readiness, and Deduction Capacity. No workflow engine or altered process
@@ -202,18 +208,18 @@ semantics were introduced.
 ## 11. Reproduction commands and final test report
 
 ```text
-Tests collected: 238
-Tests passed: 238
+Tests collected: 243
+Tests passed: 243
 Tests failed: 0
 Coverage: 100% statements, 100% branches
 Mandatory tests: 22 passed
 Boundary tests: 9 passed
 Golden tests: 5 passed
 Negative tests: 87 passed
-Replay tests: 7 passed
+Replay tests: 8 passed
 ```
 
-`uv build` succeeds, producing `tax_gps_core-0.1.0.tar.gz` and `tax_gps_core-0.1.0-py3-none-any.whl`.
+`uv build` succeeds, producing `tax_gps_core-0.1.1.tar.gz` and `tax_gps_core-0.1.1-py3-none-any.whl`.
 
 Use the exact commands in section 5 from the repository root.
 
@@ -248,3 +254,14 @@ concerns. Three non-blocking suggestions were raised; their disposition:
   `main` is reported as gone, so pushing is left to the repository owner
 
 Independent review result: **PASS**.
+
+## 13. TGPS-P1-001B foundation hardening
+
+- Calculation provenance now resolves each applied rule's primary source followed by its
+  supplementary sources in declared Rule Pack order, deduplicated at first reference.
+- Engine and package versions are `0.1.1`. The expanded canonical source list intentionally
+  changes output hashes from `0.1.0`; new calculations and replay remain deterministic, while
+  historical snapshots require their matching `0.1.0` engine artifact.
+- `.github/workflows/ci.yml` runs the locked Python 3.12 lint, format, strict-type, 100% coverage,
+  and build gates for pushes and pull requests to `main`, with read-only repository permission.
+- BPMN/DMN impact: `NO BUSINESS PROCESS CHANGE`.

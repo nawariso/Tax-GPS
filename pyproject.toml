@@ -1,6 +1,6 @@
 [project]
 name = "tax-gps-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "Tax GPS deterministic Thai personal income tax core (TGPS-P1-001)"
 readme = "README.md"
 requires-python = ">=3.12"
