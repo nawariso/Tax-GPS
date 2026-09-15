@@ -1,0 +1,145 @@
+{
+  "schema_version": "1",
+  "rule_pack_id": "TH-PIT-2026-001",
+  "version": "1.0.0",
+  "description": "Thailand individual employment-income tax rules required by TGPS-P1-001 for tax year 2026",
+  "jurisdiction": "TH",
+  "tax_year": 2026,
+  "currency": "THB",
+  "status": "EFFECTIVE",
+  "sources": [
+    {
+      "source_id": "RD-RC-SECTION-38-64",
+      "title": "Revenue Code, Sections 38 to 64",
+      "publisher": "Thai Revenue Department",
+      "authority": "REVENUE_DEPARTMENT",
+      "url": "https://www.rd.go.th/5937.html",
+      "published_at": null,
+      "retrieved_at": "2026-09-15"
+    },
+    {
+      "source_id": "RD-PIT-RATES",
+      "title": "Personal income tax rate schedule",
+      "publisher": "Thai Revenue Department",
+      "authority": "REVENUE_DEPARTMENT",
+      "url": "https://www.rd.go.th/5938.html",
+      "published_at": null,
+      "retrieved_at": "2026-09-15"
+    },
+    {
+      "source_id": "RD-EXPENSE-40-1-2026",
+      "title": "Personal income tax expense deductions (tax year 2026)",
+      "publisher": "Thai Revenue Department",
+      "authority": "REVENUE_DEPARTMENT",
+      "url": "https://rd.go.th/fileadmin/user_upload/callcenter/Q_A___Easy_Tax/Taxdeduct69.pdf",
+      "published_at": null,
+      "retrieved_at": "2026-09-15"
+    },
+    {
+      "source_id": "RD-MORTGAGE-2025-INSTRUCTIONS",
+      "title": "P.N.D.90 tax year 2025 instructions",
+      "publisher": "Thai Revenue Department",
+      "authority": "REVENUE_DEPARTMENT",
+      "url": "https://www.rd.go.th/fileadmin/tax_pdf/pit/2568/Ins90_241268.pdf",
+      "published_at": "2025-12-24",
+      "retrieved_at": "2026-09-15"
+    },
+    {
+      "source_id": "OCS-SSO-WAGE-BASE-2025",
+      "title": "Ministerial Regulation prescribing minimum and maximum wages for insured persons under section 33, B.E. 2568",
+      "publisher": "Office of the Council of State",
+      "authority": "THAI_LAW_ROYAL_GAZETTE",
+      "url": "https://www.ocs.go.th/searchlaw/law-index/?page=4",
+      "published_at": "2025-12-12",
+      "retrieved_at": "2026-09-15"
+    },
+    {
+      "source_id": "THGOV-CABINET-SSO-2025",
+      "title": "Cabinet resolution summary: phased Section 33 wage-base adjustment",
+      "publisher": "Royal Thai Government",
+      "authority": "GOVERNMENT_AUTHORITY",
+      "url": "https://www.thaigov.go.th/uploads/document/235/2025/12/pdf/20251202192323_4506.pdf",
+      "published_at": "2025-12-02",
+      "retrieved_at": "2026-09-15"
+    },
+    {
+      "source_id": "RD-DECREE-470",
+      "title": "Royal Decree issued under the Revenue Code governing tax exemption (No. 470) B.E. 2551 — exempts net income not exceeding 150,000 baht",
+      "publisher": "Thai Revenue Department",
+      "authority": "THAI_LAW_ROYAL_GAZETTE",
+      "url": "https://www.rd.go.th/33893.html",
+      "published_at": null,
+      "retrieved_at": "2026-09-15"
+    },
+    {
+      "source_id": "RD-PIT-BRACKET-TABLE",
+      "title": "Personal income tax bracket table effective from tax year 2560 (1-150,000 exempt through over 5,000,000 at 35%)",
+      "publisher": "Thai Revenue Department",
+      "authority": "REVENUE_DEPARTMENT",
+      "url": "https://www.rd.go.th/fileadmin/user_upload/borkor/tax121260.pdf",
+      "published_at": null,
+      "retrieved_at": "2026-09-15"
+    },
+    {
+      "source_id": "RD-DEDUCTION-SCHEDULE",
+      "title": "Revenue Department published allowance schedule: what deductions is a taxpayer entitled to?",
+      "publisher": "Thai Revenue Department",
+      "authority": "REVENUE_DEPARTMENT",
+      "url": "https://www.rd.go.th/fileadmin/download/tax_deductions_update30072567.pdf",
+      "published_at": "2024-07-30",
+      "retrieved_at": "2026-09-15"
+    },
+    {
+      "source_id": "RD-RMF-FAQ",
+      "title": "RMF and LTF allowance questions",
+      "publisher": "Thai Revenue Department",
+      "authority": "REVENUE_DEPARTMENT",
+      "url": "https://www.rd.go.th/60059.html",
+      "published_at": null,
+      "retrieved_at": "2026-09-15"
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "TH-PIT-RATE-SCHEDULE",
+      "version": "1.0.0",
+      "tax_year": 2026,
+      "effective_from": "2026-01-01",
+      "effective_to": "2026-12-31",
+      "status": "EFFECTIVE",
+      "source_id": "RD-PIT-RATES",
+      "verified_at": "2026-09-15",
+      "parameters": {"brackets": [{"upper": "150000.00", "rate": "0"}, {"upper": "300000.00", "rate": "0.05"}, {"upper": "500000.00", "rate": "0.10"}, {"upper": "750000.00", "rate": "0.15"}, {"upper": "1000000.00", "rate": "0.20"}, {"upper": "2000000.00", "rate": "0.25"}, {"upper": "5000000.00", "rate": "0.30"}, {"upper": null, "rate": "0.35"}]},
+      "supplementary_source_ids": ["RD-DECREE-470", "RD-PIT-BRACKET-TABLE", "RD-RC-SECTION-38-64"],
+      "review_notes": ["The Revenue Code rate schedule itself begins at 300,000 baht; the exemption of net income not exceeding 150,000 baht is granted by Royal Decree (No. 470) B.E. 2551 and is cited separately."]
+    },
+    {
+      "rule_id": "TH-PIT-EXPENSE-40-1", "version": "1.0.0", "tax_year": 2026, "effective_from": "2026-01-01", "effective_to": "2026-12-31", "status": "EFFECTIVE", "source_id": "RD-EXPENSE-40-1-2026", "verified_at": "2026-09-15",
+      "parameters": {"rate": "0.50", "cap": "100000.00"}, "supplementary_source_ids": ["RD-RC-SECTION-38-64"], "review_notes": []
+    },
+    {
+      "rule_id": "TH-PIT-ALLOWANCE-PERSONAL", "version": "1.0.0", "tax_year": 2026, "effective_from": "2026-01-01", "effective_to": "2026-12-31", "status": "EFFECTIVE", "source_id": "RD-RC-SECTION-38-64", "verified_at": "2026-09-15",
+      "parameters": {"amount": "60000.00"}, "supplementary_source_ids": ["RD-DEDUCTION-SCHEDULE"], "review_notes": []
+    },
+    {
+      "rule_id": "TH-PIT-ALLOWANCE-SSO-33", "version": "1.0.0", "tax_year": 2026, "effective_from": "2026-01-01", "effective_to": "2026-12-31", "status": "EFFECTIVE", "source_id": "OCS-SSO-WAGE-BASE-2025", "verified_at": "2026-09-15",
+      "parameters": {"rate": "0.05", "monthly_wage_floor": "1650.00", "monthly_wage_ceiling": "17500.00", "monthly_maximum": "875.00"}, "supplementary_source_ids": ["THGOV-CABINET-SSO-2025", "RD-RC-SECTION-38-64", "RD-DEDUCTION-SCHEDULE"], "review_notes": ["Tax deduction uses actual contributions paid; the statutory wage base is used only to calculate a contribution when requested.", "The cabinet summary confirms the 17,500 baht ceiling applies to B.E. 2569-2571 (2026-2028), the 1,650 baht floor is unchanged, and the rate remains 5%, giving a 875 baht monthly maximum."]
+    },
+    {
+      "rule_id": "TH-PIT-ALLOWANCE-PARENT", "version": "1.0.0", "tax_year": 2026, "effective_from": "2026-01-01", "effective_to": "2026-12-31", "status": "EFFECTIVE", "source_id": "RD-RC-SECTION-38-64", "verified_at": "2026-09-15",
+      "parameters": {"amount_per_eligible_parent": "30000.00"}, "supplementary_source_ids": ["RD-DEDUCTION-SCHEDULE"], "review_notes": ["Eligibility is supplied explicitly; this phase does not infer it.", "The published schedule conditions this allowance on a parent aged 60 or over whose assessable income does not exceed 30,000 baht; those statutory conditions are caller-asserted in this phase."]
+    },
+    {
+      "rule_id": "TH-PIT-ALLOWANCE-CHILD", "version": "1.0.0", "tax_year": 2026, "effective_from": "2026-01-01", "effective_to": "2026-12-31", "status": "EFFECTIVE", "source_id": "RD-RC-SECTION-38-64", "verified_at": "2026-09-15",
+      "parameters": {"standard": "30000.00", "additional_legal_child": "30000.00", "additional_min_order": 2, "additional_min_birth_year": 2018}, "supplementary_source_ids": ["RD-DEDUCTION-SCHEDULE"], "review_notes": ["Legal eligibility is supplied explicitly; this phase does not infer age, education, income, custody, or duplicate-claim conditions.", "The published schedule also caps non-legitimate (adopted) children at three; that count restriction is out of scope for this phase and is not enforced here."]
+    },
+    {
+      "rule_id": "TH-PIT-ALLOWANCE-MORTGAGE-INTEREST", "version": "1.0.0", "tax_year": 2026, "effective_from": "2026-01-01", "effective_to": "2026-12-31", "status": "EFFECTIVE", "source_id": "RD-MORTGAGE-2025-INSTRUCTIONS", "verified_at": "2026-09-15",
+      "parameters": {"cap": "100000.00"}, "supplementary_source_ids": ["RD-RC-SECTION-38-64", "RD-DEDUCTION-SCHEDULE"], "review_notes": ["The 2025 filing instruction corroborates the cap; no separate 2026 Revenue Department filing instruction was identified as of verification.", "The published allowance schedule independently states the 100,000 baht cap for qualifying housing-loan interest."]
+    },
+    {
+      "rule_id": "TH-PIT-LIMIT-RETIREMENT-SHARED", "version": "1.0.0", "tax_year": 2026, "effective_from": "2026-01-01", "effective_to": "2026-12-31", "status": "EFFECTIVE", "source_id": "RD-RMF-FAQ", "verified_at": "2026-09-15",
+      "parameters": {"group_id": "RETIREMENT", "cap": "500000.00"}, "supplementary_source_ids": ["RD-DEDUCTION-SCHEDULE"], "review_notes": ["This phase provides shared-cap accounting only; product-specific eligibility and sublimits are outside scope.", "The published schedule confirms the 500,000 baht combined ceiling across provident fund, GPF, RMF, national savings fund, and pension life insurance."]
+    }
+  ]
+}
