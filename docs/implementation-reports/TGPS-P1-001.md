@@ -262,6 +262,8 @@ Independent review result: **PASS**.
 - Engine and package versions are `0.1.1`. The expanded canonical source list intentionally
   changes output hashes from `0.1.0`; new calculations and replay remain deterministic, while
   historical snapshots require their matching `0.1.0` engine artifact.
-- `.github/workflows/ci.yml` runs the locked Python 3.12 lint, format, strict-type, 100% coverage,
-  and build gates for pushes and pull requests to `main`, with read-only repository permission.
+- `.github/workflows/ci.yml` sets `UV_PYTHON=3.12`, disables uv interpreter downloads, and asserts
+  the active environment is Python 3.12 before running the locked lint, format, strict-type,
+  100% coverage, and build gates for pushes and pull requests to `main`, with read-only
+  repository permission. The repository's Python 3.14 developer pin remains unchanged.
 - BPMN/DMN impact: `NO BUSINESS PROCESS CHANGE`.

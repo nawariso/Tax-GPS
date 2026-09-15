@@ -104,7 +104,9 @@ authority, or an official provider. Blogs, social media, SEO pages, and AI outpu
 ## Verification
 
 Local verification uses the same locked dependency resolution and quality gates as
-`.github/workflows/ci.yml` (Python 3.12 in CI):
+`.github/workflows/ci.yml`. CI explicitly selects and asserts Python 3.12 for uv while disabling
+automatic interpreter downloads; the repository's `.python-version` remains the developer
+default and does not control the CI environment.
 
 ```console
 uv sync --locked

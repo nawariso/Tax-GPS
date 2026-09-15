@@ -13,6 +13,11 @@ jobs:
   quality:
     name: Python 3.12 quality gates
     runs-on: ubuntu-latest
+    env:
+      # Override the repository's developer default (.python-version) for this canonical CI job.
+      UV_PYTHON: "3.12"
+      # setup-python must provide the interpreter; uv must not silently download a substitute.
+      UV_PYTHON_DOWNLOADS: "never"
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -30,7 +35,12 @@ jobs:
           cache-dependency-glob: uv.lock
 
       - name: Install locked dependencies
-        run: uv sync --locked
+        run: uv sync --locked --python 3.12
+
+      - name: Verify Python 3.12 runtime
+        run: |
+          uv run --locked python -VV
+          uv run --locked python -c "import sys; assert sys.version_info[:2] == (3, 12), sys.version"
 
       - name: Lint
         run: uv run --locked ruff check .
