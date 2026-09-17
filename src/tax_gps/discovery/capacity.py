@@ -1,7 +1,6 @@
 """Opportunity Capacity decision boundary."""
 
 from dataclasses import dataclass
-from typing import cast
 
 from tax_gps.core.money import Money
 from tax_gps.core.percentage import Percentage
@@ -37,11 +36,24 @@ def calculate_opportunity_capacity(
 ) -> OpportunityCapacity:
     if definition.standalone_limit is None:
         raise ValueError("opportunity has no governed standalone limit")
-    limit = definition.standalone_limit
+    if not definition.rule_ids:
+        raise ValueError("opportunity has no governed capacity rule")
+    rule = catalog.rule(definition.rule_ids[0])
+    cap = rule.parameters.get("cap")
+    if not isinstance(cap, str):
+        raise ValueError("opportunity rule has no governed cap")
+    limit = Money.of(cap)
+    if limit != definition.standalone_limit:
+        raise ValueError("opportunity capacity metadata conflicts with governed rule")
     if definition.shared_limit_group is None:
         return OpportunityCapacity(limit, None, None, Money.zero(), limit)
-    rule = catalog.rule(definition.rule_ids[0])
-    rate = Percentage.of(cast(str, rule.parameters["assessable_income_rate"]))
+    governed_group = rule.parameters.get("shared_group_id")
+    if governed_group != definition.shared_limit_group:
+        raise ValueError("opportunity shared group conflicts with governed rule")
+    raw_rate = rule.parameters.get("assessable_income_rate")
+    if not isinstance(raw_rate, str):
+        raise ValueError("opportunity rule has no governed assessable-income rate")
+    rate = Percentage.of(raw_rate)
     income_limit = assessable_income * rate
     shared_limit = Money.min(limit, income_limit)
     remaining = (shared_limit - shared_amount_used).floor_at_zero()

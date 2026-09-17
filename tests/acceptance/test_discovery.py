@@ -81,7 +81,7 @@ def profile(
         tax_year=TaxYear(2026),
         income=IncomeProfile(section_40_1=Money.of(salary)),
         benefits=benefits or ExistingTaxBenefits(social_security_paid=Money.of(sso)),
-        opportunity_facts=facts or OpportunityFacts(),
+        opportunity_facts=(facts if facts is not None else OpportunityFacts(shared_limit_usage=())),
     )
 
 
@@ -103,6 +103,26 @@ def discover(
 
 def right(result: DiscoveryResult, right_id: str) -> DiscoveredRight:
     return next(item for item in result.existing_rights if item.right_id == right_id)
+
+
+@pytest.mark.negative
+def test_existing_right_with_an_unready_rule_is_reported_not_ready() -> None:
+    catalog = bundled_catalog_dict()
+    catalog_definition_dict(catalog, opportunity_ids.PERSONAL_ALLOWANCE)["rule_ids"] = [
+        "TH-PIT-RULE-MISSING"
+    ]
+    result = discover(profile(), catalog=activate_catalog_dict(catalog))
+    personal = right(result, opportunity_ids.PERSONAL_ALLOWANCE)
+    assert personal.status is OpportunityStatus.RULE_NOT_READY
+    assert personal.reason_codes == (DiscoveryReasonCode.RULE_NOT_READY,)
+
+
+@pytest.mark.negative
+def test_existing_right_outside_its_effective_period_is_reported_outside_period() -> None:
+    result = discover(profile(), planning_date=date(2025, 12, 31))
+    personal = right(result, opportunity_ids.PERSONAL_ALLOWANCE)
+    assert personal.status is OpportunityStatus.OUTSIDE_EFFECTIVE_PERIOD
+    assert personal.reason_codes == (DiscoveryReasonCode.OUTSIDE_EFFECTIVE_PERIOD,)
 
 
 def opportunity(result: DiscoveryResult, opportunity_id: str) -> DiscoveredOpportunity:
@@ -314,7 +334,8 @@ def test_disc_13_a_missing_material_fact_requires_input_rather_than_assuming_no(
 @pytest.mark.mandatory
 def test_disc_16_an_opportunity_outside_its_effective_period_stays_visible() -> None:
     result = discover(
-        profile(facts=OpportunityFacts(solar_rooftop=SOLAR_FULLY_ASSERTED)),
+        profile(facts=OpportunityFacts(solar_rooftop=SOLAR_FULLY_ASSERTED, shared_limit_usage=())),
+        catalog=solar_ready_catalog(),
         planning_date=date(2026, 1, 15),
     )
     solar = opportunity(result, opportunity_ids.SOLAR_ROOFTOP)
@@ -517,7 +538,7 @@ def test_a_declared_condition_answered_no_is_ineligible_and_names_the_failed_fac
         "solar_rooftop.on_grid_connected_to_mea_or_pea",
         "solar_rooftop.no_duplicate_tax_benefit",
     )
-    assert solar.reason_codes == ()
+    assert solar.reason_codes == (DiscoveryReasonCode.ELIGIBILITY_CONDITION_FAILED,)
 
 
 def test_personal_allowance_and_social_security_are_reported_as_existing_rights() -> None:
@@ -525,6 +546,31 @@ def test_personal_allowance_and_social_security_are_reported_as_existing_rights(
     assert right(result, opportunity_ids.PERSONAL_ALLOWANCE).claimed_amount == Money.of(60000)
     assert right(result, opportunity_ids.SOCIAL_SECURITY).claimed_amount == Money.of(10500)
     assert "UNCLAIMED" not in str(result.to_dict())
+
+
+@pytest.mark.negative
+def test_existing_rights_fail_closed_for_missing_rules_and_outside_periods() -> None:
+    catalog_data = bundled_catalog_dict()
+    catalog_definition_dict(catalog_data, opportunity_ids.PERSONAL_ALLOWANCE)["rule_ids"] = [
+        "MISSING-RULE"
+    ]
+    personal = right(
+        discover(profile(), catalog=activate_catalog_dict(catalog_data)),
+        opportunity_ids.PERSONAL_ALLOWANCE,
+    )
+    assert personal.status is OpportunityStatus.RULE_NOT_READY
+    assert personal.reason_codes == (DiscoveryReasonCode.RULE_NOT_READY,)
+
+    catalog_data = bundled_catalog_dict()
+    catalog_definition_dict(catalog_data, opportunity_ids.PERSONAL_ALLOWANCE)["effective_from"] = (
+        "2027-01-01"
+    )
+    personal = right(
+        discover(profile(), catalog=activate_catalog_dict(catalog_data)),
+        opportunity_ids.PERSONAL_ALLOWANCE,
+    )
+    assert personal.status is OpportunityStatus.OUTSIDE_EFFECTIVE_PERIOD
+    assert personal.reason_codes == (DiscoveryReasonCode.OUTSIDE_EFFECTIVE_PERIOD,)
 
 
 def test_rights_absent_from_the_tax_state_are_not_reported() -> None:
@@ -593,10 +639,7 @@ def test_capacity_is_never_presented_as_an_amount_to_spend() -> None:
     assert data["requires_new_cash"] is True
     assert data["lockup_metadata"] == {
         "minimum_holding_years": 5,
-        "description": (
-            "Units purchased in tax year 2026 must be held for at least five full years "
-            "from the purchase date."
-        ),
+        "measurement": "purchase-date-to-purchase-date",
     }
 
 
@@ -605,6 +648,55 @@ def test_unknown_parent_eligibility_is_an_explicit_missing_input() -> None:
     parent = right(result, opportunity_ids.PARENT_ALLOWANCE)
     assert parent.status is OpportunityStatus.REQUIRES_INPUT
     assert parent.missing_fact_ids == ("parent.father.eligible",)
+
+
+@pytest.mark.negative
+def test_explicitly_ineligible_rights_are_not_reported_as_available() -> None:
+    result = discover(
+        profile(
+            benefits=ExistingTaxBenefits(
+                parents=(Parent("father", False),),
+                children=(Child("c1", order=1, legally_eligible=False, birth_year=2018),),
+                mortgage_interest_paid=Money.of(125000),
+                mortgage_eligible=False,
+            )
+        )
+    )
+    ids = {item.right_id for item in result.existing_rights}
+    assert opportunity_ids.PARENT_ALLOWANCE not in ids
+    assert opportunity_ids.CHILD_ALLOWANCE not in ids
+    assert opportunity_ids.MORTGAGE_INTEREST not in ids
+
+
+@pytest.mark.negative
+def test_unknown_shared_pool_usage_requires_input() -> None:
+    thai_esg = opportunity(discover(profile(facts=OpportunityFacts())), opportunity_ids.THAI_ESG)
+    assert thai_esg.status is OpportunityStatus.REQUIRES_INPUT
+    assert thai_esg.reason_codes == (DiscoveryReasonCode.REQUIRES_INPUT,)
+    assert thai_esg.missing_fact_ids == ("shared_limit_usage.THAI_ESG_2026_POOL",)
+
+
+@pytest.mark.negative
+def test_discovery_rejects_a_tax_state_from_another_profile() -> None:
+    user = profile(100000)
+    other = profile(800000)
+    with pytest.raises(ValueError, match="tax state does not match"):
+        discover_opportunities(
+            user,
+            calculate_tax(other, production_pack()),
+            production_pack(),
+            production_catalog(),
+            DiscoveryContext(TaxYear(2026), PLANNING_DATE),
+        )
+
+
+@pytest.mark.golden
+def test_g03_high_income_discovery_has_capped_capacity_and_positive_tax_impact() -> None:
+    result = discover(profile(2_800_000))
+    thai_esg = opportunity(result, opportunity_ids.THAI_ESG)
+    assert thai_esg.remaining_capacity == Money.of(300000)
+    assert thai_esg.maximum_tax_saving_at_capacity is not None
+    assert thai_esg.maximum_tax_saving_at_capacity.is_positive()
 
 
 def test_unknown_intrinsic_intent_requires_input_after_the_rule_is_ready() -> None:
@@ -618,6 +710,9 @@ def test_unknown_intrinsic_intent_requires_input_after_the_rule_is_ready() -> No
 def test_zero_standalone_capacity_without_a_shared_group_is_not_available() -> None:
     catalog = mark_rule_ready(bundled_catalog_dict(), opportunity_ids.ARTWORK_RULE)
     catalog_definition_dict(catalog, opportunity_ids.ARTWORK)["standalone_limit"] = "0.00"
+    next(rule for rule in catalog["rules"] if rule["rule_id"] == opportunity_ids.ARTWORK_RULE)[
+        "parameters"
+    ]["cap"] = "0.00"
     artwork = opportunity(
         discover(
             profile(facts=OpportunityFacts(artwork=ARTWORK_FULLY_ASSERTED)),
@@ -632,7 +727,7 @@ def test_zero_standalone_capacity_without_a_shared_group_is_not_available() -> N
 def test_unresolved_catalog_references_fail_closed_and_are_not_serialized_as_sources() -> None:
     catalog = bundled_catalog_dict()
     thai_esg = catalog_definition_dict(catalog, opportunity_ids.THAI_ESG)
-    thai_esg["rule_ids"] = ["MISSING-RULE"]
+    thai_esg["rule_ids"] = [opportunity_ids.THAI_ESG_RULE, "MISSING-RULE"]
     thai_esg["source_ids"] = ["MISSING-SOURCE"]
     result = discover(profile(), catalog=activate_catalog_dict(catalog))
     item = opportunity(result, opportunity_ids.THAI_ESG)

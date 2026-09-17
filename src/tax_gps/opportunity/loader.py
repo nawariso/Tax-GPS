@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from datetime import date
 from importlib.resources import files
 from typing import Any, Never, cast
 
+from tax_gps.core.canonical import JsonValue, freeze
 from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.opportunity.models import (
@@ -176,7 +177,7 @@ def _rule(value: object) -> OpportunityRule:
         _status(data["status"]),
         _string(data["source_id"], "source_id", nullable=True),
         _date(data["verified_at"], "verified_at", nullable=True),
-        parameters,
+        cast(Mapping[str, JsonValue], freeze(parameters)),
         _strings(data["supplementary_source_ids"], "supplementary_source_ids"),
         _strings(data["review_notes"], "review_notes"),
     )

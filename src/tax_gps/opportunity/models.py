@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date
 from enum import StrEnum
 
-from tax_gps.core.canonical import canonical_json, sha256_hex
+from tax_gps.core.canonical import JsonValue, canonical_json, sha256_hex
 from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.policy.models import RuleSource, RuleStatus
@@ -63,7 +64,7 @@ class OpportunityRule:
     status: RuleStatus
     source_id: str | None
     verified_at: date | None
-    parameters: dict[str, object]
+    parameters: Mapping[str, JsonValue]
     supplementary_source_ids: tuple[str, ...]
     review_notes: tuple[str, ...]
 

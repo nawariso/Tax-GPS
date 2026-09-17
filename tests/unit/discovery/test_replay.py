@@ -1,12 +1,14 @@
 """Discovery audit snapshot and deterministic replay acceptance."""
 
+from collections.abc import MutableMapping
 from dataclasses import replace
 from datetime import date
+from typing import cast
 
 import pytest
 
 from tax_gps.calculation.models import TaxState
-from tax_gps.core.canonical import thaw
+from tax_gps.core.canonical import JsonValue, thaw
 from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.discovery.audit import (
@@ -19,7 +21,7 @@ from tax_gps.discovery.engine import DISCOVERY_ENGINE_VERSION, discover_opportun
 from tax_gps.engine import calculate_tax
 from tax_gps.opportunity.activation import ActivatedOpportunityCatalog
 from tax_gps.policy.activation import ActivatedRulePack
-from tax_gps.profile.models import IncomeProfile, UserProfile
+from tax_gps.profile.models import IncomeProfile, OpportunityFacts, UserProfile
 from tests.support.catalog import activate_catalog_dict, bundled_catalog_dict, production_catalog
 from tests.support.policy import activate_dict, bundled_pack_dict, production_pack
 
@@ -30,6 +32,7 @@ def profile(salary: int = 800000) -> UserProfile:
         "1",
         TaxYear(2026),
         IncomeProfile(Money.of(salary)),
+        opportunity_facts=OpportunityFacts(shared_limit_usage=()),
     )
 
 
@@ -122,6 +125,31 @@ def test_discovery_snapshot_is_immutable() -> None:
         snapshot.discovery_hash = "changed"  # type: ignore[misc]
 
 
+def test_discovery_hash_binds_profile_policy_and_catalog_identity() -> None:
+    user, state, pack, catalog, context = inputs()
+    result = discover_opportunities(user, state, pack, catalog, context)
+    assert result.profile_hash == user.profile_hash()
+    assert result.rule_pack_hash == pack.content_hash
+    assert result.opportunity_catalog_hash == catalog.content_hash
+
+    raw = bundled_catalog_dict()
+    raw["description"] = "materially changed catalog"
+    changed = activate_catalog_dict(raw)
+    changed_result = discover_opportunities(user, state, pack, changed, context)
+    assert changed_result.discovery_hash != result.discovery_hash
+
+
+@pytest.mark.negative
+def test_rule_parameters_are_deeply_immutable_after_activation() -> None:
+    _user, _state, _pack, catalog, _context = inputs()
+    parameters = cast(
+        MutableMapping[str, JsonValue],
+        catalog.catalog.rule("TH-OPP-RULE-THAI-ESG-2026").parameters,
+    )
+    with pytest.raises(TypeError):
+        parameters["cap"] = "1"
+
+
 @pytest.mark.negative
 def test_snapshot_creation_rejects_an_unhashed_result() -> None:
     user, state, pack, catalog, context = inputs()
@@ -134,6 +162,21 @@ def test_snapshot_creation_rejects_an_unhashed_result() -> None:
             catalog,
             context,
             replace(result, discovery_hash=""),
+        )
+
+
+@pytest.mark.negative
+def test_snapshot_creation_rejects_a_result_bound_to_different_inputs() -> None:
+    user, state, pack, catalog, context = inputs()
+    result = discover_opportunities(user, state, pack, catalog, context)
+    with pytest.raises(ValueError, match="does not match snapshot inputs"):
+        create_discovery_snapshot(
+            user,
+            state,
+            pack,
+            catalog,
+            context,
+            replace(result, profile_hash="different-profile"),
         )
 
 

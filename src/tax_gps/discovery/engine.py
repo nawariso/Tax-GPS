@@ -21,6 +21,7 @@ from tax_gps.discovery.models import (
     DiscoveryResult,
     DiscoveryStatus,
 )
+from tax_gps.engine import calculate_tax
 from tax_gps.opportunity import opportunity_ids
 from tax_gps.opportunity.activation import ActivatedOpportunityCatalog
 from tax_gps.opportunity.models import (
@@ -33,7 +34,7 @@ from tax_gps.policy.activation import ActivatedRulePack
 from tax_gps.policy.models import RuleSource
 from tax_gps.profile.models import UserProfile
 
-DISCOVERY_ENGINE_VERSION = "tax-gps-discovery/0.1.0"
+DISCOVERY_ENGINE_VERSION = "tax-gps-discovery/0.2.0"
 T = TypeVar("T")
 
 
@@ -52,7 +53,11 @@ def _source_ids_for(
 ) -> tuple[str, ...]:
     result: list[str] = list(definition.source_ids)
     for rule_id in definition.rule_ids:
-        rule = catalog.catalog.find_rule(rule_id) or pack.pack.find_rule(rule_id)
+        rule = (
+            pack.pack.find_rule(rule_id)
+            if definition.opportunity_type is OpportunityType.EXISTING_RIGHT
+            else catalog.catalog.find_rule(rule_id)
+        )
         if rule is not None and rule.source_id is not None:
             result.append(rule.source_id)
             result.extend(rule.supplementary_source_ids)
@@ -64,6 +69,7 @@ def _existing_rights(
     state: TaxState,
     pack: ActivatedRulePack,
     catalog: ActivatedOpportunityCatalog,
+    context: DiscoveryContext,
 ) -> tuple[DiscoveredRight, ...]:
     benefits = profile.benefits
     amount_by_id = {
@@ -75,12 +81,11 @@ def _existing_rights(
     }
     present = {
         opportunity_ids.PERSONAL_ALLOWANCE: state.allowances.personal.is_positive(),
-        opportunity_ids.PARENT_ALLOWANCE: bool(benefits.parents),
-        opportunity_ids.CHILD_ALLOWANCE: bool(benefits.children),
-        opportunity_ids.SOCIAL_SECURITY: benefits.social_security_paid.is_positive(),
-        opportunity_ids.MORTGAGE_INTEREST: (
-            benefits.mortgage_eligible or benefits.mortgage_interest_paid.is_positive()
-        ),
+        opportunity_ids.PARENT_ALLOWANCE: bool(benefits.parents)
+        and any(parent.eligible is not False for parent in benefits.parents),
+        opportunity_ids.CHILD_ALLOWANCE: state.allowances.children.is_positive(),
+        opportunity_ids.SOCIAL_SECURITY: state.allowances.social_security.is_positive(),
+        opportunity_ids.MORTGAGE_INTEREST: state.allowances.mortgage_interest.is_positive(),
         opportunity_ids.RETIREMENT_SHARED_CAPACITY: bool(benefits.retirement_contributions),
     }
     rights: list[DiscoveredRight] = []
@@ -91,7 +96,19 @@ def _existing_rights(
         missing: tuple[str, ...] = ()
         status = OpportunityStatus.AVAILABLE
         reasons: tuple[DiscoveryReasonCode, ...] = (DiscoveryReasonCode.EXISTING_RIGHT_AVAILABLE,)
-        if right_id == opportunity_ids.PARENT_ALLOWANCE:
+        readiness = evaluate_opportunity_readiness(
+            definition,
+            catalog.catalog,
+            pack,
+            planning_date=context.planning_date,
+        )
+        if not readiness.ready:
+            status = OpportunityStatus.RULE_NOT_READY
+            reasons = (DiscoveryReasonCode.RULE_NOT_READY,)
+        elif check_effective_period(definition, context) is EffectivePeriodOutcome.OUTSIDE_PERIOD:
+            status = OpportunityStatus.OUTSIDE_EFFECTIVE_PERIOD
+            reasons = (DiscoveryReasonCode.OUTSIDE_EFFECTIVE_PERIOD,)
+        elif right_id == opportunity_ids.PARENT_ALLOWANCE:
             missing = tuple(
                 f"parent.{parent.relationship}.eligible"
                 for parent in benefits.parents
@@ -176,15 +193,6 @@ def _opportunity(  # noqa: PLR0911, PLR0917
     context: DiscoveryContext,
 ) -> DiscoveredOpportunity:
     source_ids = _source_ids_for(definition, pack, catalog)
-    if check_effective_period(definition, context) is EffectivePeriodOutcome.OUTSIDE_PERIOD:
-        return _discovered_opportunity(
-            definition,
-            source_ids,
-            status=OpportunityStatus.OUTSIDE_EFFECTIVE_PERIOD,
-            remaining_capacity=None,
-            maximum_tax_saving=None,
-            reason_codes=(DiscoveryReasonCode.OUTSIDE_EFFECTIVE_PERIOD,),
-        )
     facts = collect_facts(definition, profile)
     intent = check_intrinsic_intent(definition, facts.intent)
     if intent is IntentOutcome.NOT_INTENDED:
@@ -196,7 +204,12 @@ def _opportunity(  # noqa: PLR0911, PLR0917
             maximum_tax_saving=None,
             reason_codes=(DiscoveryReasonCode.NO_INTRINSIC_NEED,),
         )
-    if not evaluate_opportunity_readiness(definition, catalog.catalog, pack).ready:
+    if not evaluate_opportunity_readiness(
+        definition,
+        catalog.catalog,
+        pack,
+        planning_date=context.planning_date,
+    ).ready:
         return _discovered_opportunity(
             definition,
             source_ids,
@@ -204,6 +217,15 @@ def _opportunity(  # noqa: PLR0911, PLR0917
             remaining_capacity=None,
             maximum_tax_saving=None,
             reason_codes=(DiscoveryReasonCode.RULE_NOT_READY,),
+        )
+    if check_effective_period(definition, context) is EffectivePeriodOutcome.OUTSIDE_PERIOD:
+        return _discovered_opportunity(
+            definition,
+            source_ids,
+            status=OpportunityStatus.OUTSIDE_EFFECTIVE_PERIOD,
+            remaining_capacity=None,
+            maximum_tax_saving=None,
+            reason_codes=(DiscoveryReasonCode.OUTSIDE_EFFECTIVE_PERIOD,),
         )
     if intent is IntentOutcome.UNKNOWN:
         return _discovered_opportunity(
@@ -223,7 +245,7 @@ def _opportunity(  # noqa: PLR0911, PLR0917
             status=OpportunityStatus.INELIGIBLE,
             remaining_capacity=None,
             maximum_tax_saving=None,
-            reason_codes=(),
+            reason_codes=(DiscoveryReasonCode.ELIGIBILITY_CONDITION_FAILED,),
             missing_fact_ids=assessment.missing_fact_ids,
             failed_fact_ids=assessment.failed_fact_ids,
         )
@@ -238,6 +260,16 @@ def _opportunity(  # noqa: PLR0911, PLR0917
             missing_fact_ids=assessment.missing_fact_ids,
         )
     shared_used = profile.opportunity_facts.shared_limit_amount_used(definition.shared_limit_group)
+    if shared_used is None:
+        return _discovered_opportunity(
+            definition,
+            source_ids,
+            status=OpportunityStatus.REQUIRES_INPUT,
+            remaining_capacity=None,
+            maximum_tax_saving=None,
+            reason_codes=(DiscoveryReasonCode.REQUIRES_INPUT,),
+            missing_fact_ids=(f"shared_limit_usage.{definition.shared_limit_group}",),
+        )
     capacity = calculate_opportunity_capacity(
         definition,
         catalog.catalog,
@@ -277,7 +309,15 @@ def _resolve_sources(
 ) -> tuple[RuleSource, ...]:
     result: list[RuleSource] = []
     for source_id in source_ids:
-        source = catalog.catalog.find_source(source_id) or pack.pack.find_source(source_id)
+        catalog_source = catalog.catalog.find_source(source_id)
+        pack_source = pack.pack.find_source(source_id)
+        source = (
+            None
+            if catalog_source is not None
+            and pack_source is not None
+            and catalog_source != pack_source
+            else catalog_source or pack_source
+        )
         if source is not None and source not in result:
             result.append(source)
     return tuple(result)
@@ -301,23 +341,29 @@ def discover_opportunities(
     }
     if len(years) != 1:
         raise ValueError("profile, tax state, policy, catalog, and context tax years must match")
+    expected_state = calculate_tax(profile, pack)
+    if expected_state.output_hash != state.output_hash:
+        raise ValueError("tax state does not match profile and activated policy")
     if state.status is not TaxStatus.READY:
         result = DiscoveryResult(
-            DiscoveryStatus.UNSUPPORTED,
-            state.output_hash,
-            context.tax_year.gregorian,
-            context.planning_date,
-            (),
-            (),
-            (DiscoveryReasonCode.UNSUPPORTED_TAX_STATE,),
-            (),
-            (),
-            catalog.version,
-            engine_version,
-            "",
+            status=DiscoveryStatus.UNSUPPORTED,
+            profile_hash=profile.profile_hash(),
+            tax_state_hash=state.output_hash,
+            rule_pack_hash=pack.content_hash,
+            opportunity_catalog_hash=catalog.content_hash,
+            tax_year=context.tax_year.gregorian,
+            planning_date=context.planning_date,
+            existing_rights=(),
+            opportunities=(),
+            reason_codes=(DiscoveryReasonCode.UNSUPPORTED_TAX_STATE,),
+            rules_applied=(),
+            sources=(),
+            catalog_version=catalog.version,
+            engine_version=engine_version,
+            discovery_hash="",
         )
         return _with_hash(result)
-    rights = _existing_rights(profile, state, pack, catalog)
+    rights = _existing_rights(profile, state, pack, catalog, context)
     opportunities = tuple(
         _opportunity(definition, profile, state, pack, catalog, context)
         for definition in catalog.catalog.definitions
@@ -336,18 +382,21 @@ def discover_opportunities(
         + tuple(reason for item in opportunities for reason in item.reason_codes)
     )
     result = DiscoveryResult(
-        DiscoveryStatus.READY,
-        state.output_hash,
-        context.tax_year.gregorian,
-        context.planning_date,
-        rights,
-        opportunities,
-        reasons,
-        rules,
-        _resolve_sources(source_ids, pack, catalog),
-        catalog.version,
-        engine_version,
-        "",
+        status=DiscoveryStatus.READY,
+        profile_hash=profile.profile_hash(),
+        tax_state_hash=state.output_hash,
+        rule_pack_hash=pack.content_hash,
+        opportunity_catalog_hash=catalog.content_hash,
+        tax_year=context.tax_year.gregorian,
+        planning_date=context.planning_date,
+        existing_rights=rights,
+        opportunities=opportunities,
+        reason_codes=reasons,
+        rules_applied=rules,
+        sources=_resolve_sources(source_ids, pack, catalog),
+        catalog_version=catalog.version,
+        engine_version=engine_version,
+        discovery_hash="",
     )
     return _with_hash(result)
 

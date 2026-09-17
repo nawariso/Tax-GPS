@@ -1,8 +1,9 @@
 """Opportunity catalog loading, governance, readiness, and immutability."""
 
 import json
-from dataclasses import FrozenInstanceError
+from dataclasses import FrozenInstanceError, replace
 from datetime import date
+from types import MappingProxyType
 
 import pytest
 
@@ -110,7 +111,7 @@ def test_solar_definition_matches_the_royal_decree_period_and_cap() -> None:
 def test_thai_esg_and_thai_esgx_share_one_pool_and_expose_no_independent_cap() -> None:
     catalog = production_catalog().catalog
     rule = catalog.rule(opportunity_ids.THAI_ESG_RULE)
-    assert isinstance(rule.parameters, dict)
+    assert isinstance(rule.parameters, MappingProxyType)
     assert rule.parameters["shared_group_id"] == opportunity_ids.THAI_ESG_2026_POOL
     assert rule.parameters["assessable_income_rate"] == "0.30"
     assert rule.parameters["cap"] == "300000.00"
@@ -193,7 +194,10 @@ def test_existing_right_rules_resolve_against_the_activated_policy_pack() -> Non
 @pytest.mark.negative
 def test_readiness_reports_missing_unresolved_and_non_authoritative_sources() -> None:
     catalog = bundled_catalog_dict()
-    catalog_definition_dict(catalog, opportunity_ids.THAI_ESG)["rule_ids"] = ["TH-OPP-RULE-MISSING"]
+    catalog_definition_dict(catalog, opportunity_ids.THAI_ESG)["rule_ids"] = [
+        opportunity_ids.THAI_ESG_RULE,
+        "TH-OPP-RULE-MISSING",
+    ]
     activated = activate_catalog_dict(catalog).catalog
     readiness = evaluate_opportunity_readiness(
         activated.definition(opportunity_ids.THAI_ESG), activated, production_pack()
@@ -448,3 +452,125 @@ def test_activated_catalog_exposes_identity_for_replay() -> None:
     assert activated.version == activated.catalog.version
     assert len(activated.content_hash) == 64
     assert activate_catalog(activated.catalog).content_hash == activated.content_hash
+
+
+@pytest.mark.negative
+def test_activation_rejects_missing_required_definitions_and_dependencies() -> None:
+    catalog = bundled_catalog_dict()
+    catalog["opportunities"] = [
+        item
+        for item in catalog["opportunities"]
+        if item["opportunity_id"] != opportunity_ids.PERSONAL_ALLOWANCE
+    ]
+    with pytest.raises(CatalogActivationError, match="REQUIRED_DEFINITION_MISSING"):
+        activate_catalog_dict(catalog)
+
+    catalog = bundled_catalog_dict()
+    catalog_definition_dict(catalog, opportunity_ids.ARTWORK)["rule_ids"] = []
+    with pytest.raises(CatalogActivationError, match="RULE_DEPENDENCY_MISSING"):
+        activate_catalog_dict(catalog)
+
+    catalog = bundled_catalog_dict()
+    catalog["opportunities"] = [
+        item
+        for item in catalog["opportunities"]
+        if item["opportunity_id"] != opportunity_ids.ARTWORK
+    ]
+    with pytest.raises(CatalogActivationError, match="REQUIRED_DEFINITION_MISSING"):
+        activate_catalog_dict(catalog)
+
+
+@pytest.mark.negative
+def test_activation_rejects_conflicting_capacity_metadata() -> None:
+    catalog = bundled_catalog_dict()
+    catalog_definition_dict(catalog, opportunity_ids.THAI_ESG)["standalone_limit"] = "900000.00"
+    with pytest.raises(CatalogActivationError, match="CAPACITY_METADATA_MISMATCH"):
+        activate_catalog_dict(catalog)
+
+
+@pytest.mark.negative
+def test_activation_skips_new_cash_rule_checks_for_a_missing_definition() -> None:
+    catalog = bundled_catalog_dict()
+    catalog["opportunities"] = [
+        item
+        for item in catalog["opportunities"]
+        if item["opportunity_id"] != opportunity_ids.ARTWORK
+    ]
+    with pytest.raises(CatalogActivationError) as excinfo:
+        activate_catalog_dict(catalog)
+    message = str(excinfo.value)
+    assert f"REQUIRED_DEFINITION_MISSING:{opportunity_ids.ARTWORK}" in message
+    assert f"CAPACITY_METADATA_MISMATCH:{opportunity_ids.ARTWORK}" not in message
+
+
+@pytest.mark.negative
+def test_activation_rejects_rule_identity_group_and_intent_contract_conflicts() -> None:
+    catalog = bundled_catalog_dict()
+    catalog_definition_dict(catalog, opportunity_ids.THAI_ESG)["rule_ids"] = [
+        opportunity_ids.ARTWORK_RULE
+    ]
+    with pytest.raises(CatalogActivationError, match="REQUIRED_RULE_MISSING"):
+        activate_catalog_dict(catalog)
+
+    catalog = bundled_catalog_dict()
+    catalog["rules"] = [
+        rule for rule in catalog["rules"] if rule["rule_id"] != opportunity_ids.THAI_ESG_RULE
+    ]
+    with pytest.raises(CatalogActivationError, match="REQUIRED_RULE_MISSING"):
+        activate_catalog_dict(catalog)
+
+    catalog = bundled_catalog_dict()
+    catalog_rule_dict(catalog, opportunity_ids.THAI_ESG_RULE)["parameters"]["cap"] = 300000
+    with pytest.raises(CatalogActivationError, match="CAPACITY_METADATA_MISMATCH"):
+        activate_catalog_dict(catalog)
+
+    catalog = bundled_catalog_dict()
+    catalog_rule_dict(catalog, opportunity_ids.THAI_ESG_RULE)["parameters"]["shared_group_id"] = (
+        "OTHER"
+    )
+    with pytest.raises(CatalogActivationError, match="SHARED_GROUP_METADATA_MISMATCH"):
+        activate_catalog_dict(catalog)
+
+    catalog = bundled_catalog_dict()
+    catalog_definition_dict(catalog, opportunity_ids.ARTWORK)["intrinsic_need_required"] = False
+    with pytest.raises(CatalogActivationError, match="INTRINSIC_INTENT_GATE_MISSING"):
+        activate_catalog_dict(catalog)
+
+
+@pytest.mark.negative
+def test_readiness_rejects_missing_rules_and_conflicting_cross_catalog_sources() -> None:
+    catalog = production_catalog().catalog
+    definition = replace(catalog.definition(opportunity_ids.THAI_ESG), rule_ids=())
+    readiness = evaluate_opportunity_readiness(definition, catalog, production_pack())
+    assert ReadinessCode.REQUIRED_RULE_MISSING in {item.code for item in readiness.findings}
+
+    pack_source = production_pack().pack.sources[0]
+    conflicting_source = replace(pack_source, title=f"{pack_source.title} conflict")
+    conflicting_catalog = replace(catalog, sources=(*catalog.sources, conflicting_source))
+    definition = replace(definition, source_ids=(*definition.source_ids, pack_source.source_id))
+    readiness = evaluate_opportunity_readiness(definition, conflicting_catalog, production_pack())
+    assert ReadinessCode.RULE_SOURCE_UNRESOLVED in {item.code for item in readiness.findings}
+
+
+@pytest.mark.negative
+def test_readiness_rejects_rule_period_and_arbitrary_official_provider_host() -> None:
+    catalog = bundled_catalog_dict()
+    catalog_rule_dict(catalog, opportunity_ids.THAI_ESG_RULE)["effective_from"] = "2026-12-01"
+    activated = activate_catalog_dict(catalog).catalog
+    readiness = evaluate_opportunity_readiness(
+        activated.definition(opportunity_ids.THAI_ESG),
+        activated,
+        production_pack(),
+        planning_date=date(2026, 9, 16),
+    )
+    assert ReadinessCode.RULE_PERIOD_DOES_NOT_COVER_TAX_YEAR in {
+        item.code for item in readiness.findings
+    }
+
+    catalog = bundled_catalog_dict()
+    catalog["sources"][0]["url"] = "https://example.com/blog"
+    activated = activate_catalog_dict(catalog).catalog
+    readiness = evaluate_opportunity_readiness(
+        activated.definition(opportunity_ids.THAI_ESG), activated, production_pack()
+    )
+    assert ReadinessCode.SOURCE_NOT_AUTHORITATIVE in {item.code for item in readiness.findings}

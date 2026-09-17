@@ -6,6 +6,8 @@ from dataclasses import dataclass
 
 from tax_gps.core.canonical import canonical_json, sha256_hex
 from tax_gps.core.errors import TaxCoreError
+from tax_gps.core.money import Money
+from tax_gps.opportunity import opportunity_ids
 from tax_gps.opportunity.models import OpportunityCatalog
 from tax_gps.policy.models import RuleStatus
 
@@ -70,6 +72,39 @@ def catalog_to_dict(catalog: OpportunityCatalog) -> dict[str, object]:
     }
 
 
+def _validate_new_cash_rules(catalog: OpportunityCatalog, findings: list[str]) -> None:
+    for opportunity_id, expected_rule_id in opportunity_ids.NEW_CASH_RULE_BY_ID.items():
+        definition = catalog.find_definition(opportunity_id)
+        if definition is None:
+            continue
+        if not definition.rule_ids:
+            findings.append(f"RULE_DEPENDENCY_MISSING:{opportunity_id}")
+            continue
+        if expected_rule_id not in definition.rule_ids:
+            findings.append(f"REQUIRED_RULE_MISSING:{expected_rule_id}")
+        rule = catalog.find_rule(expected_rule_id)
+        if rule is None:
+            findings.append(f"REQUIRED_RULE_MISSING:{expected_rule_id}")
+            continue
+        cap = rule.parameters.get("cap")
+        if (
+            not isinstance(cap, str)
+            or definition.standalone_limit is None
+            or Money.of(cap) != definition.standalone_limit
+        ):
+            findings.append(f"CAPACITY_METADATA_MISMATCH:{opportunity_id}")
+        governed_group = rule.parameters.get("shared_group_id")
+        if governed_group != definition.shared_limit_group:
+            findings.append(f"SHARED_GROUP_METADATA_MISMATCH:{opportunity_id}")
+
+
+def _validate_intrinsic_intent_gates(catalog: OpportunityCatalog, findings: list[str]) -> None:
+    for opportunity_id in (opportunity_ids.ARTWORK, opportunity_ids.SOLAR_ROOFTOP):
+        definition = catalog.find_definition(opportunity_id)
+        if definition is not None and not definition.intrinsic_need_required:
+            findings.append(f"INTRINSIC_INTENT_GATE_MISSING:{opportunity_id}")
+
+
 def activate_catalog(catalog: OpportunityCatalog) -> ActivatedOpportunityCatalog:
     findings: list[str] = []
     if catalog.status is not RuleStatus.EFFECTIVE:
@@ -78,6 +113,12 @@ def activate_catalog(catalog: OpportunityCatalog) -> ActivatedOpportunityCatalog
         findings.append("CATALOG_CURRENCY_UNSUPPORTED")
     if catalog.jurisdiction != "TH":
         findings.append("CATALOG_JURISDICTION_UNSUPPORTED")
+    present = {definition.opportunity_id for definition in catalog.definitions}
+    for required in opportunity_ids.ALL_DEFINITION_IDS:
+        if required not in present:
+            findings.append(f"REQUIRED_DEFINITION_MISSING:{required}")
+    _validate_new_cash_rules(catalog, findings)
+    _validate_intrinsic_intent_gates(catalog, findings)
     if findings:
         raise CatalogActivationError("; ".join(findings))
     return ActivatedOpportunityCatalog(

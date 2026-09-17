@@ -65,6 +65,48 @@ def test_order_may_repeat_for_children_that_are_not_legally_eligible() -> None:
     assert len(benefits.children) == 2
 
 
+def test_legacy_positional_child_constructor_remains_compatible() -> None:
+    legacy = Child(1, True, 2018)
+    assert legacy.child_id == "legal-order:1"
+    assert legacy.order == 1
+
+
+@pytest.mark.negative
+@pytest.mark.parametrize(
+    ("args", "kwargs", "message"),
+    [
+        (("not-an-order", True, 2018), {}, "positive integer"),
+        ((1, None, 2018), {}, "eligibility and birth year"),
+        ((1, True, None), {}, "eligibility and birth year"),
+        ((1, "yes", 2018), {}, "legally eligible"),
+        (
+            (),
+            {"child_id": 1, "order": 1, "legally_eligible": True, "birth_year": 2018},
+            "child id",
+        ),
+    ],
+)
+def test_child_constructor_rejects_invalid_identity_and_required_fields(
+    args: tuple[object, ...], kwargs: dict[str, object], message: str
+) -> None:
+    with pytest.raises(InvalidValueError, match=message):
+        Child(*args, **kwargs)  # type: ignore[arg-type]
+
+
+@pytest.mark.negative
+@pytest.mark.parametrize("field", ["personal_eligible", "mortgage_eligible"])
+def test_existing_benefit_flags_must_be_boolean(field: str) -> None:
+    with pytest.raises(InvalidValueError, match="must be a boolean"):
+        ExistingTaxBenefits(**{field: "yes"})  # type: ignore[arg-type]
+
+
+def test_profile_collections_are_copied_to_immutable_tuples() -> None:
+    parents = [Parent("father", True)]
+    benefits = ExistingTaxBenefits(parents=parents)  # type: ignore[arg-type]
+    parents.append(Parent("father", True))
+    assert benefits.parents == (Parent("father", True),)
+
+
 @pytest.mark.negative
 def test_child_id_must_be_named() -> None:
     with pytest.raises(InvalidValueError, match="child id"):
@@ -101,6 +143,13 @@ def test_intent_and_material_facts_default_to_unknown() -> None:
     assert facts.artwork.artwork_is_qualifying is None
     assert facts.solar_rooftop.intends_to_install is None
     assert facts.solar_rooftop.is_natural_person is None
+    assert facts.shared_limit_usage is None
+
+
+@pytest.mark.negative
+def test_optional_boolean_facts_reject_non_boolean_values() -> None:
+    with pytest.raises(InvalidValueError, match="boolean"):
+        ArtworkIntent(artwork_is_qualifying="false")  # type: ignore[arg-type]
 
 
 def test_profile_dict_and_hash_cover_opportunity_facts() -> None:

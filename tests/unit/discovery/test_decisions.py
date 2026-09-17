@@ -1,5 +1,6 @@
 """Isolated DMN-aligned discovery decisions: eligibility, intent, period, capacity."""
 
+from dataclasses import replace
 from datetime import date
 
 import pytest
@@ -161,6 +162,46 @@ def test_capacity_requires_a_governed_standalone_limit() -> None:
             definition(opportunity_ids.PERSONAL_ALLOWANCE),
             catalog,
             assessable_income=Money.of(1),
+            shared_amount_used=Money.zero(),
+        )
+
+
+@pytest.mark.negative
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ("missing_rule", "capacity rule"),
+        ("non_string_cap", "governed cap"),
+        ("conflicting_cap", "metadata conflicts"),
+        ("conflicting_group", "shared group conflicts"),
+        ("non_string_rate", "assessable-income rate"),
+    ],
+)
+def test_capacity_rejects_ungoverned_or_conflicting_rule_metadata(
+    mutation: str, message: str
+) -> None:
+    catalog = production_catalog().catalog
+    thai_esg = catalog.definition(opportunity_ids.THAI_ESG)
+    rule = catalog.rule(opportunity_ids.THAI_ESG_RULE)
+    if mutation == "missing_rule":
+        thai_esg = replace(thai_esg, rule_ids=())
+    elif mutation == "non_string_cap":
+        rule = replace(rule, parameters={**rule.parameters, "cap": 1})
+    elif mutation == "conflicting_cap":
+        thai_esg = replace(thai_esg, standalone_limit=Money.of(1))
+    elif mutation == "conflicting_group":
+        rule = replace(rule, parameters={**rule.parameters, "shared_group_id": "OTHER"})
+    else:
+        rule = replace(rule, parameters={**rule.parameters, "assessable_income_rate": 1})
+    catalog = replace(
+        catalog,
+        rules=tuple(rule if item.rule_id == rule.rule_id else item for item in catalog.rules),
+    )
+    with pytest.raises(ValueError, match=message):
+        calculate_opportunity_capacity(
+            thai_esg,
+            catalog,
+            assessable_income=Money.of(800000),
             shared_amount_used=Money.zero(),
         )
 

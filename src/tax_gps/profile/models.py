@@ -15,6 +15,11 @@ def _non_negative(amount: Money, field: str) -> None:
         raise InvalidValueError(f"{field} cannot be negative")
 
 
+def _optional_bool(value: bool | None, field: str) -> None:
+    if value is not None and not isinstance(value, bool):
+        raise InvalidValueError(f"{field} must be a boolean or null")
+
+
 @dataclass(frozen=True, slots=True)
 class Parent:
     relationship: str
@@ -23,6 +28,7 @@ class Parent:
     def __post_init__(self) -> None:
         if not self.relationship.strip():
             raise InvalidValueError("parent relationship must be named")
+        _optional_bool(self.eligible, "parent eligible")
 
 
 @dataclass(frozen=True, slots=True, init=False)
@@ -34,13 +40,23 @@ class Child:
 
     def __init__(
         self,
-        child_id: str | None = None,
+        child_id: str | int | None = None,
+        legally_eligible: bool | None = None,
+        birth_year: int | None = None,
         *,
-        order: int,
-        legally_eligible: bool,
-        birth_year: int,
+        order: int | None = None,
     ) -> None:
-        stable_id = child_id if child_id is not None else f"legal-order:{order}"
+        if order is None:
+            if isinstance(child_id, bool) or not isinstance(child_id, int):
+                raise InvalidValueError("child order must be a positive integer")
+            order = child_id
+            stable_id = f"legal-order:{order}"
+        else:
+            if child_id is not None and not isinstance(child_id, str):
+                raise InvalidValueError("child id must be a string")
+            stable_id = child_id if child_id is not None else f"legal-order:{order}"
+        if legally_eligible is None or birth_year is None:
+            raise InvalidValueError("child eligibility and birth year are required")
         object.__setattr__(self, "child_id", stable_id)
         object.__setattr__(self, "order", order)
         object.__setattr__(self, "legally_eligible", legally_eligible)
@@ -54,6 +70,8 @@ class Child:
             raise InvalidValueError("child order must be a positive integer")
         if isinstance(self.birth_year, bool) or not 1900 <= self.birth_year <= 2100:
             raise InvalidValueError("child birth year must be Gregorian")
+        if not isinstance(self.legally_eligible, bool):
+            raise InvalidValueError("child legally eligible must be a boolean")
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +98,7 @@ class IncomeProfile:
     unsupported: tuple[UnsupportedIncome, ...] = ()
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "unsupported", tuple(self.unsupported))
         _non_negative(self.section_40_1, "section 40(1) income")
 
 
@@ -94,6 +113,13 @@ class ExistingTaxBenefits:
     retirement_contributions: tuple[RetirementContribution, ...] = ()
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "parents", tuple(self.parents))
+        object.__setattr__(self, "children", tuple(self.children))
+        object.__setattr__(self, "retirement_contributions", tuple(self.retirement_contributions))
+        if not isinstance(self.personal_eligible, bool):
+            raise InvalidValueError("personal eligible must be a boolean")
+        if not isinstance(self.mortgage_eligible, bool):
+            raise InvalidValueError("mortgage eligible must be a boolean")
         _non_negative(self.social_security_paid, "social security paid")
         _non_negative(self.mortgage_interest_paid, "mortgage interest paid")
         relationships = [parent.relationship.strip().casefold() for parent in self.parents]
@@ -125,6 +151,15 @@ class ArtworkIntent:
     seller_is_qualifying: bool | None = None
     has_required_document: bool | None = None
 
+    def __post_init__(self) -> None:
+        for field_name in (
+            "intends_to_purchase",
+            "artwork_is_qualifying",
+            "seller_is_qualifying",
+            "has_required_document",
+        ):
+            _optional_bool(getattr(self, field_name), f"artwork {field_name}")
+
 
 @dataclass(frozen=True, slots=True)
 class SolarRooftopIntent:
@@ -139,21 +174,30 @@ class SolarRooftopIntent:
     no_duplicate_tax_benefit: bool | None = None
     meets_director_general_conditions: bool | None = None
 
+    def __post_init__(self) -> None:
+        for field_name in self.__dataclass_fields__:
+            _optional_bool(getattr(self, field_name), f"solar rooftop {field_name}")
+
 
 @dataclass(frozen=True, slots=True)
 class OpportunityFacts:
     artwork: ArtworkIntent = ArtworkIntent()
     solar_rooftop: SolarRooftopIntent = SolarRooftopIntent()
-    shared_limit_usage: tuple[SharedLimitUsage, ...] = ()
+    shared_limit_usage: tuple[SharedLimitUsage, ...] | None = None
 
     def __post_init__(self) -> None:
+        if self.shared_limit_usage is None:
+            return
+        object.__setattr__(self, "shared_limit_usage", tuple(self.shared_limit_usage))
         groups = [usage.group_id for usage in self.shared_limit_usage]
         if len(set(groups)) != len(groups):
             raise InvalidValueError("duplicate shared limit group")
 
-    def shared_limit_amount_used(self, group_id: str | None) -> Money:
+    def shared_limit_amount_used(self, group_id: str | None) -> Money | None:
         if group_id is None:
             return Money.zero()
+        if self.shared_limit_usage is None:
+            return None
         return next(
             (usage.amount_used for usage in self.shared_limit_usage if usage.group_id == group_id),
             Money.zero(),
@@ -239,13 +283,17 @@ class UserProfile:
                         self.opportunity_facts.solar_rooftop.meets_director_general_conditions
                     ),
                 },
-                "shared_limit_usage": [
-                    {
-                        "group_id": usage.group_id,
-                        "amount_used": usage.amount_used.canonical(),
-                    }
-                    for usage in self.opportunity_facts.shared_limit_usage
-                ],
+                "shared_limit_usage": (
+                    [
+                        {
+                            "group_id": usage.group_id,
+                            "amount_used": usage.amount_used.canonical(),
+                        }
+                        for usage in self.opportunity_facts.shared_limit_usage
+                    ]
+                    if self.opportunity_facts.shared_limit_usage is not None
+                    else None
+                ),
             },
         }
 

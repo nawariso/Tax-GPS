@@ -33,6 +33,7 @@ class DiscoveryReasonCode(StrEnum):
     UNSUPPORTED_TAX_STATE = "UNSUPPORTED_TAX_STATE"
     ZERO_CURRENT_TAX_BENEFIT = "ZERO_CURRENT_TAX_BENEFIT"
     SHARED_LIMIT_APPLIED = "SHARED_LIMIT_APPLIED"
+    ELIGIBILITY_CONDITION_FAILED = "ELIGIBILITY_CONDITION_FAILED"
 
 
 def _money(value: Money | None) -> str | None:
@@ -106,15 +107,7 @@ class DiscoveredOpportunity:
     failed_fact_ids: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
-        lockup: dict[str, object] | None = None
-        if self.lockup_metadata is not None:
-            lockup = {
-                "minimum_holding_years": self.lockup_metadata.minimum_holding_years,
-                "description": (
-                    "Units purchased in tax year 2026 must be held for at least five full years "
-                    "from the purchase date."
-                ),
-            }
+        lockup = self.lockup_metadata.to_dict() if self.lockup_metadata is not None else None
         return {
             "opportunity_id": self.opportunity_id,
             "name": self.name,
@@ -139,7 +132,10 @@ class DiscoveredOpportunity:
 @dataclass(frozen=True, slots=True)
 class DiscoveryResult:
     status: DiscoveryStatus
+    profile_hash: str
     tax_state_hash: str
+    rule_pack_hash: str
+    opportunity_catalog_hash: str
     tax_year: int
     planning_date: date
     existing_rights: tuple[DiscoveredRight, ...]
@@ -154,7 +150,10 @@ class DiscoveryResult:
     def material_dict(self) -> dict[str, object]:
         return {
             "status": self.status.value,
+            "profile_hash": self.profile_hash,
             "tax_state_hash": self.tax_state_hash,
+            "rule_pack_hash": self.rule_pack_hash,
+            "opportunity_catalog_hash": self.opportunity_catalog_hash,
             "tax_year": self.tax_year,
             "planning_date": self.planning_date.isoformat(),
             "existing_rights": [item.to_dict() for item in self.existing_rights],

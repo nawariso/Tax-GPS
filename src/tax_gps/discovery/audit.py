@@ -49,6 +49,15 @@ def create_discovery_snapshot(  # noqa: PLR0917
 ) -> DiscoverySnapshot:
     if result.discovery_hash == "":
         raise ValueError("discovery result must be hashed")
+    if (
+        result.profile_hash != profile.profile_hash()
+        or result.tax_state_hash != state.output_hash
+        or result.rule_pack_hash != pack.content_hash
+        or result.opportunity_catalog_hash != catalog.content_hash
+        or result.tax_year != context.tax_year.gregorian
+        or result.planning_date != context.planning_date
+    ):
+        raise ValueError("discovery result does not match snapshot inputs")
     return DiscoverySnapshot(
         profile.profile_hash(),
         state.output_hash,
