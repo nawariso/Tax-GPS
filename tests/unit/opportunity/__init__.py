@@ -1,0 +1,1 @@
+"""Opportunity catalog governance tests."""

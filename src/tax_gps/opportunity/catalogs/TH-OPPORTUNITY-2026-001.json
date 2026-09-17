@@ -1,0 +1,118 @@
+{
+  "schema_version": "1",
+  "catalog_id": "TH-OPPORTUNITY-2026-001",
+  "version": "1.0.0",
+  "description": "Deterministic Thailand tax-right and opportunity catalog for tax year 2026",
+  "jurisdiction": "TH",
+  "tax_year": 2026,
+  "currency": "THB",
+  "status": "EFFECTIVE",
+  "sources": [
+    {
+      "source_id": "SEC-THAI-ESG-2026",
+      "title": "SEC guidance on Thai ESG and Thai ESGX tax-deduction conditions",
+      "publisher": "Securities and Exchange Commission Thailand",
+      "authority": "OFFICIAL_PROVIDER",
+      "url": "https://www.sec.or.th/TH/Pages/News_Detail.aspx?SECID=11881&NewsNo=167&NewsYear=2568&Lang=TH",
+      "published_at": "2025-11-18",
+      "retrieved_at": "2026-09-16"
+    },
+    {
+      "source_id": "RD-ARTWORK-ARTISTS",
+      "title": "Artists qualifying under the tax measure supporting artwork purchases",
+      "publisher": "Thai Revenue Department",
+      "authority": "REVENUE_DEPARTMENT",
+      "url": "https://www.rd.go.th/68506.html",
+      "published_at": null,
+      "retrieved_at": "2026-09-16"
+    },
+    {
+      "source_id": "RD-SOLAR-DECREE-805",
+      "title": "Royal Decree issued under the Revenue Code (No. 805) B.E. 2569",
+      "publisher": "Thai Revenue Department",
+      "authority": "THAI_LAW_ROYAL_GAZETTE",
+      "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dc805.pdf",
+      "published_at": "2026-03-02",
+      "retrieved_at": "2026-09-16"
+    },
+    {
+      "source_id": "RD-SOLAR-NEWS-3-2569",
+      "title": "Revenue Department press release 3/2569: Solar Rooftop tax measure",
+      "publisher": "Thai Revenue Department",
+      "authority": "REVENUE_DEPARTMENT",
+      "url": "https://www.rd.go.th/fileadmin/user_upload/news/2569thai/news3_2569.pdf",
+      "published_at": "2026-03-03",
+      "retrieved_at": "2026-09-16"
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "TH-OPP-RULE-THAI-ESG-2026",
+      "version": "1.0.0",
+      "tax_year": 2026,
+      "effective_from": "2026-01-01",
+      "effective_to": "2026-12-31",
+      "status": "EFFECTIVE",
+      "source_id": "SEC-THAI-ESG-2026",
+      "verified_at": "2026-09-16",
+      "parameters": {"assessable_income_rate": "0.30", "cap": "300000.00", "minimum_holding_years": 5, "shared_group_id": "THAI_ESG_2026_POOL"},
+      "supplementary_source_ids": [],
+      "review_notes": ["Thai ESGX usage from 2026 consumes the same pool; no independent Thai ESGX opportunity is exposed."]
+    },
+    {
+      "rule_id": "TH-OPP-RULE-ARTWORK-2025-2027",
+      "version": "1.0.0",
+      "tax_year": 2026,
+      "effective_from": "2025-01-01",
+      "effective_to": "2027-12-31",
+      "status": "DRAFT",
+      "source_id": "RD-ARTWORK-ARTISTS",
+      "verified_at": null,
+      "parameters": {"cap": "100000.00"},
+      "supplementary_source_ids": [],
+      "review_notes": ["The underlying Ministerial Regulation and Director-General notification were not retrieved in authoritative full text; the production rule remains inactive."]
+    },
+    {
+      "rule_id": "TH-OPP-RULE-SOLAR-ROOFTOP-805",
+      "version": "1.0.0",
+      "tax_year": 2026,
+      "effective_from": "2026-03-03",
+      "effective_to": "2028-12-31",
+      "status": "DRAFT",
+      "source_id": "RD-SOLAR-DECREE-805",
+      "verified_at": null,
+      "parameters": {"cap": "200000.00", "claim_basis": "actual_spend", "one_system_only": true},
+      "supplementary_source_ids": ["RD-SOLAR-NEWS-3-2569"],
+      "review_notes": ["The authoritative decree body could not be fully text-verified for all material ownership and installation conditions; production activation is fail-closed."]
+    }
+  ],
+  "opportunities": [
+    {
+      "opportunity_id": "TH-RIGHT-PERSONAL-ALLOWANCE", "name": "Personal allowance", "category": "CLAIM_EXISTING_RIGHT", "type": "EXISTING_RIGHT", "requires_new_cash": false, "intrinsic_need_required": false, "advisor_required": false, "effective_from": "2026-01-01", "effective_to": null, "rule_ids": ["TH-PIT-ALLOWANCE-PERSONAL"], "source_ids": [], "standalone_limit": null, "shared_limit_group": null, "lockup_metadata": null, "evidence_requirements": [], "catalog_version": "1.0.0"
+    },
+    {
+      "opportunity_id": "TH-RIGHT-PARENT-ALLOWANCE", "name": "Parent allowance", "category": "CLAIM_EXISTING_RIGHT", "type": "EXISTING_RIGHT", "requires_new_cash": false, "intrinsic_need_required": false, "advisor_required": false, "effective_from": "2026-01-01", "effective_to": null, "rule_ids": ["TH-PIT-ALLOWANCE-PARENT"], "source_ids": [], "standalone_limit": null, "shared_limit_group": null, "lockup_metadata": null, "evidence_requirements": [], "catalog_version": "1.0.0"
+    },
+    {
+      "opportunity_id": "TH-RIGHT-CHILD-ALLOWANCE", "name": "Child allowance", "category": "CLAIM_EXISTING_RIGHT", "type": "EXISTING_RIGHT", "requires_new_cash": false, "intrinsic_need_required": false, "advisor_required": false, "effective_from": "2026-01-01", "effective_to": null, "rule_ids": ["TH-PIT-ALLOWANCE-CHILD"], "source_ids": [], "standalone_limit": null, "shared_limit_group": null, "lockup_metadata": null, "evidence_requirements": [], "catalog_version": "1.0.0"
+    },
+    {
+      "opportunity_id": "TH-RIGHT-SOCIAL-SECURITY", "name": "Social security contribution", "category": "CLAIM_EXISTING_RIGHT", "type": "EXISTING_RIGHT", "requires_new_cash": false, "intrinsic_need_required": false, "advisor_required": false, "effective_from": "2026-01-01", "effective_to": null, "rule_ids": ["TH-PIT-ALLOWANCE-SSO-33"], "source_ids": [], "standalone_limit": null, "shared_limit_group": null, "lockup_metadata": null, "evidence_requirements": [], "catalog_version": "1.0.0"
+    },
+    {
+      "opportunity_id": "TH-RIGHT-MORTGAGE-INTEREST", "name": "Mortgage interest", "category": "CLAIM_EXISTING_RIGHT", "type": "EXISTING_RIGHT", "requires_new_cash": false, "intrinsic_need_required": false, "advisor_required": false, "effective_from": "2026-01-01", "effective_to": null, "rule_ids": ["TH-PIT-ALLOWANCE-MORTGAGE-INTEREST"], "source_ids": [], "standalone_limit": null, "shared_limit_group": null, "lockup_metadata": null, "evidence_requirements": [], "catalog_version": "1.0.0"
+    },
+    {
+      "opportunity_id": "TH-RIGHT-RETIREMENT-SHARED-CAPACITY", "name": "Retirement shared capacity", "category": "CLAIM_EXISTING_RIGHT", "type": "EXISTING_RIGHT", "requires_new_cash": false, "intrinsic_need_required": false, "advisor_required": false, "effective_from": "2026-01-01", "effective_to": null, "rule_ids": ["TH-PIT-LIMIT-RETIREMENT-SHARED"], "source_ids": [], "standalone_limit": null, "shared_limit_group": "RETIREMENT", "lockup_metadata": null, "evidence_requirements": [], "catalog_version": "1.0.0"
+    },
+    {
+      "opportunity_id": "TH-OPP-THAI-ESG-2026", "name": "Thai ESG tax capacity", "category": "INVESTMENT_TAX", "type": "NEW_CASH", "requires_new_cash": true, "intrinsic_need_required": false, "advisor_required": false, "effective_from": "2026-01-01", "effective_to": "2026-12-31", "rule_ids": ["TH-OPP-RULE-THAI-ESG-2026"], "source_ids": ["SEC-THAI-ESG-2026"], "standalone_limit": "300000.00", "shared_limit_group": "THAI_ESG_2026_POOL", "lockup_metadata": {"minimum_holding_years": 5, "measurement": "purchase-date-to-purchase-date"}, "evidence_requirements": [{"evidence_id": "FUND-PURCHASE", "description": "Evidence of qualifying Thai ESG purchase"}], "catalog_version": "1.0.0"
+    },
+    {
+      "opportunity_id": "TH-OPP-ARTWORK-2025-2027", "name": "Qualifying artwork purchase", "category": "LIFESTYLE_INTENT", "type": "NEW_CASH", "requires_new_cash": true, "intrinsic_need_required": true, "advisor_required": false, "effective_from": "2025-01-01", "effective_to": "2027-12-31", "rule_ids": ["TH-OPP-RULE-ARTWORK-2025-2027"], "source_ids": ["RD-ARTWORK-ARTISTS"], "standalone_limit": "100000.00", "shared_limit_group": null, "lockup_metadata": null, "evidence_requirements": [{"evidence_id": "QUALIFYING-ARTWORK", "description": "Visual artwork qualifying under the measure"}, {"evidence_id": "QUALIFYING-SELLER", "description": "Qualifying artist, entity, or auction seller"}, {"evidence_id": "TAX-INVOICE-OR-RECEIPT", "description": "Full-form tax invoice or receipt with artwork details"}], "catalog_version": "1.0.0"
+    },
+    {
+      "opportunity_id": "TH-OPP-SOLAR-ROOFTOP-2026", "name": "Residential solar rooftop", "category": "UTILITY_INVESTMENT", "type": "NEW_CASH", "requires_new_cash": true, "intrinsic_need_required": true, "advisor_required": false, "effective_from": "2026-03-03", "effective_to": "2028-12-31", "rule_ids": ["TH-OPP-RULE-SOLAR-ROOFTOP-805"], "source_ids": ["RD-SOLAR-DECREE-805", "RD-SOLAR-NEWS-3-2569"], "standalone_limit": "200000.00", "shared_limit_group": null, "lockup_metadata": null, "evidence_requirements": [{"evidence_id": "RESIDENTIAL-SITE", "description": "Qualifying residential building and taxpayer relationship"}, {"evidence_id": "MEA-PEA-CONNECTION", "description": "Completed MEA or PEA grid connection"}, {"evidence_id": "VAT-SELLER", "description": "VAT-registered seller"}, {"evidence_id": "E-TAX-INVOICE", "description": "e-Tax Invoice"}, {"evidence_id": "NON-DUPLICATION", "description": "Cost not used under another tax measure"}], "catalog_version": "1.0.0"
+    }
+  ]
+}
