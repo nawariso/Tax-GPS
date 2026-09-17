@@ -117,14 +117,14 @@ uv build
 Final local results on CPython 3.14.3:
 
 ```text
-Tests collected: 353
-Tests passed: 353
+Tests collected: 384
+Tests passed: 384
 Tests failed: 0
 Coverage: 100% statements, 100% branches
 Mandatory tests: 50 passed
 Boundary tests: 9 passed
-Golden tests: 10 passed
-Negative tests: 123 passed
+Golden tests: 11 passed
+Negative tests: 150 passed
 Replay tests: 15 passed
 Ruff lint: passed
 Ruff format check: passed
@@ -132,6 +132,10 @@ Mypy strict: passed (67 source files)
 Build: passed
 Artifacts: tax_gps_core-0.1.1.tar.gz, tax_gps_core-0.1.1-py3-none-any.whl
 ```
+
+These counts reflect the fail-closed readiness/activation hardening at commit `62aa54a`
+(TGPS-P1-002A close-out), superseding the `353`-test snapshot recorded when this report was
+first authored at commit `5bbdd8e`.
 
 A local Python 3.12 interpreter was not installed, and `--no-python-downloads` correctly failed
 closed rather than silently substituting 3.14. The repository CI explicitly provisions and
@@ -196,4 +200,113 @@ future recommendation process was introduced.
 - Accepted Phase 1.0 tag: `v0.1.1` at `c949e50fe23f82a26cb9fc50dfc668de74f0cc7d`
 - Feature branch: `feature/tgps-p1-002-opportunity-discovery`
 - Verified implementation commit: `5bbdd8e7061876bf6d86ad3ac3be2d6a3bf2bb55`
-- Publication and Python 3.12 CI evidence: pending push at the time this report was authored
+- Fail-closed readiness/activation hardening commit: `62aa54a6e5bacac3dde5fb5d4f86f8bdb404d10f`
+- Publication and Python 3.12 CI evidence: recorded in `TGPS-P1-002A` close-out below
+
+## 11. Regulatory addendum — Thai ESG / Thai ESGX (TGPS-P1-002A)
+
+This section documents the legal-domain interpretation the bundled catalog encodes for tax year
+2026, and draws an explicit line between the two distinct Thai ESGX tax rights so that the
+capacity model is never misread as covering more than it does.
+
+### 11.1 Thai ESG — 2026 new-money purchases
+
+For tax year 2026, a qualifying Thai ESG purchase is deductible up to the lesser of:
+
+```text
+30% of assessable income
+and
+300,000 THB
+```
+
+Qualifying units must be held for a minimum of 5 years, measured purchase-date-to-purchase-date
+(day-to-day) from the date of each qualifying purchase. Source: SEC Thailand guidance
+(`SEC-THAI-ESG-2026`, `TH-OPP-RULE-THAI-ESG-2026`).
+
+Bundled parameters: `assessable_income_rate = 0.30`, `cap = 300000.00`,
+`minimum_holding_years = 5`.
+
+### 11.2 Thai ESGX new investment from 2026 — same pool as Thai ESG
+
+New/additional Thai ESGX investments made from tax year 2026 onward draw on the **same** annual
+deduction capacity as Thai ESG. They are not a second, independent 300,000 THB allowance.
+
+```text
+THAI_ESG_2026_POOL
+    ├── Thai ESG purchases (2026)
+    └── Thai ESGX new-money purchases (2026)
+
+Shared maximum = min(30% of assessable income, 300,000 THB)
+```
+
+The bundled rule enforces this by attaching a single `shared_group_id: THAI_ESG_2026_POOL` to the
+Thai ESG rule and by capacity calculation (`calculate_opportunity_capacity`) reducing the shared
+ceiling by caller-supplied `shared_limit_usage` before returning remaining capacity — so any
+Thai ESGX new-money use the caller reports against `THAI_ESG_2026_POOL` correctly consumes the
+same 300,000 THB / 30% ceiling rather than adding to it. Rule review note: "Thai ESGX usage from
+2026 consumes the same pool; no independent Thai ESGX opportunity is exposed."
+
+The underlying Revenue Department instrument specific to the ESG/ESGX shared-pool mechanism was
+not independently retrieved and text-verified beyond the SEC guidance already cited; this remains
+the same residual provenance limitation recorded in Section 4 above, not a new gap introduced by
+this addendum.
+
+### 11.3 Important exclusion — 2025 LTF → Thai ESGX conversion carry-over
+
+The 2025 measure permitting conversion of qualifying LTF (Long-Term Equity Fund) holdings into
+Thai ESGX units is a **separate existing-right tax path**, distinct from new-money Thai ESG /
+Thai ESGX capacity:
+
+```text
+2025: up to 300,000 THB (conversion year)
+2026-2029: remaining eligible conversion amount spread equally, subject to applicable rules
+```
+
+This carry-over right is **not** modeled as part of `THAI_ESG_2026_POOL`, and the implementation
+does not conceptually or computationally collapse an `LTF_CONVERSION_CARRYOVER` right into the
+new-money shared pool. No such right, shared-limit group, catalog rule, or opportunity identifier
+exists anywhere in this codebase (verified: no `LTF`/conversion-carryover identifier appears in
+`src/tax_gps`, aside from an unrelated RMF/LTF source title string in the accepted Tax Core
+policy pack).
+
+### 11.4 Scope declaration
+
+```text
+OUT OF SCOPE — future existing-right implementation
+```
+
+The 2025 LTF → Thai ESGX conversion carry-over deduction for tax years 2026-2029 is not
+implemented in `TGPS-P1-002`. This is a deliberate scope boundary, not an oversight: implementing
+it now would require a new, separately verified existing-right catalog entry and was not
+requested by `TGPS-P1-002`. It is not implemented merely to close this addendum.
+
+### 11.5 Implementation semantics — explicit statement
+
+```text
+Current implementation models:
+Thai ESG / Thai ESGX new-money shared capacity for 2026 (THAI_ESG_2026_POOL,
+min(30% of assessable income, 300,000 THB), 5-year purchase-date-to-purchase-date holding).
+
+Current implementation does NOT model:
+2025 LTF -> Thai ESGX conversion carry-over deductions for 2026-2029 (OUT OF SCOPE).
+```
+
+No tax logic, discovery ordering, capacity calculation, or catalog data changed as a result of
+this addendum — Section 11 documents behavior the implementation already had at commit `62aa54a`.
+
+## 12. Non-blocking follow-up items (preserved from independent review)
+
+Recorded for a future hardening phase; none are blockers for `TGPS-P1-002` or `TGPS-P1-002A`:
+
+- **F-01 — Positional rule resolution.** `calculate_opportunity_capacity` resolves the governed
+  cap via `definition.rule_ids[0]`; catalog activation only checks that the expected NEW_CASH
+  rule id is present in `rule_ids`, not that it is first. Consider resolving by the expected rule
+  id explicitly rather than by position, to avoid divergence if `rule_ids` ordering ever changes.
+- **F-02 — Period validation asymmetry.** `OpportunityRule` readiness checks both the definition's
+  and the rule's effective period and flags disagreement; existing-right `TaxRule` readiness
+  relies solely on the definition's effective period via `check_effective_period`. This asymmetry
+  is intentional and covered by tests but undocumented in code; a future architecture-hardening
+  task should add an inline comment or unify the invariant.
+- **F-03 — Trusted-host allowlist.** `_authoritative()` hard-codes `sec.or.th` for
+  `OFFICIAL_PROVIDER` sources and `go.th` for others. Future policy governance may move this into
+  a versioned, catalog-independent trust registry rather than a code constant.
