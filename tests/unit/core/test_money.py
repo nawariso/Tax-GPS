@@ -108,6 +108,33 @@ class TestArithmetic:
         assert Money.sum([Money.of(1), Money.of(2), Money.of(3)]) == Money.of(6)
         assert Money.sum([]) == Money.zero()
 
+    def test_times_scales_by_whole_number(self) -> None:
+        assert Money.of(50000).times(3) == Money.of(150000)
+        assert Money.of(50000).times(0) == Money.zero()
+
+    def test_times_does_not_mutate_the_original(self) -> None:
+        original = Money.of(50000)
+        scaled = original.times(3)
+        assert original == Money.of(50000)
+        assert scaled == Money.of(150000)
+        assert scaled is not original
+
+    def test_times_preserves_canonical_quantization(self) -> None:
+        assert Money.of(50000).times(3).canonical() == "150000.00"
+        assert Money.zero().times(5).canonical() == "0.00"
+
+    def test_times_rejects_negative_factor(self) -> None:
+        with pytest.raises(InvalidMoneyError):
+            Money.of(1).times(-1)
+
+    def test_times_rejects_bool_factor(self) -> None:
+        with pytest.raises(InvalidMoneyError):
+            Money.of(1).times(True)
+
+    def test_times_rejects_non_int_factor(self) -> None:
+        with pytest.raises(InvalidMoneyError):
+            Money.of(1).times(1.5)  # type: ignore[arg-type]
+
     def test_comparisons(self) -> None:
         assert Money.of(1) < Money.of(2)
         assert Money.of(2) <= Money.of(2)

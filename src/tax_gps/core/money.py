@@ -75,6 +75,12 @@ class Money:
             return NotImplemented
         return Money(exact(EXACT.multiply, self.amount, other.ratio, InvalidMoneyError))
 
+    def times(self, factor: int) -> Money:
+        """Scale by a non-negative whole number (e.g. a policy month count)."""
+        if isinstance(factor, bool) or not isinstance(factor, int) or factor < 0:
+            raise InvalidMoneyError("money scale factor must be a non-negative int")
+        return Money(exact(EXACT.multiply, self.amount, Decimal(factor), InvalidMoneyError))
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Money):
             return NotImplemented
