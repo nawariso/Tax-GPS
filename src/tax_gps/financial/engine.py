@@ -23,6 +23,7 @@ from tax_gps.financial.decisions import (
     NewCashInputs,
     assess_new_cash_opportunity,
     existing_right_passthrough,
+    missing_capacity,
     not_applicable,
 )
 from tax_gps.financial.models import (
@@ -52,8 +53,13 @@ def _assess_new_cash(
             assessments.append(not_applicable(item.opportunity_id))
             continue
         remaining_capacity = item.remaining_capacity
-        if remaining_capacity is None:  # pragma: no cover - AVAILABLE always carries capacity
-            remaining_capacity = context.available_budget
+        if remaining_capacity is None:
+            # Fail-closed: an AVAILABLE opportunity must carry known tax capacity. Unknown
+            # upstream capacity must never be silently treated as the available budget (§4,
+            # §31, R1-04) -- that would let unbounded new cash pass through as "capped" by
+            # a figure that was never actually validated as a tax-capacity ceiling.
+            assessments.append(missing_capacity(item.opportunity_id))
+            continue
         assessments.append(
             assess_new_cash_opportunity(
                 NewCashInputs(

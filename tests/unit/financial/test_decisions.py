@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import date
 
 from tax_gps.core.money import Money
@@ -163,3 +164,50 @@ def test_assess_new_cash_opportunity_partial_state_requires_review() -> None:
     assessment = assess_new_cash_opportunity(inputs)
     assert assessment.decision is GuardrailDecision.REQUIRE_REVIEW
     assert FinancialReasonCode.FINANCIAL_INPUT_REQUIRED in assessment.reason_codes
+
+
+# --- Defensive branches: these functions are exported and independently callable, so they --
+# --- must fail closed even given a state shape that assess_new_cash_opportunity's PARTIAL ---
+# --- routing would normally prevent from ever reaching them. -------------------------------
+
+
+def test_emergency_floor_decision_defensive_none_when_liquid_assets_unknown() -> None:
+    state = _state(liquid_assets=500000, expenses=50000)
+    tampered_state = replace(state, liquid_assets=None)
+    inputs = NewCashInputs(
+        opportunity_id="opp",
+        category=OpportunityCategory.INVESTMENT_TAX,
+        remaining_capacity=Money.of(100000),
+        available_budget=Money.of(100000),
+        state=tampered_state,
+    )
+    assert emergency_floor_decision(inputs) is None
+
+
+def test_emergency_floor_decision_defensive_none_when_reserve_floor_unknown() -> None:
+    state = _state(liquid_assets=500000, expenses=50000)
+    tampered_state = replace(state, emergency_reserve_floor=None)
+    inputs = NewCashInputs(
+        opportunity_id="opp",
+        category=OpportunityCategory.INVESTMENT_TAX,
+        remaining_capacity=Money.of(100000),
+        available_budget=Money.of(100000),
+        state=tampered_state,
+    )
+    assert emergency_floor_decision(inputs) is None
+
+
+def test_liquidity_ceiling_decision_defensive_treats_unknown_surplus_as_zero() -> None:
+    state = _state(liquid_assets=500000, expenses=50000)
+    tampered_state = replace(state, spendable_surplus=None)
+    inputs = NewCashInputs(
+        opportunity_id="thai-esg",
+        category=OpportunityCategory.INVESTMENT_TAX,
+        remaining_capacity=Money.of(100000),
+        available_budget=Money.of(100000),
+        state=tampered_state,
+    )
+    assessment = liquidity_ceiling_decision(inputs)
+    assert assessment.decision is GuardrailDecision.BLOCK
+    assert assessment.max_feasible_allocation == Money.zero()
+    assert FinancialReasonCode.NO_SPENDABLE_SURPLUS in assessment.reason_codes

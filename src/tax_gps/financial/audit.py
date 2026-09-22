@@ -11,7 +11,11 @@ from tax_gps.financial.engine import GUARDRAIL_ENGINE_VERSION, evaluate_guardrai
 from tax_gps.financial.models import GuardrailResult
 from tax_gps.financial.policy import ActivatedFinancialPolicy
 from tax_gps.financial.profile import FinancialPlanningContext
-from tax_gps.financial.state import FinancialState
+from tax_gps.financial.state import (
+    FinancialState,
+    FinancialStateIntegrityError,
+    verify_financial_state_integrity,
+)
 
 
 class GuardrailReplayError(TaxCoreError):
@@ -46,6 +50,10 @@ def create_guardrail_snapshot(
 ) -> GuardrailSnapshot:
     if result.guardrail_hash == "":
         raise ValueError("guardrail result must be hashed")
+    try:
+        verify_financial_state_integrity(state)
+    except FinancialStateIntegrityError as exc:
+        raise ValueError(f"financial state failed self-integrity verification: {exc}") from exc
     if (
         result.profile_hash != discovery.profile_hash
         or result.discovery_hash != discovery.discovery_hash
@@ -83,6 +91,12 @@ def replay_guardrails(
         raise GuardrailReplayError("profile does not match guardrail snapshot")
     if snapshot.discovery_hash != discovery.discovery_hash:
         raise GuardrailReplayError("discovery result does not match guardrail snapshot")
+    try:
+        verify_financial_state_integrity(state)
+    except FinancialStateIntegrityError as exc:
+        raise GuardrailReplayError(
+            f"financial state failed self-integrity verification: {exc}"
+        ) from exc
     if snapshot.financial_state_hash != state.state_hash:
         raise GuardrailReplayError("financial state does not match guardrail snapshot")
     if (

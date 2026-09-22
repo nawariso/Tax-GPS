@@ -28,6 +28,22 @@ def not_applicable(opportunity_id: str) -> GuardrailAssessment:
     )
 
 
+def missing_capacity(opportunity_id: str) -> GuardrailAssessment:
+    """Fail-closed: an AVAILABLE opportunity carrying no known tax capacity (§4, §31, R1-04).
+
+    Unknown legal/tax capacity must never become permission to allocate cash: a producer
+    bug or an inconsistently constructed ``DiscoveredOpportunity`` (AVAILABLE with
+    ``remaining_capacity=None``) must not fall through to ``available_budget`` as a
+    substitute ceiling.
+    """
+    return GuardrailAssessment(
+        opportunity_id=opportunity_id,
+        decision=GuardrailDecision.NOT_APPLICABLE,
+        max_feasible_allocation=None,
+        reason_codes=(FinancialReasonCode.DISCOVERY_CAPACITY_MISSING,),
+    )
+
+
 def existing_right_passthrough(opportunity_id: str) -> GuardrailAssessment:
     """Decision: existing rights require no new spending and are never blocked (§30)."""
     return GuardrailAssessment(
@@ -81,11 +97,16 @@ def critical_debt_decision(inputs: NewCashInputs) -> GuardrailAssessment | None:
 
 
 def emergency_floor_decision(inputs: NewCashInputs) -> GuardrailAssessment | None:
-    """Decision 5 (§34-35): liquid assets below the emergency reserve floor."""
+    """Decision 5 (§34-35): liquid assets below the emergency reserve floor.
+
+    Defensive: normally unreachable via ``assess_new_cash_opportunity`` because a PARTIAL
+    state (liquid_assets or emergency_reserve_floor unknown) is routed to
+    ``financial_input_required`` before this decision runs. This function is exported and
+    independently callable, so it fails closed rather than trusting that invariant (tested
+    directly in test_decisions.py).
+    """
     state = inputs.state
-    if (
-        state.liquid_assets is None or state.emergency_reserve_floor is None
-    ):  # pragma: no cover - unreachable: PARTIAL state is routed away before this call
+    if state.liquid_assets is None or state.emergency_reserve_floor is None:
         return None
     if state.liquid_assets >= state.emergency_reserve_floor:
         return None
@@ -105,9 +126,15 @@ def emergency_floor_decision(inputs: NewCashInputs) -> GuardrailAssessment | Non
 
 
 def liquidity_ceiling_decision(inputs: NewCashInputs) -> GuardrailAssessment:
-    """Decisions 7 (§36-38): no-surplus, capped, or healthy allocation ceiling."""
+    """Decisions 7 (§36-38): no-surplus, capped, or healthy allocation ceiling.
+
+    Defensive: ``surplus is None`` is normally unreachable via ``assess_new_cash_opportunity``
+    (PARTIAL states are routed to ``financial_input_required`` first); this function is
+    exported and independently callable, so an unknown surplus fails closed to zero rather
+    than trusting that invariant (tested directly in test_decisions.py).
+    """
     surplus = inputs.state.spendable_surplus
-    if surplus is None:  # pragma: no cover - guarded by caller (financial input required)
+    if surplus is None:
         surplus = Money.zero()
     ceiling = Money.min(inputs.remaining_capacity, inputs.available_budget)
     if surplus.is_zero():

@@ -17,7 +17,10 @@ from enum import StrEnum
 from tax_gps.core.canonical import canonical_json, sha256_hex
 from tax_gps.core.errors import InvalidValueError
 from tax_gps.core.money import Money
-from tax_gps.financial.policy import ActivatedFinancialPolicy
+from tax_gps.financial.policy import (
+    ActivatedFinancialPolicy,
+    evaluate_financial_policy_temporal_readiness,
+)
 from tax_gps.financial.profile import FinancialPlanningContext, FinancialProfile
 from tax_gps.financial.reason_codes import FinancialReasonCode
 
@@ -117,7 +120,10 @@ def _emergency_fund_months(liquid_assets: Money, monthly_essential_expenses: Mon
     try:
         ratio = _ROUNDING_CONTEXT.divide(liquid_assets.amount, monthly_essential_expenses.amount)
         ratio = ratio.quantize(_RATIO_QUANTIZE, context=_ROUNDING_CONTEXT)
-    except DecimalException as exc:  # pragma: no cover - guarded by finite Money construction
+    except DecimalException as exc:
+        # Reachable: Money permits amounts up to ~47 significant digits before the ratio's
+        # digit count (bounded by _ROUNDING_CONTEXT's prec=50) is exceeded by extreme
+        # liquid_assets / expenses combinations (see test_state.py's boundary coverage).
         raise InvalidValueError("emergency fund months ratio is not computable") from exc
     return f"{ratio:.{_RATIO_PLACES}f}"
 
@@ -177,18 +183,24 @@ def compute_financial_state(
     engine_version: str = FINANCIAL_STATE_ENGINE_VERSION,
 ) -> FinancialState:
     policy = activated_policy.policy
+    temporal_findings = evaluate_financial_policy_temporal_readiness(policy, context.planning_date)
+    if temporal_findings:
+        raise FinancialValidationError(
+            "financial policy is not effective for the planning date (fail closed): "
+            + "; ".join(temporal_findings)
+        )
+
     liquid_assets = profile.liquid_assets
     expenses = profile.monthly_essential_expenses
+    liquid_assets_known = liquid_assets is not None
     expenses_known = expenses is not None
 
-    if liquid_assets is None:
-        raise FinancialValidationError(
-            "available budget cannot be validated without known liquid assets (fail closed)"
-        )
-    if context.available_budget > liquid_assets:
-        raise FinancialValidationError(
-            "available budget cannot exceed known liquid assets (fail closed)"
-        )
+    if liquid_assets_known:
+        assert liquid_assets is not None  # noqa: S101 - narrowed by liquid_assets_known above
+        if context.available_budget > liquid_assets:
+            raise FinancialValidationError(
+                "available budget cannot exceed known liquid assets (fail closed)"
+            )
 
     near_term_committed_cash = _near_term_committed_cash(
         profile, context, policy.near_term_liquidity_months
@@ -203,10 +215,11 @@ def compute_financial_state(
     spendable_surplus: Money | None = None
 
     reasons: list[FinancialReasonCode] = []
-    if not expenses_known:
+    if not liquid_assets_known or not expenses_known:
         reasons.append(FinancialReasonCode.FINANCIAL_INPUT_REQUIRED)
     else:
         assert expenses is not None  # noqa: S101 - narrowed by expenses_known above
+        assert liquid_assets is not None  # noqa: S101 - narrowed by liquid_assets_known above
         (
             emergency_reserve_floor,
             emergency_reserve_target,
@@ -234,7 +247,11 @@ def compute_financial_state(
     elif profile.protection.required_life_coverage is None:
         reasons.append(FinancialReasonCode.PROTECTION_NEED_UNKNOWN)
 
-    status = FinancialStateStatus.READY if expenses_known else FinancialStateStatus.PARTIAL
+    status = (
+        FinancialStateStatus.READY
+        if (liquid_assets_known and expenses_known)
+        else FinancialStateStatus.PARTIAL
+    )
     state = FinancialState(
         status=status,
         liquid_assets=liquid_assets,
@@ -262,3 +279,21 @@ def compute_financial_state(
 
 def _with_hash(state: FinancialState) -> FinancialState:
     return replace(state, state_hash=sha256_hex(canonical_json(state.material_dict())))
+
+
+class FinancialStateIntegrityError(InvalidValueError):
+    """``FinancialState.state_hash`` does not match its own ``material_dict()`` (R1-02).
+
+    Replay/snapshot trust boundaries must not trust a carried ``state_hash`` at face value;
+    this recomputes it from the state's own material fields and fails closed on any mismatch,
+    catching tampering that a changed ``GuardrailResult`` alone would not reveal (e.g. a
+    financial-state mutation that happens to leave the final guardrail decision unchanged).
+    """
+
+
+def verify_financial_state_integrity(state: FinancialState) -> None:
+    expected_hash = sha256_hex(canonical_json(state.material_dict()))
+    if state.state_hash != expected_hash:
+        raise FinancialStateIntegrityError(
+            "financial state hash does not match its material fields (fail closed)"
+        )

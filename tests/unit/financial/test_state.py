@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import date
 from decimal import Decimal
 
 import pytest
 
+from tax_gps.core.errors import InvalidValueError
 from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.financial.policy import (
@@ -24,10 +26,12 @@ from tax_gps.financial.profile import (
 )
 from tax_gps.financial.reason_codes import FinancialReasonCode
 from tax_gps.financial.state import (
+    FinancialStateIntegrityError,
     FinancialStateStatus,
     FinancialValidationError,
     _emergency_fund_months,
     compute_financial_state,
+    verify_financial_state_integrity,
 )
 
 PLANNING_DATE = date(2026, 6, 1)
@@ -204,10 +208,32 @@ def test_budget_exceeding_liquid_assets_fails_closed() -> None:
 
 
 @pytest.mark.negative
-def test_budget_without_known_liquid_assets_fails_closed() -> None:
+def test_budget_without_known_liquid_assets_is_not_evaluated_against_liquid_assets() -> None:
+    """R1-01: available_budget <= liquid_assets is only evaluated when liquid assets are known;
+    unknown liquid assets must yield PARTIAL, never a fail-closed validation error and never
+    an implicit zero.
+    """
     profile = FinancialProfile(liquid_assets=None, monthly_essential_expenses=Money.of(5000))
-    with pytest.raises(FinancialValidationError):
-        compute_financial_state(profile, _policy(), _context(0))
+    state = compute_financial_state(profile, _policy(), _context(0))
+    assert state.status is FinancialStateStatus.PARTIAL
+    assert state.liquid_assets is None
+    assert FinancialReasonCode.FINANCIAL_INPUT_REQUIRED in state.reason_codes
+
+
+@pytest.mark.negative
+def test_unknown_liquid_assets_leave_liquidity_derived_fields_unknown() -> None:
+    """R1-01: emergency_fund_months, reserve floor/target, protected_liquidity, and
+    spendable_surplus must all remain None when liquid_assets is unknown, even though
+    expenses are known.
+    """
+    profile = FinancialProfile(liquid_assets=None, monthly_essential_expenses=Money.of(50000))
+    state = compute_financial_state(profile, _policy(), _context(0))
+    assert state.status is FinancialStateStatus.PARTIAL
+    assert state.emergency_fund_months is None
+    assert state.emergency_reserve_floor is None
+    assert state.emergency_reserve_target is None
+    assert state.protected_liquidity is None
+    assert state.spendable_surplus is None
 
 
 def test_protection_gap_computed_when_both_known() -> None:
@@ -269,3 +295,88 @@ def test_financial_state_to_dict_includes_state_hash() -> None:
 @pytest.mark.negative
 def test_emergency_fund_months_none_when_expenses_zero_directly() -> None:
     assert _emergency_fund_months(Money.of(100), Money.zero()) is None
+
+
+@pytest.mark.negative
+def test_emergency_fund_months_raises_when_ratio_exceeds_context_precision() -> None:
+    """R1-05: the DecimalException branch in ``_emergency_fund_months`` is reachable when
+    liquid_assets / monthly_essential_expenses produces a ratio wider than the rounding
+    context's 50-digit precision (e.g. an extreme liquid_assets with a tiny expense base).
+    """
+    huge_liquid_assets = Money.of("9" * 47 + ".00")
+    tiny_expenses = Money.of("0.01")
+    with pytest.raises(InvalidValueError, match="not computable"):
+        _emergency_fund_months(huge_liquid_assets, tiny_expenses)
+
+
+# --- R1-02: FinancialState self-integrity verification ------------------------------------
+
+
+@pytest.mark.replay
+def test_verify_financial_state_integrity_accepts_untampered_state() -> None:
+    profile = FinancialProfile(
+        liquid_assets=Money.of(300000), monthly_essential_expenses=Money.of(50000)
+    )
+    state = compute_financial_state(profile, _policy(), _context(0))
+    verify_financial_state_integrity(state)  # must not raise
+
+
+@pytest.mark.replay
+@pytest.mark.negative
+def test_verify_financial_state_integrity_rejects_mutated_liquid_assets_with_stale_hash() -> None:
+    profile = FinancialProfile(
+        liquid_assets=Money.of(300000), monthly_essential_expenses=Money.of(50000)
+    )
+    state = compute_financial_state(profile, _policy(), _context(0))
+    tampered = replace(state, liquid_assets=Money.of(999999999))
+    with pytest.raises(FinancialStateIntegrityError):
+        verify_financial_state_integrity(tampered)
+
+
+@pytest.mark.replay
+@pytest.mark.negative
+def test_verify_financial_state_integrity_rejects_mutated_critical_debt_with_stale_hash() -> None:
+    profile = FinancialProfile(
+        liquid_assets=Money.of(300000), monthly_essential_expenses=Money.of(50000)
+    )
+    state = compute_financial_state(profile, _policy(), _context(0))
+    tampered = replace(
+        state,
+        critical_debt_balance=Money.of(999999),
+        critical_debt_ids=("forged-debt",),
+    )
+    with pytest.raises(FinancialStateIntegrityError):
+        verify_financial_state_integrity(tampered)
+
+
+@pytest.mark.replay
+@pytest.mark.negative
+def test_verify_financial_state_integrity_rejects_mutated_protection_gap_with_stale_hash() -> None:
+    """Mutation where the final guardrail decision would otherwise remain identical: a forged
+    protection_gap changes only an informational field, never the BLOCK/CAP/ALLOW decision,
+    yet must still fail closed on hash mismatch (R1-02 mandatory test 4).
+    """
+    profile = FinancialProfile(
+        liquid_assets=Money.of(300000), monthly_essential_expenses=Money.of(50000)
+    )
+    state = compute_financial_state(profile, _policy(), _context(0))
+    tampered = replace(state, protection_gap=Money.of(1))
+    with pytest.raises(FinancialStateIntegrityError):
+        verify_financial_state_integrity(tampered)
+
+
+@pytest.mark.replay
+@pytest.mark.negative
+def test_verify_financial_state_integrity_rejects_mutated_reason_codes_with_stale_hash() -> None:
+    """Mutation representing tampered commitment/protection reason data (R1-02 mandatory
+    test 3) while the carried state_hash stays stale.
+    """
+    profile = FinancialProfile(
+        liquid_assets=Money.of(300000), monthly_essential_expenses=Money.of(50000)
+    )
+    state = compute_financial_state(profile, _policy(), _context(0))
+    tampered = replace(
+        state, reason_codes=(*state.reason_codes, FinancialReasonCode.PROTECTION_GAP)
+    )
+    with pytest.raises(FinancialStateIntegrityError):
+        verify_financial_state_integrity(tampered)

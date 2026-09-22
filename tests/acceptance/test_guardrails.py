@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import fields
+from dataclasses import replace as dc_replace
 from datetime import date
 from decimal import Decimal
 
@@ -20,7 +21,12 @@ from tax_gps.financial.audit import (
     replay_guardrails,
 )
 from tax_gps.financial.engine import evaluate_guardrails
-from tax_gps.financial.models import GuardrailAssessment, GuardrailDecision, GuardrailResult
+from tax_gps.financial.models import (
+    GuardrailAssessment,
+    GuardrailDecision,
+    GuardrailResult,
+    GuardrailResultStatus,
+)
 from tax_gps.financial.policy import (
     ActivatedFinancialPolicy,
     activate_financial_policy,
@@ -93,14 +99,14 @@ _DEFAULT_PROTECTION = ProtectionProfile()
 
 def _financial_profile(
     *,
-    liquid_assets: int,
+    liquid_assets: int | None,
     expenses: int | None,
     debts: tuple[Debt, ...] = (),
     committed_cash_needs: tuple[CommittedCashNeed, ...] = (),
     protection: ProtectionProfile = _DEFAULT_PROTECTION,
 ) -> FinancialProfile:
     return FinancialProfile(
-        liquid_assets=Money.of(liquid_assets),
+        liquid_assets=Money.of(liquid_assets) if liquid_assets is not None else None,
         monthly_essential_expenses=Money.of(expenses) if expenses is not None else None,
         debts=debts,
         committed_cash_needs=committed_cash_needs,
@@ -366,3 +372,69 @@ def test_gr_16_no_recommendation_leakage() -> None:
     for model in (GuardrailResult, GuardrailAssessment):
         for field in fields(model):
             assert not any(token in field.name.lower() for token in forbidden), field.name
+
+
+@pytest.mark.mandatory
+def test_gr_17_unknown_liquid_assets_existing_right_still_allows() -> None:
+    """R1-01: unknown liquid assets + existing rights -> ALLOW."""
+    discovery = _discovery(
+        _tax_profile(benefits=ExistingTaxBenefits(parents=(Parent("father", True),)))
+    )
+    financial_profile = _financial_profile(liquid_assets=None, expenses=50000)
+    result = _guardrails(discovery, financial_profile, budget=0)
+    parent = assessment(result, opportunity_ids.PARENT_ALLOWANCE)
+    assert parent.decision is GuardrailDecision.ALLOW
+    assert parent.reason_codes == (FinancialReasonCode.EXISTING_RIGHT_PASSTHROUGH,)
+
+
+@pytest.mark.mandatory
+@pytest.mark.negative
+def test_gr_18_unknown_liquid_assets_new_cash_requires_review() -> None:
+    """R1-01: unknown liquid assets + AVAILABLE Thai ESG -> REQUIRE_REVIEW /
+    FINANCIAL_INPUT_REQUIRED, never ALLOW and never treated as zero liquidity.
+    """
+    discovery = _discovery(_tax_profile(800000))
+    financial_profile = _financial_profile(liquid_assets=None, expenses=50000)
+    result = _guardrails(discovery, financial_profile, budget=0)
+    thai_esg = assessment(result, opportunity_ids.THAI_ESG)
+    assert thai_esg.decision is GuardrailDecision.REQUIRE_REVIEW
+    assert FinancialReasonCode.FINANCIAL_INPUT_REQUIRED in thai_esg.reason_codes
+    assert result.status is GuardrailResultStatus.PARTIAL
+
+
+@pytest.mark.mandatory
+@pytest.mark.negative
+def test_gr_19_out_of_period_policy_fails_closed() -> None:
+    """R1-03: a policy whose effective period does not cover the planning_date must fail
+    closed rather than silently applying an out-of-period policy.
+    """
+    out_of_period_policy = activate_financial_policy(
+        dc_replace(bundled_financial_policy(TaxYear(2026)), effective_to=date(2026, 12, 31))
+    )
+    context = FinancialPlanningContext(planning_date=date(2027, 1, 1), available_budget=Money.of(0))
+    financial_profile = _financial_profile(liquid_assets=500000, expenses=50000)
+    with pytest.raises(FinancialValidationError):
+        compute_financial_state(financial_profile, out_of_period_policy, context)
+
+
+@pytest.mark.mandatory
+@pytest.mark.negative
+def test_gr_20_available_opportunity_with_unknown_capacity_fails_closed() -> None:
+    """R1-04: an AVAILABLE opportunity with unknown remaining_capacity must never fall back
+    to available_budget as an implicit ceiling; it fails closed to NOT_APPLICABLE with
+    DISCOVERY_CAPACITY_MISSING.
+    """
+    discovery = _discovery(_tax_profile(800000))
+    mutated_opportunities = tuple(
+        dc_replace(item, remaining_capacity=None)
+        if item.opportunity_id == opportunity_ids.THAI_ESG
+        else item
+        for item in discovery.opportunities
+    )
+    discovery = dc_replace(discovery, opportunities=mutated_opportunities)
+    financial_profile = _financial_profile(liquid_assets=500000, expenses=50000)
+    result = _guardrails(discovery, financial_profile, budget=100000)
+    thai_esg = assessment(result, opportunity_ids.THAI_ESG)
+    assert thai_esg.decision is GuardrailDecision.NOT_APPLICABLE
+    assert thai_esg.max_feasible_allocation is None
+    assert FinancialReasonCode.DISCOVERY_CAPACITY_MISSING in thai_esg.reason_codes

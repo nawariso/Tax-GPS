@@ -1,4 +1,4 @@
-"""Unit tests for the versioned Financial Guardrail Policy (TGPS-P1-003 §23-26).
+"""Unit tests for the versioned Financial Guardrail Policy (TGPS-P1-003 §23-26, R1-03).
 
 Every readiness finding and activation-rejection path is exercised with the specific
 finding code asserted, not merely executed.
@@ -15,19 +15,36 @@ import pytest
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.financial.policy import (
     BUNDLED_FINANCIAL_POLICY_ID_2026,
+    BUNDLED_FINANCIAL_POLICY_TAX_YEAR,
     POLICY_CLASSIFICATION,
     ActivatedFinancialPolicy,
     FinancialGuardrailPolicy,
     FinancialPolicyActivationError,
+    FinancialPolicySource,
+    FinancialPolicySourceAuthority,
     FinancialPolicyStatus,
+    FinancialPolicyValidationError,
     activate_financial_policy,
     bundled_financial_policy,
     evaluate_financial_policy_readiness,
+    evaluate_financial_policy_temporal_readiness,
 )
 
 
 def _valid_policy() -> FinancialGuardrailPolicy:
     return bundled_financial_policy(TaxYear(2026))
+
+
+def _source(**overrides: object) -> FinancialPolicySource:
+    defaults: dict[str, object] = {
+        "source_id": "TEST-SOURCE",
+        "publisher": "Test Publisher",
+        "title": "Test Title",
+        "url": "https://example.go.th/test",
+        "authority": FinancialPolicySourceAuthority.MARKET_EDUCATION_BODY,
+    }
+    defaults.update(overrides)
+    return FinancialPolicySource(**defaults)  # type: ignore[arg-type]
 
 
 def test_bundled_policy_is_ready_and_classified_as_product_policy() -> None:
@@ -96,6 +113,34 @@ def test_missing_basis_sources_is_a_readiness_finding() -> None:
     assert "MISSING_BASIS_SOURCES" in evaluate_financial_policy_readiness(policy)
 
 
+@pytest.mark.negative
+def test_effective_from_after_effective_to_is_a_readiness_finding() -> None:
+    policy = replace(
+        _valid_policy(), effective_from=date(2026, 12, 31), effective_to=date(2026, 1, 1)
+    )
+    assert "INVALID_EFFECTIVE_PERIOD" in evaluate_financial_policy_readiness(policy)
+
+
+@pytest.mark.negative
+def test_non_https_basis_source_url_is_a_readiness_finding() -> None:
+    policy = replace(_valid_policy(), basis_sources=(_source(url="http://example.go.th/x"),))
+    findings = evaluate_financial_policy_readiness(policy)
+    assert any(f.startswith("INVALID_BASIS_SOURCE_METADATA") for f in findings)
+
+
+@pytest.mark.negative
+def test_blank_basis_source_fields_are_a_readiness_finding() -> None:
+    policy = replace(_valid_policy(), basis_sources=(_source(publisher="  "),))
+    findings = evaluate_financial_policy_readiness(policy)
+    assert any(f.startswith("INVALID_BASIS_SOURCE_METADATA") for f in findings)
+
+
+def test_valid_structured_basis_source_is_accepted() -> None:
+    policy = replace(_valid_policy(), basis_sources=(_source(),))
+    findings = evaluate_financial_policy_readiness(policy)
+    assert not any(f.startswith("INVALID_BASIS_SOURCE_METADATA") for f in findings)
+
+
 @pytest.mark.parametrize(
     "status",
     [
@@ -141,9 +186,12 @@ def test_effective_period_and_provenance_are_recorded_not_law() -> None:
     assert policy.effective_from == date(2026, 1, 1)
     assert policy.effective_to == date(2026, 12, 31)
     assert policy.basis_sources
-    assert all(
-        "not Thai statute" in s or "not a Bank of Thailand" in s for s in policy.basis_sources
-    )
+    for source in policy.basis_sources:
+        assert source.source_id
+        assert source.publisher
+        assert source.title
+        assert source.url.startswith("https://")
+    assert any("NOT a Bank of Thailand" in note for note in policy.review_notes)
     assert any(POLICY_CLASSIFICATION in note for note in policy.review_notes)
 
 
@@ -158,3 +206,61 @@ def test_content_hash_is_deterministic_and_reflects_material_fields() -> None:
 def test_effective_to_none_serializes_as_null() -> None:
     policy = replace(_valid_policy(), effective_to=None)
     assert policy.to_dict()["effective_to"] is None
+
+
+# --- R1-03: policy effective-period vs. planning_date --------------------------------------
+
+
+def test_planning_date_within_effective_period_has_no_temporal_findings() -> None:
+    policy = _valid_policy()
+    assert evaluate_financial_policy_temporal_readiness(policy, date(2026, 6, 1)) == ()
+
+
+@pytest.mark.negative
+def test_planning_date_after_effective_to_fails_closed() -> None:
+    policy = replace(_valid_policy(), effective_to=date(2026, 12, 31))
+    findings = evaluate_financial_policy_temporal_readiness(policy, date(2027, 1, 1))
+    assert "PLANNING_DATE_AFTER_POLICY_EFFECTIVE_TO" in findings
+
+
+@pytest.mark.negative
+def test_planning_date_before_effective_from_fails_closed() -> None:
+    policy = _valid_policy()
+    findings = evaluate_financial_policy_temporal_readiness(policy, date(2025, 12, 31))
+    assert "PLANNING_DATE_BEFORE_POLICY_EFFECTIVE_FROM" in findings
+
+
+@pytest.mark.boundary
+def test_planning_date_exactly_on_effective_to_is_within_period() -> None:
+    policy = _valid_policy()
+    assert evaluate_financial_policy_temporal_readiness(policy, date(2026, 12, 31)) == ()
+
+
+@pytest.mark.boundary
+def test_planning_date_exactly_on_effective_from_is_within_period() -> None:
+    policy = _valid_policy()
+    assert evaluate_financial_policy_temporal_readiness(policy, date(2026, 1, 1)) == ()
+
+
+def test_temporal_readiness_with_no_effective_to_never_expires() -> None:
+    policy = replace(_valid_policy(), effective_to=None)
+    assert evaluate_financial_policy_temporal_readiness(policy, date(2099, 1, 1)) == ()
+
+
+# --- R1-03: year-specific policy identity -----------------------------------------------
+
+
+def test_bundled_policy_is_scoped_to_tax_year_2026() -> None:
+    assert TaxYear(2026) == BUNDLED_FINANCIAL_POLICY_TAX_YEAR
+
+
+@pytest.mark.negative
+def test_bundled_policy_rejects_non_2026_tax_year() -> None:
+    with pytest.raises(FinancialPolicyValidationError):
+        bundled_financial_policy(TaxYear(2027))
+
+
+@pytest.mark.negative
+def test_bundled_policy_rejects_a_year_before_2026() -> None:
+    with pytest.raises(FinancialPolicyValidationError):
+        bundled_financial_policy(TaxYear(2025))

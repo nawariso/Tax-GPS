@@ -200,3 +200,28 @@ def test_replay_rejects_guardrail_output_mismatch_with_matching_hash() -> None:
     tampered_snapshot = replace(snapshot, guardrail_output={"forged": True})
     with pytest.raises(GuardrailReplayError, match="guardrail output does not match replay"):
         replay_guardrails(tampered_snapshot, discovery, state, policy, context)
+
+
+# --- R1-02: FinancialState self-integrity verified at both trust boundaries ----------------
+
+
+def test_create_snapshot_rejects_tampered_financial_state_with_stale_hash() -> None:
+    """Snapshot creation must not trust ``state.state_hash`` at face value: a state mutated
+    after computation, with its carried hash left stale, fails closed even though nothing
+    about the ``GuardrailResult`` inputs it is compared against changed.
+    """
+    discovery, state, policy, context, result = _fixture()
+    tampered_state = replace(state, liquid_assets=Money.of(999999999))
+    with pytest.raises(ValueError, match="failed self-integrity verification"):
+        create_guardrail_snapshot(discovery, tampered_state, policy, context, result)
+
+
+def test_replay_rejects_tampered_financial_state_with_stale_hash() -> None:
+    """Replay must not trust ``state.state_hash`` at face value either: this is the second
+    of the two required trust boundaries (R1-02).
+    """
+    discovery, state, policy, context, result = _fixture()
+    snapshot = create_guardrail_snapshot(discovery, state, policy, context, result)
+    tampered_state = replace(state, liquid_assets=Money.of(999999999))
+    with pytest.raises(GuardrailReplayError, match="failed self-integrity verification"):
+        replay_guardrails(snapshot, discovery, tampered_state, policy, context)
