@@ -13,13 +13,16 @@ from tax_gps.candidate.models import (
 )
 from tax_gps.core.canonical import canonical_json, sha256_hex
 from tax_gps.core.money import Money
-from tax_gps.discovery.engine import _source_ids_for
+from tax_gps.discovery.capacity import calculate_opportunity_capacity
+from tax_gps.discovery.context import DiscoveryContext
+from tax_gps.discovery.engine import _source_ids_for, discover_opportunities
 from tax_gps.discovery.models import DiscoveryResult, DiscoveryStatus
 from tax_gps.opportunity.activation import ActivatedOpportunityCatalog, activate_catalog
 from tax_gps.opportunity.loader import load_bundled_catalog
 from tax_gps.opportunity.models import OpportunityStatus, OpportunityType
 from tax_gps.opportunity.readiness import evaluate_opportunity_readiness
 from tax_gps.policy.models import RuleStatus
+from tax_gps.profile.models import UserProfile
 
 BUNDLED_ALLOCATION_POLICY_ID = "TH-ALLOCATION-2026-001"
 BUNDLED_ALLOCATION_POLICY_VERSION = "1.0.0"
@@ -29,8 +32,10 @@ BUNDLED_CANDIDATE_MAXIMUM = 32
 @dataclass(frozen=True, slots=True)
 class ActivatedAllocationPolicy:
     policy: AllocationPolicy
+    profile: UserProfile
     catalog: ActivatedOpportunityCatalog
     content_hash: str
+    profile_hash: str
     discovery_hash: str
     tax_state_hash: str
     rule_ids: tuple[str, ...]
@@ -42,13 +47,18 @@ class ActivatedAllocationPolicy:
 
 
 def _validate_upstream(
-    tax: TaxState, discovery: DiscoveryResult, catalog: ActivatedOpportunityCatalog
+    profile: UserProfile,
+    tax: TaxState,
+    discovery: DiscoveryResult,
+    catalog: ActivatedOpportunityCatalog,
 ) -> None:
     bundled = activate_catalog(load_bundled_catalog())
     if catalog.content_hash != bundled.content_hash or catalog != bundled:
         raise ValueError("allocation catalog is not the accepted bundled catalog")
     if discovery.opportunity_catalog_hash != catalog.content_hash:
         raise ValueError("allocation catalog hash differs from discovery")
+    if profile.profile_hash() != discovery.profile_hash:
+        raise ValueError("profile hash differs from discovery")
     if discovery.discovery_hash != sha256_hex(canonical_json(discovery.material_dict())):
         raise ValueError("discovery integrity mismatch")
     if tax.output_hash != sha256_hex(canonical_json(tax.material_dict())):
@@ -63,10 +73,33 @@ def _validate_upstream(
         raise ValueError("candidate inputs do not match accepted tax/discovery state")
 
 
+def _verify_discovery_replay(
+    profile: UserProfile,
+    tax: TaxState,
+    discovery: DiscoveryResult,
+    catalog: ActivatedOpportunityCatalog,
+) -> None:
+    expected = discover_opportunities(
+        profile,
+        tax,
+        tax._activated_pack,
+        catalog,
+        DiscoveryContext(tax.tax_year, discovery.planning_date),
+    )
+    if (
+        discovery.discovery_hash != expected.discovery_hash
+        or discovery.material_dict() != expected.material_dict()
+    ):
+        raise ValueError("P1-002 discovery replay disagrees with supplied discovery")
+
+
 def _accepted_opportunities(
-    tax: TaxState, discovery: DiscoveryResult, catalog: ActivatedOpportunityCatalog
+    profile: UserProfile,
+    tax: TaxState,
+    discovery: DiscoveryResult,
+    catalog: ActivatedOpportunityCatalog,
 ) -> tuple[tuple[str, str | None, Money], ...]:
-    _validate_upstream(tax, discovery, catalog)
+    _validate_upstream(profile, tax, discovery, catalog)
     accepted: list[tuple[str, str | None, Money]] = []
     discovered_ids: set[str] = set()
     for item in discovery.opportunities:
@@ -96,9 +129,23 @@ def _accepted_opportunities(
             or not item.requires_new_cash
         ):
             raise ValueError("allocatable opportunity has incomplete P1-002 tax semantics")
+        shared_used = profile.opportunity_facts.shared_limit_amount_used(
+            definition.shared_limit_group
+        )
+        if shared_used is None:
+            raise ValueError("allocatable opportunity has unknown shared usage")
+        governed = calculate_opportunity_capacity(
+            definition,
+            catalog.catalog,
+            assessable_income=tax.income.assessable_income,
+            shared_amount_used=shared_used,
+        )
+        if item.remaining_capacity != governed.remaining_capacity:
+            raise ValueError("discovered capacity differs from governed catalog rule")
         if tax.tax_impact(item.remaining_capacity).saving != item.maximum_tax_saving_at_capacity:
             raise ValueError("P1-002 tax semantics disagree with full allocation deduction")
         accepted.append((item.opportunity_id, item.shared_limit_group, item.remaining_capacity))
+    _verify_discovery_replay(profile, tax, discovery, catalog)
     return tuple(accepted)
 
 
@@ -115,10 +162,13 @@ def _shared_groups(
 
 
 def bundled_allocation_policy(
-    tax: TaxState, discovery: DiscoveryResult, catalog: ActivatedOpportunityCatalog
+    profile: UserProfile,
+    tax: TaxState,
+    discovery: DiscoveryResult,
+    catalog: ActivatedOpportunityCatalog,
 ) -> AllocationPolicy:
-    """Construct the only production policy shape from accepted P1-002 facts."""
-    accepted = _accepted_opportunities(tax, discovery, catalog)
+    """Construct the only production policy shape from replayed P1-002 facts."""
+    accepted = _accepted_opportunities(profile, tax, discovery, catalog)
     return AllocationPolicy(
         BUNDLED_ALLOCATION_POLICY_ID,
         catalog.content_hash,
@@ -136,12 +186,13 @@ def bundled_allocation_policy(
 
 def activate_allocation_policy(
     policy: AllocationPolicy,
+    profile: UserProfile,
     tax: TaxState,
     discovery: DiscoveryResult,
     catalog: ActivatedOpportunityCatalog,
 ) -> ActivatedAllocationPolicy:
-    """Reject self-attested treatment/group values; bind to the accepted bundle."""
-    accepted = _accepted_opportunities(tax, discovery, catalog)
+    """Reject self-attested treatment/group values; bind to replayed P1-002 facts."""
+    accepted = _accepted_opportunities(profile, tax, discovery, catalog)
     if policy.catalog_hash != discovery.opportunity_catalog_hash:
         raise ValueError("allocation policy catalog hash mismatch")
     if (
@@ -164,7 +215,7 @@ def activate_allocation_policy(
         raise ValueError("allocation policy contains unknown shared group")
     if required_groups - provided_groups:
         raise ValueError("allocation policy omits shared group")
-    expected = bundled_allocation_policy(tax, discovery, catalog)
+    expected = bundled_allocation_policy(profile, tax, discovery, catalog)
     if any(
         item.remaining
         != next(
@@ -191,8 +242,10 @@ def activate_allocation_policy(
     )
     return ActivatedAllocationPolicy(
         policy,
+        profile,
         catalog,
         policy.content_hash(),
+        profile.profile_hash(),
         discovery.discovery_hash,
         tax.output_hash,
         rule_ids,

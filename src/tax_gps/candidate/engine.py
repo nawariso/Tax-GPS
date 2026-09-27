@@ -318,7 +318,9 @@ def build_candidates(
     """Publish only with policy re-verified against the accepted production bundle."""
     if type(policy) is not ActivatedAllocationPolicy:
         raise ValueError("activated allocation policy required")
-    expected = activate_allocation_policy(policy.policy, tax, discovery, policy.catalog)
+    expected = activate_allocation_policy(
+        policy.policy, policy.profile, tax, discovery, policy.catalog
+    )
     if policy != expected:
         raise ValueError("activated allocation policy integrity mismatch")
     return _construct_candidates(

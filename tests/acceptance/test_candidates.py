@@ -30,22 +30,38 @@ from tax_gps.financial.profile import FinancialPlanningContext, FinancialProfile
 from tax_gps.financial.reason_codes import FinancialReasonCode
 from tax_gps.financial.state import FinancialState, compute_financial_state
 from tax_gps.opportunity import opportunity_ids
-from tax_gps.profile.models import ExistingTaxBenefits, IncomeProfile, OpportunityFacts, UserProfile
+from tax_gps.profile.models import (
+    ExistingTaxBenefits,
+    IncomeProfile,
+    OpportunityFacts,
+    SharedLimitUsage,
+    UserProfile,
+)
 from tests.support.catalog import production_catalog
 from tests.support.policy import production_pack
+
+
+def _profile(
+    salary: Money | None = None,
+    *,
+    shared_limit_usage: tuple[SharedLimitUsage, ...] | None = (),
+) -> UserProfile:
+    if salary is None:
+        salary = Money.of(990500)
+    return UserProfile(
+        profile_id="employee",
+        version="1",
+        tax_year=TaxYear(2026),
+        income=IncomeProfile(section_40_1=salary),
+        benefits=ExistingTaxBenefits(social_security_paid=Money.of(10500)),
+        opportunity_facts=OpportunityFacts(shared_limit_usage=shared_limit_usage),
+    )
 
 
 def _inputs(
     *, budget: str = "100000", assets: str | None = "500000", salary: int = 990500
 ) -> tuple[TaxState, DiscoveryResult, FinancialState, GuardrailResult, AllocationPolicy]:
-    profile = UserProfile(
-        profile_id="employee",
-        version="1",
-        tax_year=TaxYear(2026),
-        income=IncomeProfile(section_40_1=Money.of(salary)),
-        benefits=ExistingTaxBenefits(social_security_paid=Money.of(10500)),
-        opportunity_facts=OpportunityFacts(shared_limit_usage=()),
-    )
+    profile = _profile(Money.of(salary))
     tax = calculate_tax(profile, production_pack())
     discovery = discover_opportunities(
         profile,
@@ -68,7 +84,7 @@ def _inputs(
         context,
     )
     guardrails = evaluate_guardrails(discovery, financial, financial_policy, context)
-    policy = bundled_allocation_policy(tax, discovery, production_catalog())
+    policy = bundled_allocation_policy(profile, tax, discovery, production_catalog())
     return tax, discovery, financial, guardrails, policy
 
 
@@ -76,7 +92,9 @@ def _build(
     inputs: tuple[TaxState, DiscoveryResult, FinancialState, GuardrailResult, AllocationPolicy],
 ) -> CandidateResult:
     tax, discovery, financial, guards, raw = inputs
-    active = activate_allocation_policy(raw, tax, discovery, production_catalog())
+    active = activate_allocation_policy(
+        raw, _profile(tax.income.assessable_income), tax, discovery, production_catalog()
+    )
     return build_candidates(tax, discovery, financial, guards, active)
 
 
@@ -176,7 +194,11 @@ def test_reordered_upstream_collections_keep_allocations_ids_and_outcomes() -> N
     )
     guards = replace(guards, guardrail_hash=sha256_hex(canonical_json(guards.material_dict())))
     left = _build((tax, discovery, financial, guardrails, policy))
-    right = _build((tax, reordered, financial, guards, policy))
+    with pytest.raises(ValueError, match="discovery replay"):
+        _build((tax, reordered, financial, guards, policy))
+    # Construction mechanics remain order-independent, but a reordered/rehashed
+    # discovery is not accepted as an authoritative P1-002 production result.
+    right = _build_synthetic((tax, reordered, financial, guards, policy))
     assert [c.allocation_dict() for c in left.candidates] == [
         c.allocation_dict() for c in right.candidates
     ]
@@ -432,8 +454,10 @@ def test_tax_impact_requires_matching_authoritative_baseline() -> None:
     )
     guards = replace(guards, discovery_hash=discovery.discovery_hash)
     guards = replace(guards, guardrail_hash=sha256_hex(canonical_json(guards.material_dict())))
-    with pytest.raises(ValueError, match="tax baseline differs"):
+    with pytest.raises(ValueError, match="tax state does not match profile"):
         _build((tax, discovery, financial, guards, policy))
+    with pytest.raises(ValueError, match="tax baseline differs"):
+        _build_synthetic((tax, discovery, financial, guards, policy))
 
 
 @pytest.mark.negative
@@ -526,7 +550,9 @@ def test_snapshot_serialization_and_replay() -> None:
     result = _build(inputs)
     snapshot = create_candidate_snapshot(result)
     tax, discovery, financial, guards, raw = inputs
-    active = activate_allocation_policy(raw, tax, discovery, production_catalog())
+    active = activate_allocation_policy(
+        raw, _profile(tax.income.assessable_income), tax, discovery, production_catalog()
+    )
     assert (
         replay_candidates(snapshot, tax, discovery, financial, guards, active).to_dict()
         == result.to_dict()
