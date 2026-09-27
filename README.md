@@ -1,8 +1,8 @@
-# Tax GPS — Deterministic Tax Core and Opportunity Discovery
+# Tax GPS — Deterministic Tax Core, Discovery, Guardrails & Candidate Outcomes
 
-Phase 1.0 and 1.1 implementation of `TGPS-P1-001` and `TGPS-P1-002`: a deterministic,
-auditable Thai individual income-tax core and tax-right/opportunity discovery engine for
-Gregorian tax year 2026 (B.E. 2569 is display metadata only).
+Phases 1.0–1.3 implement `TGPS-P1-001` through `TGPS-P1-004`: a deterministic,
+auditable Thai individual income-tax core, opportunity discovery, financial guardrails,
+and feasible candidate outcomes for Gregorian tax year 2026 (B.E. 2569 is display metadata only).
 
 The authoritative specification is
 [`docs/requirements/TGPS-P1-001-deterministic-tax-core.md`](docs/requirements/TGPS-P1-001-deterministic-tax-core.md).
@@ -10,6 +10,30 @@ The implementation report is
 [`docs/implementation-reports/TGPS-P1-001.md`](docs/implementation-reports/TGPS-P1-001.md).
 The discovery implementation report is
 [`docs/implementation-reports/TGPS-P1-002.md`](docs/implementation-reports/TGPS-P1-002.md).
+
+The candidate-allocation requirement is
+[`docs/requirements/TGPS-P1-004.md`](docs/requirements/TGPS-P1-004.md).
+The candidate implementation report is
+[`docs/implementation-reports/TGPS-P1-004.md`](docs/implementation-reports/TGPS-P1-004.md).
+
+## Candidate allocations (P1-004)
+
+`tax_gps.candidate.engine.build_candidates(tax, discovery, financial, guardrails, policy)`
+produces feasible, bounded allocation compositions and deterministic outcomes only. It does
+not rank, select, or recommend a candidate. `NO_ACTION` is always present, and tax savings
+come from the existing progressive PIT core, not a marginal-rate approximation. The caller
+must supply an explicit `AllocationPolicy` tied to the accepted catalog hash, with governed
+per-opportunity deduction treatments (`FULL_ALLOCATION_DEDUCTION` or an explicit fraction),
+remaining shared-pool limits derived from accepted usage, and a maximum candidate count
+(1–256). Absent treatment/group metadata fails closed; the engine never assumes every
+purchase is deductible. Raw profile facts are not serialized into candidate audit records;
+state and policy hashes, exact allocations, tax, and financial outcomes are retained.
+
+See `tests/acceptance/test_candidates.py::_inputs` for a fully exercised construction
+of TaxState, DiscoveryResult, FinancialState, GuardrailResult, and the explicit allocation
+policy. Run `uv run pytest tests/acceptance/test_candidates.py -q` to verify the integration.
+The sample shared-pool remainder in the fixture is not a production default: production
+callers must derive the remainder from accepted policy and actual known group usage.
 
 ## Scope
 
