@@ -5,8 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from tax_gps.calculation.models import TaxState
+from tax_gps.candidate.activation import ActivatedAllocationPolicy
 from tax_gps.candidate.engine import CANDIDATE_ENGINE_VERSION, build_candidates
-from tax_gps.candidate.models import AllocationPolicy, CandidateResult
+from tax_gps.candidate.models import CandidateResult
 from tax_gps.core.canonical import JsonValue, freeze
 from tax_gps.discovery.models import DiscoveryResult
 from tax_gps.financial.models import GuardrailResult
@@ -38,7 +39,7 @@ def replay_candidates(  # noqa: PLR0917 - snapshot and five accepted upstream in
     discovery: DiscoveryResult,
     financial: FinancialState,
     guardrails: GuardrailResult,
-    policy: AllocationPolicy,
+    policy: ActivatedAllocationPolicy,
     *,
     engine_version: str = CANDIDATE_ENGINE_VERSION,
 ) -> CandidateResult:

@@ -7,7 +7,7 @@ from enum import StrEnum
 
 from tax_gps.core.canonical import canonical_json, sha256_hex
 from tax_gps.core.money import Money
-from tax_gps.core.percentage import Percentage
+from tax_gps.policy.models import RuleStatus
 
 
 class DeductionSemantics(StrEnum):
@@ -19,26 +19,16 @@ class DeductionSemantics(StrEnum):
 class OpportunityTreatment:
     opportunity_id: str
     semantics: DeductionSemantics
-    rate: Percentage | None = None
 
     def __post_init__(self) -> None:
         if (
             not self.opportunity_id
-            or not isinstance(self.semantics, DeductionSemantics)
-            or (
-                self.semantics is DeductionSemantics.FULL_ALLOCATION_DEDUCTION
-                and self.rate is not None
-            )
-            or (self.semantics is DeductionSemantics.PERCENTAGE_OF_ALLOCATION and self.rate is None)
+            or self.semantics is not DeductionSemantics.FULL_ALLOCATION_DEDUCTION
         ):
-            raise ValueError("invalid explicit deduction treatment")
+            raise ValueError("only FULL_ALLOCATION_DEDUCTION is supported")
 
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "opportunity_id": self.opportunity_id,
-            "semantics": self.semantics.value,
-            "rate": self.rate.canonical() if self.rate is not None else None,
-        }
+    def to_dict(self) -> dict[str, str]:
+        return {"opportunity_id": self.opportunity_id, "semantics": self.semantics.value}
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,6 +54,9 @@ class AllocationPolicy:
     treatments: tuple[OpportunityTreatment, ...]
     shared_limits: tuple[SharedLimit, ...]
     max_candidates: int
+    tax_year: int = 2026
+    version: str = "1.0.0"
+    status: RuleStatus = RuleStatus.EFFECTIVE
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "treatments", tuple(self.treatments))
@@ -71,6 +64,10 @@ class AllocationPolicy:
         if (
             not self.policy_id
             or not self.catalog_hash
+            or not self.version
+            or isinstance(self.tax_year, bool)
+            or not isinstance(self.tax_year, int)
+            or not isinstance(self.status, RuleStatus)
             or (
                 isinstance(self.max_candidates, bool)
                 or not isinstance(self.max_candidates, int)
@@ -87,6 +84,9 @@ class AllocationPolicy:
     def material_dict(self) -> dict[str, object]:
         return {
             "policy_id": self.policy_id,
+            "version": self.version,
+            "tax_year": self.tax_year,
+            "status": self.status.value,
             "catalog_hash": self.catalog_hash,
             "treatments": [
                 t.to_dict() for t in sorted(self.treatments, key=lambda t: t.opportunity_id)

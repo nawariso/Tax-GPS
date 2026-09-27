@@ -7,12 +7,12 @@ from enum import StrEnum
 from typing import cast
 
 from tax_gps.calculation.models import TaxState, TaxStatus
+from tax_gps.candidate.activation import ActivatedAllocationPolicy, activate_allocation_policy
 from tax_gps.candidate.models import (
     Allocation,
     AllocationPolicy,
     CandidateOutcome,
     CandidateResult,
-    DeductionSemantics,
     OpportunityTreatment,
 )
 from tax_gps.core.canonical import canonical_json, sha256_hex
@@ -26,7 +26,7 @@ from tax_gps.financial.state import (
 )
 from tax_gps.opportunity.models import OpportunityStatus, OpportunityType
 
-CANDIDATE_ENGINE_VERSION = "tax-gps-candidates/0.1.0"
+CANDIDATE_ENGINE_VERSION = "tax-gps-candidates/0.2.0"
 MAX_ALLOCATABLE_OPPORTUNITIES = 8
 
 
@@ -138,7 +138,6 @@ def _allocatable(
 def _outcome(
     allocations: tuple[Allocation, ...],
     *,
-    treatments: dict[str, OpportunityTreatment],
     groups: dict[str, Money],
     opportunities: dict[str, DiscoveredOpportunity],
     tax: TaxState,
@@ -154,15 +153,8 @@ def _outcome(
     if not allocations:
         reasons.append(CandidateReasonCode.NO_ACTION_BASELINE)
     for allocation in allocations:
-        treatment = treatments[allocation.opportunity_id]
-        if treatment.semantics is DeductionSemantics.FULL_ALLOCATION_DEDUCTION:
-            deductible += allocation.amount
-            reasons.append(CandidateReasonCode.FULL_ALLOCATION_DEDUCTION)
-        else:
-            rate = treatment.rate
-            if rate is None:  # pragma: no cover - enforced in OpportunityTreatment
-                raise ValueError("unreachable: missing governed deduction rate")
-            deductible += allocation.amount * rate
+        deductible += allocation.amount
+        reasons.append(CandidateReasonCode.FULL_ALLOCATION_DEDUCTION)
         item = opportunities[allocation.opportunity_id]
         assessment = next(
             a for a in guardrails.assessments if a.opportunity_id == allocation.opportunity_id
@@ -210,7 +202,7 @@ def _outcome(
     )
 
 
-def build_candidates(
+def _construct_candidates(
     tax: TaxState,
     discovery: DiscoveryResult,
     financial: FinancialState,
@@ -225,7 +217,6 @@ def build_candidates(
     if len(available) > MAX_ALLOCATABLE_OPPORTUNITIES:
         raise ValueError("allocatable opportunity maximum exceeded; no expansion")
     groups = {item.group_id: item.remaining for item in policy.shared_limits}
-    treatments = {item.opportunity_id: item for item in policy.treatments}
     opportunities = {item.opportunity_id: item for item in discovery.opportunities}
     input_hash = sha256_hex(
         canonical_json(
@@ -300,7 +291,6 @@ def build_candidates(
     candidates = tuple(
         _outcome(
             composition,
-            treatments=treatments,
             groups=groups,
             opportunities=opportunities,
             tax=tax,
@@ -314,3 +304,23 @@ def build_candidates(
     )
     result = CandidateResult(candidates, input_hash, policy_hash, engine_version, "")
     return replace(result, result_hash=sha256_hex(canonical_json(result.material_dict())))
+
+
+def build_candidates(
+    tax: TaxState,
+    discovery: DiscoveryResult,
+    financial: FinancialState,
+    guardrails: GuardrailResult,
+    policy: ActivatedAllocationPolicy,
+    *,
+    engine_version: str = CANDIDATE_ENGINE_VERSION,
+) -> CandidateResult:
+    """Publish only with policy re-verified against the accepted production bundle."""
+    if type(policy) is not ActivatedAllocationPolicy:
+        raise ValueError("activated allocation policy required")
+    expected = activate_allocation_policy(policy.policy, tax, discovery, policy.catalog)
+    if policy != expected:
+        raise ValueError("activated allocation policy integrity mismatch")
+    return _construct_candidates(
+        tax, discovery, financial, guardrails, policy.policy, engine_version=engine_version
+    )

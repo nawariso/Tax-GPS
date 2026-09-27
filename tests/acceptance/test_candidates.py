@@ -6,8 +6,9 @@ from datetime import date
 import pytest
 
 from tax_gps.calculation.models import TaxState
+from tax_gps.candidate.activation import activate_allocation_policy, bundled_allocation_policy
 from tax_gps.candidate.audit import create_candidate_snapshot, replay_candidates
-from tax_gps.candidate.engine import build_candidates
+from tax_gps.candidate.engine import _construct_candidates, build_candidates
 from tax_gps.candidate.models import (
     AllocationPolicy,
     CandidateResult,
@@ -17,7 +18,6 @@ from tax_gps.candidate.models import (
 )
 from tax_gps.core.canonical import canonical_json, sha256_hex
 from tax_gps.core.money import Money
-from tax_gps.core.percentage import Percentage
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.discovery.context import DiscoveryContext
 from tax_gps.discovery.engine import discover_opportunities
@@ -68,24 +68,30 @@ def _inputs(
         context,
     )
     guardrails = evaluate_guardrails(discovery, financial, financial_policy, context)
-    policy = AllocationPolicy(
-        "allocation-test/1",
-        production_catalog().content_hash,
-        (
-            OpportunityTreatment(
-                opportunity_ids.THAI_ESG, DeductionSemantics.FULL_ALLOCATION_DEDUCTION
-            ),
-        ),
-        (SharedLimit(opportunity_ids.THAI_ESG_2026_POOL, Money.of(300000)),),
-        32,
-    )
+    policy = bundled_allocation_policy(tax, discovery, production_catalog())
     return tax, discovery, financial, guardrails, policy
 
 
 def _build(
     inputs: tuple[TaxState, DiscoveryResult, FinancialState, GuardrailResult, AllocationPolicy],
 ) -> CandidateResult:
-    return build_candidates(*inputs)
+    tax, discovery, financial, guards, raw = inputs
+    active = activate_allocation_policy(raw, tax, discovery, production_catalog())
+    return build_candidates(tax, discovery, financial, guards, active)
+
+
+def _build_synthetic(
+    inputs: tuple[TaxState, DiscoveryResult, FinancialState, GuardrailResult, AllocationPolicy],
+) -> CandidateResult:
+    """Exercise boundary mechanics only; this cannot activate production authority."""
+    return _construct_candidates(*inputs)
+
+
+@pytest.mark.negative
+def test_r1_raw_allocation_policy_cannot_enter_production_engine() -> None:
+    tax, discovery, financial, guards, raw = _inputs()
+    with pytest.raises(ValueError, match="activated allocation policy"):
+        build_candidates(tax, discovery, financial, guards, raw)  # type: ignore[arg-type]
 
 
 @pytest.mark.golden
@@ -206,9 +212,7 @@ def _two_opportunities(
         policy,
         treatments=(
             *policy.treatments,
-            OpportunityTreatment(
-                "TEST-SECOND", DeductionSemantics.PERCENTAGE_OF_ALLOCATION, Percentage.of("0.50")
-            ),
+            OpportunityTreatment("TEST-SECOND", DeductionSemantics.FULL_ALLOCATION_DEDUCTION),
         ),
         shared_limits=(SharedLimit(opportunity_ids.THAI_ESG_2026_POOL, Money.of(100000)),),
     )
@@ -217,28 +221,28 @@ def _two_opportunities(
 
 @pytest.mark.golden
 @pytest.mark.boundary
-def test_shared_limit_collision_and_partial_deduction() -> None:
-    result = _build(_two_opportunities())
+def test_shared_limit_collision_and_full_deduction() -> None:
+    result = _build_synthetic(_two_opportunities())
     assert [c.total_allocation.canonical() for c in result.candidates] == [
         "0.00",
         "100000.00",
         "100000.00",
     ]
     assert all(c.total_allocation <= Money.of(100000) for c in result.candidates)
-    partial = next(
+    allocated = next(
         c
         for c in result.candidates
         if c.allocations and c.allocations[0].opportunity_id == "TEST-SECOND"
     )
-    assert partial.deductible_amount == Money.of(50000)
-    assert partial.tax_saved == Money.of(10000)
-    assert "SHARED_LIMIT_APPLIED" in partial.reason_codes
+    assert allocated.deductible_amount == Money.of(100000)
+    assert allocated.tax_saved == Money.of(18500)
+    assert "SHARED_LIMIT_APPLIED" in allocated.reason_codes
     assert len({c.candidate_id for c in result.candidates}) == 3
 
 
 @pytest.mark.golden
 def test_multiple_opportunities_with_budget_enforcement() -> None:
-    result = _build(_two_opportunities(same_group=False))
+    result = _build_synthetic(_two_opportunities(same_group=False))
     assert sorted(c.total_allocation.canonical() for c in result.candidates) == [
         "0.00",
         "100000.00",
@@ -271,7 +275,7 @@ def test_multiple_opportunities_with_budget_enforcement() -> None:
     guards = replace(guards, guardrail_hash=sha256_hex(canonical_json(guards.material_dict())))
     combined = next(
         c
-        for c in _build((tax, discovery, financial, guards, policy)).candidates
+        for c in _build_synthetic((tax, discovery, financial, guards, policy)).candidates
         if len(c.allocations) == 2 and c.total_allocation == Money.of(150000)
     )
     assert "SHARED_LIMIT_APPLIED" not in combined.reason_codes
@@ -281,7 +285,7 @@ def test_multiple_opportunities_with_budget_enforcement() -> None:
 def test_candidate_bound_overflow_fails_closed() -> None:
     inputs = _two_opportunities()
     with pytest.raises(ValueError, match="maximum exceeded"):
-        _build((*inputs[:4], replace(inputs[4], max_candidates=2)))
+        _build_synthetic((*inputs[:4], replace(inputs[4], max_candidates=2)))
 
 
 @pytest.mark.negative
@@ -318,7 +322,7 @@ def test_product_space_over_eight_allocatable_opportunities_fails_before_expansi
         ),
     )
     with pytest.raises(ValueError, match="opportunity maximum"):
-        _build((tax, discovery, financial, guards, policy))
+        _build_synthetic((tax, discovery, financial, guards, policy))
 
 
 @pytest.mark.negative
@@ -350,26 +354,19 @@ def test_allocation_policy_rejects_malformed_constraints(bad: str) -> None:
 
 
 @pytest.mark.negative
-@pytest.mark.parametrize(
-    ("semantics", "rate"),
-    [
-        (DeductionSemantics.FULL_ALLOCATION_DEDUCTION, Percentage.of("0.5")),
-        (DeductionSemantics.PERCENTAGE_OF_ALLOCATION, None),
-    ],
-)
-def test_deduction_treatment_rejects_invalid_rate(
-    semantics: DeductionSemantics, rate: Percentage | None
-) -> None:
-    with pytest.raises(ValueError, match="invalid explicit deduction treatment"):
-        OpportunityTreatment("TEST", semantics, rate)
+def test_deduction_treatment_rejects_unsupported_semantics() -> None:
+    with pytest.raises(ValueError, match="FULL_ALLOCATION_DEDUCTION"):
+        OpportunityTreatment("TEST", DeductionSemantics.PERCENTAGE_OF_ALLOCATION)
+    with pytest.raises(TypeError, match="positional"):
+        OpportunityTreatment("TEST", DeductionSemantics.FULL_ALLOCATION_DEDUCTION, "0.5")  # type: ignore[call-arg]
 
 
 @pytest.mark.negative
 def test_missing_treatment_or_shared_limit_fails_closed() -> None:
     inputs = _inputs()
-    with pytest.raises(ValueError, match="deduction treatment"):
+    with pytest.raises(ValueError, match="omits treatment"):
         _build((*inputs[:4], replace(inputs[4], treatments=())))
-    with pytest.raises(ValueError, match="common remaining limit"):
+    with pytest.raises(ValueError, match="omits shared group"):
         _build((*inputs[:4], replace(inputs[4], shared_limits=())))
 
 
@@ -419,7 +416,7 @@ def test_future_opportunity_without_shared_group_uses_own_ceiling() -> None:
     )
     guards = replace(guards, discovery_hash=discovery.discovery_hash)
     guards = replace(guards, guardrail_hash=sha256_hex(canonical_json(guards.material_dict())))
-    result = _build((tax, discovery, financial, guards, policy))
+    result = _build_synthetic((tax, discovery, financial, guards, policy))
     assert len(result.candidates) >= 3
     assert all(c.total_allocation <= guards.available_budget for c in result.candidates)
 
@@ -441,13 +438,13 @@ def test_tax_impact_requires_matching_authoritative_baseline() -> None:
 
 @pytest.mark.negative
 def test_shared_limit_and_treatment_contract_reject_bad_values() -> None:
-    with pytest.raises(ValueError, match="invalid explicit deduction"):
-        OpportunityTreatment("TEST", "UNRECOGNIZED", Percentage.of("0.5"))  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="FULL_ALLOCATION_DEDUCTION"):
+        OpportunityTreatment("TEST", "UNRECOGNIZED")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="invalid shared"):
         SharedLimit("", Money.zero())
     with pytest.raises(ValueError, match="invalid shared"):
         SharedLimit("POOL", Money.of(-1))
-    with pytest.raises(ValueError, match="invalid explicit deduction"):
+    with pytest.raises(ValueError, match="FULL_ALLOCATION_DEDUCTION"):
         OpportunityTreatment("", DeductionSemantics.FULL_ALLOCATION_DEDUCTION)
     policy = _inputs()[-1]
     treatments = list(policy.treatments)
@@ -518,7 +515,9 @@ def test_policy_tuple_order_does_not_change_hash_or_outcomes() -> None:
     policy = inputs[-1]
     reordered = replace(policy, treatments=tuple(reversed(policy.treatments)))
     assert reordered.content_hash() == policy.content_hash()
-    assert _build((*inputs[:4], reordered)).to_dict() == _build(inputs).to_dict()
+    assert (
+        _build_synthetic((*inputs[:4], reordered)).to_dict() == _build_synthetic(inputs).to_dict()
+    )
 
 
 @pytest.mark.replay
@@ -526,6 +525,32 @@ def test_snapshot_serialization_and_replay() -> None:
     inputs = _inputs()
     result = _build(inputs)
     snapshot = create_candidate_snapshot(result)
-    assert replay_candidates(snapshot, *inputs).to_dict() == result.to_dict()
+    tax, discovery, financial, guards, raw = inputs
+    active = activate_allocation_policy(raw, tax, discovery, production_catalog())
+    assert (
+        replay_candidates(snapshot, tax, discovery, financial, guards, active).to_dict()
+        == result.to_dict()
+    )
     with pytest.raises(ValueError, match="replay"):
-        replay_candidates(replace(snapshot, result_hash="bad"), *inputs)
+        replay_candidates(
+            replace(snapshot, result_hash="bad"), tax, discovery, financial, guards, active
+        )
+
+
+@pytest.mark.negative
+@pytest.mark.parametrize(
+    "variant", ["tax_policy", "discovery_hash", "missing_treatment", "missing_group"]
+)
+def test_synthetic_constructor_rejects_invalid_upstream_or_policy(variant: str) -> None:
+    tax, discovery, financial, guards, policy = _inputs()
+    if variant == "tax_policy":
+        tax = replace(tax, rule_pack_version="forged")
+        tax = replace(tax, output_hash=sha256_hex(canonical_json(tax.material_dict())))
+    elif variant == "discovery_hash":
+        discovery = replace(discovery, discovery_hash="forged")
+    elif variant == "missing_treatment":
+        policy = replace(policy, treatments=())
+    else:
+        policy = replace(policy, shared_limits=())
+    with pytest.raises(ValueError, match=r"integrity|deduction treatment|common remaining limit"):
+        _build_synthetic((tax, discovery, financial, guards, policy))

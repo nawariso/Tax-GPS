@@ -22,18 +22,23 @@ The candidate implementation report is
 produces feasible, bounded allocation compositions and deterministic outcomes only. It does
 not rank, select, or recommend a candidate. `NO_ACTION` is always present, and tax savings
 come from the existing progressive PIT core, not a marginal-rate approximation. The caller
-must supply an explicit `AllocationPolicy` tied to the accepted catalog hash, with governed
-per-opportunity deduction treatments (`FULL_ALLOCATION_DEDUCTION` or an explicit fraction),
-remaining shared-pool limits derived from accepted usage, and a maximum candidate count
-(1–256). Absent treatment/group metadata fails closed; the engine never assumes every
-purchase is deductible. Raw profile facts are not serialized into candidate audit records;
-state and policy hashes, exact allocations, tax, and financial outcomes are retained.
+must pass an `ActivatedAllocationPolicy` bound by `activate_allocation_policy(raw_policy, tax,
+discovery, catalog)`. Build the raw production policy with `bundled_allocation_policy(tax,
+discovery, catalog)`, using the accepted activated opportunity catalog. Activation verifies the
+EFFECTIVE bundled catalog and policy ID/version/year, P1-002 tax-saving semantics and
+rule/source provenance, and the sole governed shared-pool remainder. Only
+`FULL_ALLOCATION_DEDUCTION` is supported; non-1:1 allocation-to-deduction is deferred
+pending separately governed upstream policy/catalog support. Arbitrary caller treatments,
+unknown groups, and self-attested content hashes cannot grant production authority. The
+candidate maximum remains 1–256, with no more than eight allocatable opportunities.
+Raw profile facts are not serialized into candidate audit records; state and policy hashes,
+exact allocations, tax, and financial outcomes are retained.
 
 See `tests/acceptance/test_candidates.py::_inputs` for a fully exercised construction
-of TaxState, DiscoveryResult, FinancialState, GuardrailResult, and the explicit allocation
-policy. Run `uv run pytest tests/acceptance/test_candidates.py -q` to verify the integration.
-The sample shared-pool remainder in the fixture is not a production default: production
-callers must derive the remainder from accepted policy and actual known group usage.
+of TaxState, DiscoveryResult, FinancialState, GuardrailResult, and production policy
+activation. Run `uv run pytest tests/acceptance/test_candidates.py tests/acceptance/test_candidate_policy_binding.py -q` to verify the integration.
+Synthetic multi-opportunity cases test construction mechanics only and are never
+activated as production policy.
 
 ## Scope
 
