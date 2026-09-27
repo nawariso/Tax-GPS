@@ -1,8 +1,8 @@
-# Tax GPS — Deterministic Tax Core and Opportunity Discovery
+# Tax GPS — Deterministic Tax Core, Discovery, Guardrails & Candidate Outcomes
 
-Phase 1.0 and 1.1 implementation of `TGPS-P1-001` and `TGPS-P1-002`: a deterministic,
-auditable Thai individual income-tax core and tax-right/opportunity discovery engine for
-Gregorian tax year 2026 (B.E. 2569 is display metadata only).
+Phases 1.0–1.3 implement `TGPS-P1-001` through `TGPS-P1-004`: a deterministic,
+auditable Thai individual income-tax core, opportunity discovery, financial guardrails,
+and feasible candidate outcomes for Gregorian tax year 2026 (B.E. 2569 is display metadata only).
 
 The authoritative specification is
 [`docs/requirements/TGPS-P1-001-deterministic-tax-core.md`](docs/requirements/TGPS-P1-001-deterministic-tax-core.md).
@@ -10,6 +10,40 @@ The implementation report is
 [`docs/implementation-reports/TGPS-P1-001.md`](docs/implementation-reports/TGPS-P1-001.md).
 The discovery implementation report is
 [`docs/implementation-reports/TGPS-P1-002.md`](docs/implementation-reports/TGPS-P1-002.md).
+
+The candidate-allocation requirement is
+[`docs/requirements/TGPS-P1-004.md`](docs/requirements/TGPS-P1-004.md).
+The candidate implementation report is
+[`docs/implementation-reports/TGPS-P1-004.md`](docs/implementation-reports/TGPS-P1-004.md).
+
+## Candidate allocations (P1-004)
+
+`tax_gps.candidate.engine.build_candidates(tax, discovery, financial, guardrails, policy)`
+produces feasible, bounded allocation compositions and deterministic outcomes only. It does
+not rank, select, or recommend a candidate. `NO_ACTION` is always present, and tax savings
+come from the existing progressive PIT core, not a marginal-rate approximation. The caller
+must pass an `ActivatedAllocationPolicy` bound by `activate_allocation_policy(raw_policy,
+profile, tax, discovery, catalog)`. Build the raw production policy with
+`bundled_allocation_policy(profile, tax, discovery, catalog)`, using the accepted
+`UserProfile` and activated opportunity catalog. Activation binds the profile hash to
+discovery, replays P1-002 from accepted profile/tax/catalog/planning-date evidence, and
+independently verifies governed capacity with P1-002's capacity function and the profile's
+shared-usage facts. A self-consistent discovery hash is integrity metadata, not authority
+for remaining capacity. Unknown shared usage cannot become new-cash allocation. Activation
+also verifies the EFFECTIVE bundled catalog and policy ID/version/year, P1-002 tax-saving
+semantics and rule/source provenance. Only `FULL_ALLOCATION_DEDUCTION` is supported;
+non-1:1 allocation-to-deduction is deferred pending separately governed upstream
+policy/catalog support. Arbitrary caller treatments, unknown groups, and self-attested
+content hashes cannot grant production authority. The candidate maximum remains 1–256,
+with no more than eight allocatable opportunities. Raw profile facts are not serialized
+into candidate audit records; state and policy hashes, exact allocations, tax, and
+financial outcomes are retained.
+
+See `tests/acceptance/test_candidates.py::_inputs` for a fully exercised construction
+of TaxState, DiscoveryResult, FinancialState, GuardrailResult, and production policy
+activation. Run `uv run pytest tests/acceptance/test_candidates.py tests/acceptance/test_candidate_policy_binding.py tests/acceptance/test_candidate_capacity_authority.py -q` to verify the integration.
+Synthetic multi-opportunity cases test construction mechanics only and are never
+activated as production policy.
 
 ## Scope
 
