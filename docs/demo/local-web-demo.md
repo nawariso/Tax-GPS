@@ -30,19 +30,26 @@ uv run python -m examples.web_demo
 4. สลับไปดูสิทธิและเงื่อนไข พร้อมสถานะที่ยังไม่พร้อม กฎและ source IDs
 5. เปิดรายละเอียด hash หรือดาวน์โหลด JSON ผลคำนวณ
 
-มีสถานการณ์สำเร็จรูป 4 แบบ: มีสภาพคล่อง, สภาพคล่องจำกัด,
-ยังไม่ทราบสินทรัพย์สภาพคล่อง, และฐานภาษีต่ำจนไม่มีผลประหยัดภาษี
-กรณีสุดท้ายตั้งใจแสดงว่าการใช้เงินไม่จำเป็นต้องให้ประโยชน์ภาษี
+มีสถานการณ์สำเร็จรูป 7 แบบ: มีสภาพคล่อง, สภาพคล่องจำกัด,
+ยังไม่ทราบสินทรัพย์สภาพคล่อง, ฐานภาษีต่ำจนไม่มีผลประหยัดภาษี,
+ครอบครัวพร้อมสิทธิบุตร/ดอกเบี้ยบ้าน, หนี้ดอกเบี้ยสูง, และภาระจ่ายใกล้ถึงกำหนด
+กรณีฐานภาษีต่ำตั้งใจแสดงว่าการใช้เงินไม่จำเป็นต้องให้ประโยชน์ภาษี
 
 ## ขอบเขตและสมมุติฐานที่แสดงบนหน้าจอ
 
 - เงินได้จากเงินเดือน 40(1) ปี 2026 / พ.ศ. 2569 เท่านั้น
-- เข้าเงื่อนไขสิทธิส่วนตัว ไม่มีหนี้ ไม่มีภาระเงินสดผูกพัน ไม่มีสิทธิบิดามารดา/บุตร/
-  ดอกเบี้ยบ้าน/เงินสะสมเกษียณในตัว adapter นี้ ความคุ้มครองประกันยังไม่ทราบ
+- Stage 2 กรอกสิทธิส่วนตัว บิดามารดา บุตร ดอกเบี้ยบ้าน หนี้ ภาระจ่าย และความคุ้มครองได้
+  เพิ่ม/ลบรายการได้ในส่วนข้อมูลเพิ่มเติม สิทธิที่เลือกเป็นข้อเท็จจริงที่ผู้กรอกยืนยัน
+  ระบบไม่ตรวจเอกสารหรือวินิจฉัยสิทธิแทน เลือกยังไม่ทราบสิทธิ = ยังไม่เผยแพร่ผล
+- รายการว่างหมายถึงยืนยันว่าไม่มีในโปรไฟล์ทดลอง ไม่ใช่ยังไม่ทราบว่ามีหรือไม่
+- รายได้ประเภทอื่นหรือเงินออมเกษียณที่มากกว่าศูนย์/ยังไม่ทราบจะไม่เผยแพร่ผลภาษี
+  เพราะเส้นทางเงินเดือนยังไม่รองรับครบ ดู [input contract](input-coverage.md)
+- Legacy API เจ็ดช่องเดิมยังจำกัดที่ไม่มีหนี้/ภาระจ่าย/สิทธิครอบครัว และไม่ทราบความคุ้มครอง
+  หน้าจอ Stage 2 ส่ง extended profile เสมอ ไม่ใช้ legacy defaults แทนข้อมูลที่ขาด
 - ช่องวงเงินกลุ่ม Thai ESG / ESGX ที่ใช้ไปแล้วเป็นข้อมูลตรวจความจุร่วม ไม่ใช่รายการ
   ลดหย่อนใหม่ในฐานภาษีเริ่มต้น หากมีประวัติการใช้สิทธิจริง ต้องใช้โปรไฟล์เต็มที่รองรับ
   ก่อนนำไปเป็นเครื่องมือสำหรับข้อมูลจริง
-- เว้นสินทรัพย์หรือวงเงินร่วมว่าง = unknown ไม่ใช่ 0
+- เว้นสินทรัพย์ ค่าใช้จ่าย ความคุ้มครอง หรือวงเงินร่วมว่าง = unknown ไม่ใช่ 0
 - ไม่มีการหักภาษี ณ ที่จ่าย ไม่มีจำนวนเงินคืน/ภาษีต้องชำระสุทธิ ไม่มีการยื่นแบบ
 - ไม่มีอันดับ คำแนะนำซื้อ/ขาย ผลตอบแทนคาดการณ์ หรือการเลือกกองทุน
 - ไม่เปลี่ยนกฎที่อยู่ใน engine และไม่ตรวจยืนยันกฎหมายล่าสุดใหม่
@@ -79,7 +86,7 @@ standard-library HTTP server นี้สำหรับ local demo เท่า
 ## การตรวจสอบ
 
 ```console
-uv run pytest tests/acceptance/test_web_demo.py -q
+uv run pytest tests/acceptance/test_web_demo.py tests/acceptance/test_demo_profile.py -q
 uv run python -m examples.check_web_demo
 uv run ruff check .
 uv run ruff format --check .
@@ -88,8 +95,8 @@ uv run pytest --cov=tax_gps --cov-branch --cov-report=term-missing -q
 uv build
 ```
 
-Local checkpoint verification: 25 Python demo tests; 633 total Python tests passed,
-plus 5 JavaScript lifecycle regression tests using real HTTP/engine responses.
+Stage 2 verification: 42 Python demo/profile tests; 650 total Python tests passed,
+plus 10 JavaScript lifecycle/profile regression tests using real HTTP/engine responses.
 Strict mypy includes `examples/`. The frontend check requires Node.js 22+ only for
 verification; running the demo itself still needs only Python and uv. Its helper starts
 an isolated loopback server on an ephemeral port and shuts it down afterward.
@@ -102,17 +109,23 @@ The demo CI workflow now includes this check, but remote execution remains UNVER
 Core package `tax_gps` retains 100% statement and branch coverage; this coverage figure
 is not a claim of 100% coverage for the demo HTTP adapter or JavaScript.
 
-Browser verification exercised all four scenarios, editing a budget to 25,000,
+Stage 1 browser verification exercised the original four scenarios, editing a budget to 25,000,
 invalid-input handling with old results hidden, recovery, both result views, audit disclosure,
 and an actual JSON download whose result hash matched the displayed one.
-Desktop and mobile widths 390 / 360 showed no page-level horizontal overflow.
+Stage 2 additionally verified all seven scenarios, coverage edits, unsupported retirement
+and unknown eligibility rejection, removing debt, and export containing the submitted
+profile with matching result hash. Normal/family/debt layouts at widths 1440 / 390 / 360
+showed no page-level horizontal overflow. The desktop family screenshot was visually reviewed.
 
 Generated local evidence (Git-ignored, illustrative inputs only):
 
 - `examples/artifacts/browser-checks.json`
 - `examples/artifacts/desktop.png`
 - `examples/artifacts/mobile.png`
-- `examples/artifacts/tax-gps-demo-2026.json`
+- `examples/artifacts/tax-gps-demo-2026.json` (Stage 1)
+- `examples/artifacts/stage2-browser-checks.json`
+- `examples/artifacts/stage2-export.json`
+- `examples/artifacts/stage2-desktop.png`
 
 These artifacts are local evidence, not fixtures consumed by the demo. A clean clone has no
 screenshots until browser verification is repeated. Remote CI for these demo changes is

@@ -7,11 +7,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from examples.demo_profile import amount, parse_profile
 from tax_gps.candidate.activation import activate_allocation_policy, bundled_allocation_policy
 from tax_gps.candidate.engine import build_candidates
 from tax_gps.core.money import Money
@@ -44,23 +44,22 @@ MAX_BODY = 4096
 STATIC = {
     "/": ("index.html", "text/html; charset=utf-8"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/profile.js": ("profile.js", "text/javascript; charset=utf-8"),
+    "/profile.css": ("profile.css", "text/css; charset=utf-8"),
     "/style.css": ("style.css", "text/css; charset=utf-8"),
 }
 
 
 def _money(data: dict[str, str], name: str) -> Money:
-    value = data[name]
-    if not re.fullmatch(r"[0-9]{1,12}(?:\.[0-9]{1,2})?", value):
-        raise ValueError(f"{name}: enter a nonnegative THB amount with at most two decimals")
-    return Money.of(value)
+    return amount(data[name], name)
 
 
 def calculate(data: object) -> dict[str, object]:
     """Compose the existing production activation path, never duplicate tax rules."""
     if (
         not isinstance(data, dict)
-        or set(data) != FIELDS
-        or not all(isinstance(value, str) for value in data.values())
+        or set(data) not in (FIELDS, FIELDS | {"profile"})
+        or not all(isinstance(data.get(key), str) for key in FIELDS)
     ):
         raise ValueError("Supply exactly the seven demo fields as strings")
     planning_date = date.fromisoformat(data["planning_date"])
@@ -68,12 +67,24 @@ def calculate(data: object) -> dict[str, object]:
         raise ValueError("This demo supports the bundled 2026 policy only")
     year = TaxYear(2026)
     usage = data["shared_usage"]
+    benefits = ExistingTaxBenefits(social_security_paid=_money(data, "social_security"))
+    financial_profile = FinancialProfile(
+        liquid_assets=_money(data, "assets") if data["assets"] != "" else None,
+        monthly_essential_expenses=_money(data, "expenses") if data["expenses"] != "" else None,
+    )
+    if "profile" in data:
+        benefits, financial_profile = parse_profile(
+            data["profile"],
+            assets=financial_profile.liquid_assets,
+            expenses=financial_profile.monthly_essential_expenses,
+            social=_money(data, "social_security"),
+        )
     profile = UserProfile(
         profile_id="local-demo",
         version="1",
         tax_year=year,
         income=IncomeProfile(section_40_1=_money(data, "salary")),
-        benefits=ExistingTaxBenefits(social_security_paid=_money(data, "social_security")),
+        benefits=benefits,
         opportunity_facts=OpportunityFacts(
             shared_limit_usage=(
                 (SharedLimitUsage(THAI_ESG_2026_POOL, _money(data, "shared_usage")),)
@@ -93,10 +104,7 @@ def calculate(data: object) -> dict[str, object]:
     context = FinancialPlanningContext(planning_date, _money(data, "budget"))
     financial_policy = activate_financial_policy(bundled_financial_policy(year))
     financial = compute_financial_state(
-        FinancialProfile(
-            liquid_assets=_money(data, "assets") if data["assets"] != "" else None,
-            monthly_essential_expenses=_money(data, "expenses"),
-        ),
+        financial_profile,
         financial_policy,
         context,
     )
@@ -116,7 +124,11 @@ def calculate(data: object) -> dict[str, object]:
         "discovery": discovery.to_dict(),
         "guardrails": guards.to_dict(),
         "outcomes": outcomes.to_dict(),
-        "demo_scope": "EMPLOYEE_40_1_ONLY_NO_DEBT_NO_COMMITMENTS_UNKNOWN_PROTECTION",
+        "tax_state": tax.to_dict(),
+        "submitted_profile": {"tax": profile.to_dict(), "financial": financial_profile.to_dict()},
+        "demo_scope": "EXPLICIT_EMPLOYEE_PROFILE_NO_RETIREMENT"
+        if "profile" in data
+        else "EMPLOYEE_40_1_ONLY_NO_DEBT_NO_COMMITMENTS_UNKNOWN_PROTECTION",
     }
 
 

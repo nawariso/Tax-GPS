@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="th">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tax GPS — ห้องทดลองวางแผนภาษี</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tax GPS — ห้องทดลองวางแผนภาษี</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/profile.css"><script src="/profile.js" defer></script><script src="/app.js" defer></script></head>
 <body>
 <header class="topbar"><a href="/" class="brand"><span class="brandmark">↗</span> TAX GPS<span class="brandnote">รู้ภาษี · เห็นทางเลือก</span></a><span class="localbadge"><i></i> LOCAL DEMO</span></header>
 <main>
@@ -8,21 +8,41 @@
 <div class="notice"><span>i</span><div>พื้นที่ทดลอง ไม่ใช่ระบบยื่นภาษีจริง <small>คำนวณด้วย engine และ policy ที่อยู่ใน repository ไม่ได้ตรวจยืนยันกฎหมายล่าสุดใหม่ในเดโมนี้ · P1-004 ยังรอ independent acceptance</small></div></div>
 <div class="workspace">
 <aside class="panel inputpanel"><div class="sectionhead"><span class="step">01</span><div><h2>ข้อมูลของคุณ</h2><p>จำนวนเงินเป็นบาท</p></div></div>
-<label for="scenario">ลองสถานการณ์ตัวอย่าง</label><select id="scenario"><option value="normal">พนักงานเงินเดือน · มีสภาพคล่อง</option><option value="tight">เงินเหลือน้อย · จำกัดการใช้เงิน</option><option value="unknown">ยังไม่ทราบสภาพคล่อง</option><option value="zero">ฐานภาษีต่ำ · ไม่มีผลประหยัดภาษี</option></select>
+<label for="scenario">ลองสถานการณ์ตัวอย่าง</label><select id="scenario"><option value="normal">พนักงานเงินเดือน · มีสภาพคล่อง</option><option value="tight">เงินเหลือน้อย · จำกัดการใช้เงิน</option><option value="unknown">ยังไม่ทราบสภาพคล่อง</option><option value="zero">ฐานภาษีต่ำ · ไม่มีผลประหยัดภาษี</option><option value="family">ครอบครัว · บุตรและดอกเบี้ยบ้าน</option><option value="debt">มีหนี้ดอกเบี้ยสูง · ไม่ใช้เงินใหม่เพื่อภาษี</option><option value="commitment">มีภาระจ่ายใกล้ถึงกำหนด · กันเงินก่อน</option></select>
 <form id="planner">
 <label for="salary">รายได้จากเงินเดือนทั้งปี</label><div class="amount"><input id="salary" name="salary" type="text" inputmode="decimal" required value="990500"><span>บาท / ปี</span></div>
 <label for="social_security">ประกันสังคมที่จ่ายแล้ว</label><div class="amount"><input id="social_security" name="social_security" type="text" inputmode="decimal" required value="10500"><span>บาท / ปี</span></div>
 <div class="formdivider"></div>
 <label for="assets">สินทรัพย์สภาพคล่อง</label><div class="amount"><input id="assets" name="assets" type="text" inputmode="decimal" value="500000"><span>บาท</span></div><small class="hint">เว้นว่าง = ยังไม่ทราบ ไม่ใช่ศูนย์</small>
-<label for="expenses">ค่าใช้จ่ายจำเป็นต่อเดือน</label><div class="amount"><input id="expenses" name="expenses" type="text" inputmode="decimal" required value="50000"><span>บาท / เดือน</span></div>
+<label for="expenses">ค่าใช้จ่ายจำเป็นต่อเดือน</label><div class="amount"><input id="expenses" name="expenses" type="text" inputmode="decimal" value="50000"><span>บาท / เดือน</span></div>
 <label for="budget">งบที่ต้องการนำมาทดลอง</label><div class="amount"><input id="budget" name="budget" type="text" inputmode="decimal" required value="100000"><span>บาท</span></div>
 <details class="advanced"><summary>ข้อมูลเพิ่มเติม</summary><label for="shared_usage">วงเงินกลุ่ม Thai ESG / ESGX ที่ใช้ไปแล้ว</label><input id="shared_usage" name="shared_usage" type="text" inputmode="decimal" value="0"><small class="hint">เป็นการใช้วงเงินร่วมเพื่อเช็กความจุ ไม่ใช่รายการลดหย่อนเพิ่มในฐานภาษีนี้ · เว้นว่างถ้ายังไม่ทราบ</small><label for="planning_date">วันที่วางแผน</label><input id="planning_date" name="planning_date" type="date" required min="2026-01-01" max="2026-12-31" value="2026-10-14"></details>
-<p class="assumption">ขอบเขตเดโม: สิทธิส่วนตัวเข้าเงื่อนไข ไม่มีหนี้ ไม่มีภาระจ่ายที่ผูกพัน ไม่มีสิทธิบุตร/บิดามารดา/ดอกเบี้ยบ้าน และยังไม่ทราบความคุ้มครองประกัน ไม่เหมาะกับโปรไฟล์นอกขอบเขตนี้</p>
+<details class="advanced profile-section"><summary>สิทธิส่วนตัวและครอบครัว</summary>
+<p class="hint">เลือกสิทธิหลังตรวจเงื่อนไขแล้ว ระบบไม่ตรวจเอกสารหรือรับรองสิทธิให้ · ไม่มีรายการ = ระบุว่าไม่มีในโปรไฟล์ทดลองนี้ ไม่ใช่ข้อมูลที่ยังไม่ทราบ</p>
+<label for="personal_eligible">เข้าเงื่อนไขค่าลดหย่อนส่วนตัว</label><select id="personal_eligible"><option value="true">ใช่ · ตรวจเงื่อนไขแล้ว</option><option value="false">ไม่ใช่</option><option value="unknown">ยังไม่ทราบ</option></select>
+<h3>บิดา / มารดา</h3><div id="parentsRecords"></div><button id="addparents" class="secondary" type="button">+ เพิ่มบิดา / มารดา</button>
+<h3>บุตร</h3><div id="childrenRecords"></div><button id="addchildren" class="secondary" type="button">+ เพิ่มบุตร</button>
+<label for="mortgage_interest">ดอกเบี้ยบ้านที่จ่ายจริงทั้งปี (บาท)</label><input id="mortgage_interest" inputmode="decimal" value="0" required>
+<label for="mortgage_eligible">เข้าเงื่อนไขสิทธิดอกเบี้ยบ้าน</label><select id="mortgage_eligible"><option value="false">ไม่ใช้สิทธินี้</option><option value="true">ใช่ · ตรวจเงื่อนไขแล้ว</option><option value="unknown">ยังไม่ทราบ</option></select>
+</details>
+<details class="advanced profile-section"><summary>หนี้และภาระจ่ายที่ต้องกันเงิน</summary>
+<p class="hint">ไม่มีรายการ = ยืนยันไม่มีในโปรไฟล์ทดลอง · รวมยอดจ่ายประจำที่จำเป็นในค่าใช้จ่ายต่อเดือนโดยไม่ซ้ำกับภาระจ่ายครั้งเดียว</p>
+<h3>หนี้</h3><div id="debtsRecords"></div><button id="adddebts" class="secondary" type="button">+ เพิ่มหนี้</button>
+<h3>ภาระจ่ายครั้งเดียว</h3><div id="commitmentsRecords"></div><button id="addcommitments" class="secondary" type="button">+ เพิ่มภาระจ่าย</button>
+</details>
+<details class="advanced profile-section"><summary>ความคุ้มครองและรายการนอกขอบเขต</summary>
+<label for="required_coverage">ความคุ้มครองชีวิตที่ต้องการ (บาท)</label><input id="required_coverage" inputmode="decimal" placeholder="เว้นว่าง = ยังไม่ทราบ">
+<label for="existing_coverage">ความคุ้มครองชีวิตที่มีอยู่ (บาท)</label><input id="existing_coverage" inputmode="decimal" placeholder="เว้นว่าง = ยังไม่ทราบ"><p class="hint">ใส่ค่าที่ตรวจสอบแล้ว ระบบไม่ประเมินความต้องการประกันแทนคุณ และไม่สมมุติค่าว่างเป็นศูนย์</p>
+<label for="other_income">รายได้ประเภทอื่นทั้งปี (บาท)</label><input id="other_income" inputmode="decimal" value="0"><p class="hint">รองรับเงินเดือน 40(1) เท่านั้น ถ้ามีรายได้อื่นหรือยังไม่ทราบ จะไม่แสดงผลภาษีที่ตกหล่น</p>
+<label for="retirement_usage">เงินออมเกษียณ / เงินสมทบที่มีสิทธิภาษีทั้งปี (บาท)</label><input id="retirement_usage" inputmode="decimal" value="0"><p class="hint">ยังไม่รองรับโปรไฟล์ที่มีรายการนี้ เพราะ core ยังไม่หักจากฐานภาษี กรอกเพื่อแสดงข้อจำกัด ไม่ใช่เพื่อคำนวณสิทธิเกษียณ</p>
+</details>
+<p class="assumption">ขอบเขต: เงินเดือนปี 2026 ตาม policy ใน repository สิทธิเป็นข้อมูลที่ผู้กรอกยืนยัน ไม่ใช่การรับรองกฎหมาย · เว้นว่างสินทรัพย์ ค่าใช้จ่าย หรือความคุ้มครอง = ยังไม่ทราบ · P1-004 ยังรอ independent acceptance</p>
 <button id="calculate" class="primary" type="submit">คำนวณและดูทางเลือก <span>↗</span></button>
 </form><p class="privacy">ไม่บันทึกข้อมูล · ไม่มีบริการภายนอก · ทำงานในเครื่อง</p></aside>
 <section class="results" aria-busy="true"><div id="error" class="error" role="alert" hidden></div><div id="loading" class="loading" role="status">กำลังคำนวณจาก engine…</div><div id="result" hidden>
 <div class="sectionhead"><span class="step">02</span><div><h2>ภาพรวมก่อนใช้เงินเพิ่ม</h2><p>สิทธิที่มีอยู่ถูกนำมาคำนวณแล้ว ไม่จัดสรรซ้ำ</p></div><span id="ready" class="tag"></span></div>
 <div class="metrics"><article class="metric dark"><p>ภาษีเงินได้ปัจจุบัน</p><strong id="tax">—</strong><small>บาท / ปี · ไม่หักภาษี ณ ที่จ่าย</small></article><article class="metric"><p>เงินได้สุทธิที่ใช้คำนวณภาษี</p><strong id="taxable">—</strong><small>หลังค่าใช้จ่ายและสิทธิเดิม</small></article><article class="metric"><p>สภาพคล่องที่ใช้เพิ่มได้</p><strong id="surplus">—</strong><small id="reserve">—</small></article></div>
+<details class="profile-summary"><summary>สิทธิเดิมและเงินที่ต้องกันไว้ — ดูที่มาของภาพรวม</summary><dl id="profileBreakdown"></dl><p id="financialReasons" class="hint"></p></details>
 <div class="tabs" role="group" aria-label="มุมมองผลลัพธ์"><button id="comparisonTab" class="tab active" type="button" aria-pressed="true">เปรียบเทียบทางเลือก</button><button id="rightsTab" class="tab" type="button" aria-pressed="false">สิทธิและเงื่อนไข</button></div>
 <div id="comparisonView"><div class="comparisonhead"><h2>จ่ายเท่าไร แล้วเหลืออะไร?</h2><p>เรียงตาม engine ไม่ใช่ลำดับความน่าสนใจ</p></div><div id="candidates" class="candidates"></div><div class="explain"><span>↔</span><div><strong>ภาษีที่ประหยัด ≠ เงินสดที่ได้รับวันนี้</strong><p>เงินจัดสรรถูกหักจากสภาพคล่องทันที เดโมไม่บวกเงินคืนภาษีสมมุติ และไม่คาดการณ์ผลตอบแทนการลงทุน</p></div></div></div>
 <div id="rightsView" hidden><h2>สิทธิเดิมและโอกาสที่ค้นพบ</h2><p class="muted">เพดานสิทธิไม่ใช่จำนวนเงินที่แนะนำให้ใช้</p><div id="rights"></div></div>

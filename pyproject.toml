@@ -25,6 +25,7 @@ module-name = "tax_gps"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = ["-ra", "--strict-markers", "--strict-config", "--import-mode=importlib"]
 markers = [
     "mandatory: TGPS-P1-001 section 12 mandatory acceptance tests",

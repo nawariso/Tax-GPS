@@ -27,11 +27,12 @@ function showTab(rights) {
 $('comparisonTab').addEventListener('click', () => showTab(false));
 $('rightsTab').addEventListener('click', () => showTab(true));
 function render(data) {
+  renderProfile(data);
   $('tax').textContent = money(data.tax_before);
   $('taxable').textContent = money(data.taxable_income);
   $('surplus').textContent = money(data.financial.spendable_surplus);
   $('reserve').textContent = `หลังกันเงินที่ต้องรักษา ${baht(data.financial.protected_liquidity)}`;
-  $('ready').textContent = data.financial.status === 'READY' ? 'ข้อมูลการเงินครบในขอบเขตเดโม' : 'ข้อมูลยังไม่ครบ';
+  $('ready').textContent = data.financial.status === 'READY' ? 'ข้อมูลสภาพคล่องครบ' : 'ข้อมูลสภาพคล่องยังไม่ครบ';
   const names = new Map(data.discovery.opportunities.map(item => [item.opportunity_id, labels[item.opportunity_id] || item.name]));
   $('candidates').replaceChildren();
   data.outcomes.candidates.forEach(candidate => {
@@ -95,6 +96,7 @@ async function calculate() {
   document.querySelector('.results').setAttribute('aria-busy','true');
   try {
     const data = Object.fromEntries(new FormData(form));
+    data.profile = collectProfile();
     const response = await fetch('/api/calculate', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
     if (version !== calculationVersion) return;
     const result = await response.json();
@@ -105,7 +107,7 @@ async function calculate() {
     $('result').hidden = false;
   } catch (error) {
     if (version !== calculationVersion) return;
-    $('error').textContent = `ยังไม่แสดงผลคำนวณ: โปรดตรวจจำนวนเงิน (ไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง) งบต้องไม่เกินสินทรัพย์ที่ทราบ และวันที่ต้องอยู่ในปี 2026 — ${error.message}`;
+    $('error').textContent = `ยังไม่แสดงผลคำนวณ: โปรดตรวจจำนวนเงิน (ไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง) งบต้องไม่เกินสินทรัพย์ที่ทราบ และวันที่ต้องอยู่ในปี 2026 ตรวจสิทธิที่ยังไม่ทราบและรายการนอกขอบเขตด้วย — ${error.message}`;
     $('error').hidden = false;
   } finally {
     if (version === calculationVersion) {
@@ -117,9 +119,18 @@ async function calculate() {
 }
 form.addEventListener('submit', event => { event.preventDefault(); calculate(); });
 $('scenario').addEventListener('change', () => {
+  resetProfile();
   const defaults = {salary:'990500',social_security:'10500',assets:'500000',expenses:'50000',budget:'100000',shared_usage:'0',planning_date:'2026-10-14'};
-  const variants = {normal:{},tight:{assets:'200000'},unknown:{assets:'',budget:'0'},zero:{salary:'200000'}};
+  const variants = {normal:{},tight:{assets:'200000'},unknown:{assets:'',budget:'0'},zero:{salary:'200000'},family:{},debt:{},commitment:{}};
   Object.entries({...defaults,...variants[$('scenario').value]}).forEach(([key,value]) => { $(key).value = value; });
+  if ($('scenario').value==='family') {
+    addRecord('parents',{relationship:'father',eligible:'true'});
+    addRecord('children',{child_id:'child-1',order:'1',birth_year:'2015',legally_eligible:'true'});
+    addRecord('children',{child_id:'child-2',order:'2',birth_year:'2020',legally_eligible:'true'});
+    $('mortgage_interest').value='140000';$('mortgage_eligible').value='true';
+  }
+  if ($('scenario').value==='debt') addRecord('debts',{debt_id:'card-1',category:'CREDIT_CARD',balance:'120000',apr_percent:'24',minimum_payment:'5000',secured:'false'});
+  if ($('scenario').value==='commitment') addRecord('commitments',{need_id:'tuition',amount:'300000',due_date:'2026-11-01',mandatory:'true',description:'ค่าเรียนตัวอย่าง'});
   showTab(false);
   calculate();
 });
@@ -132,4 +143,5 @@ $('download').addEventListener('click', () => {
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
+initProfile();
 calculate();

@@ -30,7 +30,7 @@ uv run python -m examples.web_demo
 ```
 
 Open `http://127.0.0.1:8765/` in your browser. Stop with Ctrl+C. Use `--port 8766`
-if the default port is busy. The screen includes editable input, four example scenarios,
+if the default port is busy. The screen includes editable input, seven example scenarios,
 baseline versus feasible outcomes, rights/conditions, and JSON download.
 
 The employee example calculates PIT 79,000 THB before and 60,500 THB after a 100,000 THB
@@ -39,9 +39,13 @@ allocation: tax saving 18,500 THB, cash outflow 100,000 THB, remaining spendable
 
 Important boundaries:
 
-- Employee Section 40(1), bundled tax year 2026, personal allowance eligibility assumed.
-- No debts, commitments, parents, children, mortgage or retirement deductions in this
-  small adapter; protection remains unknown. Do not use it for profiles outside that scope.
+- Employee Section 40(1), bundled tax year 2026; the default example explicitly asserts
+  personal allowance eligibility. Extended profiles can declare a different known status.
+- Stage 2 accepts explicit parents/children, mortgage interest, debts, committed payments,
+  and known/unknown life coverage. Eligibility is a caller assertion, not legal verification.
+- Positive or unknown other income and retirement contributions block the demo: the current
+  core does not deduct retirement contributions from PIT taxable income. No incomplete tax
+  result is published for these profiles. See [input coverage](docs/demo/input-coverage.md).
 - Shared Thai ESG/ESGX usage is a capacity fact only, not an additional deduction in the
   demo baseline. Blank shared usage remains unknown and prevents new allocation.
 - No ranking, recommendation, product choice, return forecast, tax withholding reconciliation,
@@ -52,7 +56,8 @@ Important boundaries:
   P1-004 independent acceptance remains pending. This is not production approval.
 
 See [the demo guide](docs/demo/local-web-demo.md) for scope and test commands,
-and [the checkpoint handoff](docs/demo/checkpoint-review.md) for review boundaries and remaining gates.
+and the [Stage 1 checkpoint handoff](docs/demo/checkpoint-review.md) plus
+[Stage 2 handoff](docs/demo/stage2-review.md) for review boundaries and remaining gates.
 
 ## Candidate allocations (P1-004)
 
