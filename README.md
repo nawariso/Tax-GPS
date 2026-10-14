@@ -16,6 +16,27 @@ The candidate-allocation requirement is
 The candidate implementation report is
 [`docs/implementation-reports/TGPS-P1-004.md`](docs/implementation-reports/TGPS-P1-004.md).
 
+## Product roadmap and requirements
+
+The agreed product direction is recorded in the [roadmap](docs/ROADMAP.md) and
+[decision log](docs/DECISIONS.md). The next milestone is
+[TGPS-C01: baseline integrity](docs/requirements/TGPS-C01-baseline-integrity.md).
+Its scope is agreed and implementation is in progress (Tasks 1–2 of 5 done); see the
+[C01 plan](docs/superpowers/plans/2026-10-15-c01-baseline-integrity.md) for per-task status. These records distinguish agreed direction, implementation evidence,
+and milestone acceptance.
+
+## Product and domain review
+
+The [15 October 2026 review](docs/reviews/2026-10-15-product-domain-review.md)
+records baseline deduction gaps, source-evidence issues, local verification results,
+and proposed requirements for annual tax estimates and investment comparisons.
+Its proposals do not change the accepted milestone contracts or legal policy versions.
+Reproduce the synthetic retirement, unknown-parent and prior-purchase cases with:
+
+```console
+uv run python -m docs.reviews.reproduce_tax_gaps
+```
+
 ## Interactive local demo
 
 The Thai browser demo is a separately authorized presentation adapter, not part of the
