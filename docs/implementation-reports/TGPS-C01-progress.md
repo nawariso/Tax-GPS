@@ -22,3 +22,4 @@ Spec: TGPS-C01 v0.1. User authorized implementation after receiving the detailed
 - Task 3: PARTIAL — evidence record, 1.0.1 resources, loader selectors, version tests present.
 - Task 4: PARTIAL — `Connection: close`, `_discard_rejected_body` and a rejected-POST test exist; diagnosis evidence (repetition counts/runtimes) still missing.
 - Task 5: pending.
+- Commits 2026-10-15: code `6428809` (C01 Task 1-2 + Task 3 partial, WIP), docs `2cc5dca`; pushed to origin/feature/tgps-c01-baseline-integrity. Remote CI runs only on PR/main, so no CI result for these SHAs yet.
