@@ -54,5 +54,13 @@ jobs:
       - name: Test with full branch coverage
         run: uv run --locked pytest --cov=tax_gps --cov-branch --cov-report=term-missing
 
+      - name: Set up Node.js for frontend lifecycle tests
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Test frontend lifecycle against the real engine
+        run: uv run --locked python -m examples.check_web_demo
+
       - name: Build distributions
         run: uv build

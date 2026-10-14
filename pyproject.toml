@@ -67,5 +67,5 @@ ignore = [
 [tool.mypy]
 strict = true
 python_version = "3.12"
-files = ["src", "tests"]
+files = ["src", "tests", "examples"]
 warn_unreachable = true

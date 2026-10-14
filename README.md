@@ -16,6 +16,44 @@ The candidate-allocation requirement is
 The candidate implementation report is
 [`docs/implementation-reports/TGPS-P1-004.md`](docs/implementation-reports/TGPS-P1-004.md).
 
+## Interactive local demo
+
+The Thai browser demo is a separately authorized presentation adapter, not part of the
+P1-004 domain scope or independent acceptance. It calls the existing activation,
+tax, discovery, guardrail and candidate engines without changing or duplicating rules.
+
+From the repository root:
+
+```console
+uv sync --locked
+uv run python -m examples.web_demo
+```
+
+Open `http://127.0.0.1:8765/` in your browser. Stop with Ctrl+C. Use `--port 8766`
+if the default port is busy. The screen includes editable input, four example scenarios,
+baseline versus feasible outcomes, rights/conditions, and JSON download.
+
+The employee example calculates PIT 79,000 THB before and 60,500 THB after a 100,000 THB
+allocation: tax saving 18,500 THB, cash outflow 100,000 THB, remaining spendable surplus
+250,000 THB. These are executed engine outcomes, not estimated screen placeholders.
+
+Important boundaries:
+
+- Employee Section 40(1), bundled tax year 2026, personal allowance eligibility assumed.
+- No debts, commitments, parents, children, mortgage or retirement deductions in this
+  small adapter; protection remains unknown. Do not use it for profiles outside that scope.
+- Shared Thai ESG/ESGX usage is a capacity fact only, not an additional deduction in the
+  demo baseline. Blank shared usage remains unknown and prevents new allocation.
+- No ranking, recommendation, product choice, return forecast, tax withholding reconciliation,
+  filing, authentication or persistence. Downloaded JSON contains submitted financial facts.
+- Loopback-only HTTP server and explicit asset allowlist; no repository-wide file server,
+  external services, fonts, analytics, browser storage or submitted-data logging.
+- Existing bundled legal policy is used as-is; this demo does not reverify current law.
+  P1-004 independent acceptance remains pending. This is not production approval.
+
+See [the demo guide](docs/demo/local-web-demo.md) for scope and test commands,
+and [the checkpoint handoff](docs/demo/checkpoint-review.md) for review boundaries and remaining gates.
+
 ## Candidate allocations (P1-004)
 
 `tax_gps.candidate.engine.build_candidates(tax, discovery, financial, guardrails, policy)`
@@ -191,6 +229,7 @@ uv run pytest -m boundary -q      # PIT bracket boundaries
 uv run pytest -m golden -q        # personas G01-G03 and fixtures
 uv run pytest -m negative -q      # invalid input, unsupported income, inactive policy
 uv run pytest -m replay -q        # deterministic hash and replay
+uv run python -m examples.check_web_demo  # real-engine frontend lifecycle tests; Node.js 22+
 uv build
 ```
 
