@@ -25,7 +25,7 @@ from tax_gps.policy.models import RuleStatus
 from tax_gps.profile.models import UserProfile
 
 BUNDLED_ALLOCATION_POLICY_ID = "TH-ALLOCATION-2026-001"
-BUNDLED_ALLOCATION_POLICY_VERSION = "1.0.0"
+BUNDLED_ALLOCATION_POLICY_VERSION = "1.0.1"
 BUNDLED_CANDIDATE_MAXIMUM = 32
 
 

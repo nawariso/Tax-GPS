@@ -5,7 +5,7 @@ from datetime import date
 
 import pytest
 
-from tax_gps.calculation.models import DeductionCapacity, TaxStatus
+from tax_gps.calculation.models import TaxStatus
 from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.discovery.context import DiscoveryContext
@@ -208,28 +208,27 @@ def test_disc_05_thai_esg_capacity_is_capped_at_300000_for_high_income() -> None
 
 
 @pytest.mark.mandatory
-def test_disc_06_shared_pool_usage_reduces_capacity_without_a_second_cap() -> None:
-    used = OpportunityFacts(
-        shared_limit_usage=(SharedLimitUsage(opportunity_ids.THAI_ESG_2026_POOL, Money.of(120000)),)
-    )
+def test_disc_06_prior_usage_blocks_baseline_but_capacity_math_remains_available() -> None:
+    from tax_gps.discovery.capacity import calculate_opportunity_capacity
+    used = OpportunityFacts(shared_limit_usage=(SharedLimitUsage(opportunity_ids.THAI_ESG_2026_POOL, Money.of(120000)),))
     result = discover(profile(2000000, facts=used))
-    thai_esg = opportunity(result, opportunity_ids.THAI_ESG)
-    assert thai_esg.remaining_capacity == Money.of(180000)
-    assert DiscoveryReasonCode.SHARED_LIMIT_APPLIED in thai_esg.reason_codes
+    assert result.baseline_status == "UNSUPPORTED"
+    assert result.opportunities == ()
+    catalog = production_catalog().catalog
+    capacity = calculate_opportunity_capacity(catalog.definition(opportunity_ids.THAI_ESG), catalog, assessable_income=Money.of(2000000), shared_amount_used=Money.of(120000))
+    assert capacity.remaining_capacity == Money.of(180000)
 
 
 @pytest.mark.mandatory
-def test_disc_06_exhausted_shared_pool_reports_no_remaining_capacity() -> None:
-    exhausted = OpportunityFacts(
-        shared_limit_usage=(SharedLimitUsage(opportunity_ids.THAI_ESG_2026_POOL, Money.of(300000)),)
-    )
-    thai_esg = opportunity(discover(profile(2000000, facts=exhausted)), opportunity_ids.THAI_ESG)
-    assert thai_esg.status is not OpportunityStatus.AVAILABLE
-    assert thai_esg.remaining_capacity == Money.zero()
-    assert thai_esg.reason_codes == (
-        DiscoveryReasonCode.NO_REMAINING_CAPACITY,
-        DiscoveryReasonCode.SHARED_LIMIT_APPLIED,
-    )
+def test_disc_06_exhausted_pool_does_not_authorize_an_incomplete_baseline() -> None:
+    from tax_gps.discovery.capacity import calculate_opportunity_capacity
+    exhausted = OpportunityFacts(shared_limit_usage=(SharedLimitUsage(opportunity_ids.THAI_ESG_2026_POOL, Money.of(300000)),))
+    result = discover(profile(2000000, facts=exhausted))
+    assert result.baseline_status == "UNSUPPORTED"
+    assert result.opportunities == ()
+    catalog = production_catalog().catalog
+    capacity = calculate_opportunity_capacity(catalog.definition(opportunity_ids.THAI_ESG), catalog, assessable_income=Money.of(2000000), shared_amount_used=Money.of(300000))
+    assert capacity.remaining_capacity == Money.zero()
 
 
 def test_zero_income_capacity_does_not_claim_that_shared_usage_was_applied() -> None:
@@ -243,7 +242,7 @@ def test_zero_income_capacity_does_not_claim_that_shared_usage_was_applied() -> 
 @pytest.mark.mandatory
 def test_disc_07_artwork_is_available_at_100000_when_governed_and_fully_asserted() -> None:
     result = discover(
-        profile(facts=OpportunityFacts(artwork=ARTWORK_FULLY_ASSERTED)),
+        profile(facts=OpportunityFacts(shared_limit_usage=(), artwork=ARTWORK_FULLY_ASSERTED)),
         catalog=artwork_ready_catalog(),
     )
     artwork = opportunity(result, opportunity_ids.ARTWORK)
@@ -257,7 +256,7 @@ def test_disc_07_artwork_is_available_at_100000_when_governed_and_fully_asserted
 def test_disc_08_explicit_absence_of_artwork_intent_is_ineligible() -> None:
     for catalog in (production_catalog(), artwork_ready_catalog()):
         result = discover(
-            profile(facts=OpportunityFacts(artwork=ArtworkIntent(intends_to_purchase=False))),
+            profile(facts=OpportunityFacts(shared_limit_usage=(), artwork=ArtworkIntent(intends_to_purchase=False))),
             catalog=catalog,
         )
         artwork = opportunity(result, opportunity_ids.ARTWORK)
@@ -269,7 +268,7 @@ def test_disc_08_explicit_absence_of_artwork_intent_is_ineligible() -> None:
 def test_disc_09_explicit_absence_of_solar_intent_is_ineligible() -> None:
     result = discover(
         profile(
-            facts=OpportunityFacts(
+            facts=OpportunityFacts(shared_limit_usage=(),
                 solar_rooftop=replace(SOLAR_FULLY_ASSERTED, intends_to_install=False)
             )
         )
@@ -283,7 +282,7 @@ def test_disc_09_explicit_absence_of_solar_intent_is_ineligible() -> None:
 @pytest.mark.mandatory
 def test_disc_10_unverified_solar_policy_is_rule_not_ready() -> None:
     result = discover(
-        profile(facts=OpportunityFacts(solar_rooftop=SOLAR_FULLY_ASSERTED)),
+        profile(facts=OpportunityFacts(shared_limit_usage=(), solar_rooftop=SOLAR_FULLY_ASSERTED)),
         catalog=solar_unverified_catalog(),
     )
     solar = opportunity(result, opportunity_ids.SOLAR_ROOFTOP)
@@ -306,7 +305,7 @@ def test_disc_11_g01_zero_pit_keeps_the_opportunity_but_reports_no_current_benef
 @pytest.mark.golden
 def test_disc_12_g02_saving_on_100000_is_18500_not_20000() -> None:
     result = discover(
-        profile(facts=OpportunityFacts(artwork=ARTWORK_FULLY_ASSERTED)),
+        profile(facts=OpportunityFacts(shared_limit_usage=(), artwork=ARTWORK_FULLY_ASSERTED)),
         catalog=artwork_ready_catalog(),
     )
     artwork = opportunity(result, opportunity_ids.ARTWORK)
@@ -318,7 +317,7 @@ def test_disc_12_g02_saving_on_100000_is_18500_not_20000() -> None:
 def test_disc_13_a_missing_material_fact_requires_input_rather_than_assuming_no() -> None:
     result = discover(
         profile(
-            facts=OpportunityFacts(
+            facts=OpportunityFacts(shared_limit_usage=(),
                 solar_rooftop=replace(SOLAR_FULLY_ASSERTED, paid_to_vat_registrant=None)
             )
         ),
@@ -363,7 +362,7 @@ def test_disc_20_the_output_carries_no_ranking_or_recommendation_semantics() -> 
                 mortgage_eligible=True,
                 retirement_contributions=(RetirementContribution("PVD", Money.of(100000)),),
             ),
-            facts=OpportunityFacts(artwork=ARTWORK_FULLY_ASSERTED),
+            facts=OpportunityFacts(shared_limit_usage=(), artwork=ARTWORK_FULLY_ASSERTED),
         )
     )
 
@@ -383,56 +382,19 @@ def test_disc_20_the_output_carries_no_ranking_or_recommendation_semantics() -> 
 
 
 @pytest.mark.golden
-def test_g04_fully_used_retirement_capacity_reports_zero_remaining() -> None:
-    result = discover(
-        profile(
-            2800000,
-            benefits=ExistingTaxBenefits(
-                social_security_paid=Money.of(10500),
-                retirement_contributions=(RetirementContribution("PVD", Money.of(500000)),),
-            ),
-        )
-    )
-    retirement = right(result, opportunity_ids.RETIREMENT_SHARED_CAPACITY)
-    assert retirement.claimed_amount == Money.of(500000)
-    assert retirement.remaining_capacity == Money.zero()
-    assert retirement.reason_codes == (
-        DiscoveryReasonCode.EXISTING_RIGHT_AVAILABLE,
-        DiscoveryReasonCode.NO_REMAINING_CAPACITY,
-    )
+def test_g04_material_retirement_is_not_presented_as_an_applied_right() -> None:
+    result = discover(profile(2800000, benefits=ExistingTaxBenefits(retirement_contributions=(RetirementContribution("PVD", Money.of(500000)),))))
+    assert result.baseline_status == "UNSUPPORTED"
+    assert result.existing_rights == result.opportunities == ()
+    assert result.baseline_reason_codes == ("RETIREMENT_BASELINE_UNSUPPORTED",)
 
 
-def test_retirement_right_resolves_capacity_by_shared_group_not_position() -> None:
-    user = profile(
-        2800000,
-        benefits=ExistingTaxBenefits(
-            retirement_contributions=(RetirementContribution("PVD", Money.of(100000)),),
-        ),
-    )
+def test_discovery_rejects_tax_material_mutation_with_an_unchanged_hash() -> None:
+    user = profile(2800000)
     state = calculate_tax(user, production_pack())
-    unrelated = DeductionCapacity(
-        category="UNRELATED",
-        standalone_limit=Money.of(1),
-        amount_used=Money.zero(),
-        standalone_remaining=Money.of(1),
-        shared_group="UNRELATED",
-        shared_limit=Money.of(1),
-        shared_amount_used=Money.zero(),
-        shared_remaining=Money.of(1),
-        usable_amount=Money.of(1),
-    )
-    state = replace(state, deduction_capacities=(unrelated, *state.deduction_capacities))
-
-    result = discover_opportunities(
-        user,
-        state,
-        production_pack(),
-        production_catalog(),
-        DiscoveryContext(TaxYear(2026), PLANNING_DATE),
-    )
-
-    retirement = right(result, opportunity_ids.RETIREMENT_SHARED_CAPACITY)
-    assert retirement.remaining_capacity == Money.of(400000)
+    state = replace(state, pit=Money.zero())
+    with pytest.raises(ValueError, match="tax state does not match"):
+        discover_opportunities(user, state, production_pack(), production_catalog(), DiscoveryContext(TaxYear(2026), PLANNING_DATE))
 
 
 @pytest.mark.golden
@@ -461,7 +423,7 @@ def test_g08_parent_and_mortgage_rights_are_both_discovered() -> None:
 
 @pytest.mark.golden
 def test_g09_solar_is_available_only_when_every_gate_passes() -> None:
-    complete = OpportunityFacts(solar_rooftop=SOLAR_FULLY_ASSERTED)
+    complete = OpportunityFacts(shared_limit_usage=(), solar_rooftop=SOLAR_FULLY_ASSERTED)
     assert (
         opportunity(
             discover(profile(facts=complete), catalog=solar_ready_catalog()),
@@ -491,7 +453,7 @@ def test_g09_solar_is_available_only_when_every_gate_passes() -> None:
         opportunity(
             discover(
                 profile(
-                    facts=OpportunityFacts(
+                    facts=OpportunityFacts(shared_limit_usage=(),
                         solar_rooftop=replace(SOLAR_FULLY_ASSERTED, is_natural_person=None)
                     )
                 ),
@@ -505,7 +467,7 @@ def test_g09_solar_is_available_only_when_every_gate_passes() -> None:
         opportunity(
             discover(
                 profile(
-                    facts=OpportunityFacts(
+                    facts=OpportunityFacts(shared_limit_usage=(),
                         solar_rooftop=replace(SOLAR_FULLY_ASSERTED, is_natural_person=False)
                     )
                 ),
@@ -521,7 +483,7 @@ def test_a_declared_condition_answered_no_is_ineligible_and_names_the_failed_fac
     solar = opportunity(
         discover(
             profile(
-                facts=OpportunityFacts(
+                facts=OpportunityFacts(shared_limit_usage=(),
                     solar_rooftop=replace(
                         SOLAR_FULLY_ASSERTED,
                         on_grid_connected_to_mea_or_pea=False,
@@ -581,7 +543,7 @@ def test_rights_absent_from_the_tax_state_are_not_reported() -> None:
 
 
 def test_result_reports_applied_rules_and_authoritative_sources() -> None:
-    result = discover(profile(facts=OpportunityFacts(solar_rooftop=SOLAR_FULLY_ASSERTED)))
+    result = discover(profile(facts=OpportunityFacts(shared_limit_usage=(), solar_rooftop=SOLAR_FULLY_ASSERTED)))
     assert "TH-PIT-ALLOWANCE-PERSONAL" in result.rules_applied
     assert opportunity_ids.THAI_ESG_RULE in result.rules_applied
     assert opportunity_ids.SOLAR_ROOFTOP_RULE in result.rules_applied
@@ -645,9 +607,9 @@ def test_capacity_is_never_presented_as_an_amount_to_spend() -> None:
 
 def test_unknown_parent_eligibility_is_an_explicit_missing_input() -> None:
     result = discover(profile(benefits=ExistingTaxBenefits(parents=(Parent("father", None),))))
-    parent = right(result, opportunity_ids.PARENT_ALLOWANCE)
-    assert parent.status is OpportunityStatus.REQUIRES_INPUT
-    assert parent.missing_fact_ids == ("parent.father.eligible",)
+    assert result.baseline_status == "REQUIRES_INPUT"
+    assert result.missing_fact_ids == ("parent.father.eligible",)
+    assert result.opportunities == ()
 
 
 @pytest.mark.negative
@@ -670,10 +632,11 @@ def test_explicitly_ineligible_rights_are_not_reported_as_available() -> None:
 
 @pytest.mark.negative
 def test_unknown_shared_pool_usage_requires_input() -> None:
-    thai_esg = opportunity(discover(profile(facts=OpportunityFacts())), opportunity_ids.THAI_ESG)
-    assert thai_esg.status is OpportunityStatus.REQUIRES_INPUT
-    assert thai_esg.reason_codes == (DiscoveryReasonCode.REQUIRES_INPUT,)
-    assert thai_esg.missing_fact_ids == ("shared_limit_usage.THAI_ESG_2026_POOL",)
+    result = discover(profile(facts=OpportunityFacts()))
+    assert result.baseline_status == "REQUIRES_INPUT"
+    assert result.baseline_reason_codes == ("SHARED_USAGE_REQUIRED",)
+    assert result.missing_fact_ids == ("opportunity_facts.shared_limit_usage",)
+    assert result.opportunities == ()
 
 
 @pytest.mark.negative
@@ -715,7 +678,7 @@ def test_zero_standalone_capacity_without_a_shared_group_is_not_available() -> N
     ]["cap"] = "0.00"
     artwork = opportunity(
         discover(
-            profile(facts=OpportunityFacts(artwork=ARTWORK_FULLY_ASSERTED)),
+            profile(facts=OpportunityFacts(shared_limit_usage=(), artwork=ARTWORK_FULLY_ASSERTED)),
             catalog=activate_catalog_dict(catalog),
         ),
         opportunity_ids.ARTWORK,

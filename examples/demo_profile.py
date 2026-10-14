@@ -7,6 +7,7 @@ from datetime import date
 from decimal import Decimal
 from typing import cast
 
+from examples.demo_errors import DemoInputError
 from tax_gps.core.decimal_context import EXACT
 from tax_gps.core.money import Money
 from tax_gps.financial.profile import (
@@ -16,7 +17,7 @@ from tax_gps.financial.profile import (
     FinancialProfile,
     ProtectionProfile,
 )
-from tax_gps.profile.models import Child, ExistingTaxBenefits, Parent
+from tax_gps.profile.models import Child, ExistingTaxBenefits, Parent, RetirementContribution
 
 SCALARS = frozenset(
     {
@@ -50,7 +51,11 @@ def _strings(value: object, fields: frozenset[str], name: str) -> dict[str, str]
 
 def _boolean(value: str, name: str) -> bool:
     if value not in {"true", "false"}:
-        raise ValueError(f"{name}: ยังไม่ทราบสิทธิหรือข้อเท็จจริง จึงยังไม่เผยแพร่ผลคำนวณ")
+        reason = "PARENT_ELIGIBILITY_REQUIRED" if name.startswith("parent.") else "ELIGIBILITY_REQUIRED"
+        raise DemoInputError(
+            f"{name}: ยังไม่ทราบสิทธิหรือข้อเท็จจริง จึงยังไม่เผยแพร่ผลคำนวณ",
+            reason_codes=(reason,), missing_fact_ids=(name,),
+        )
     return value == "true"
 
 
@@ -65,7 +70,7 @@ def _parents(items: list[object]) -> tuple[Parent, ...]:
     for item in items:
         entry = _strings(item, frozenset({"relationship", "eligible"}), "parent")
         result.append(
-            Parent(entry["relationship"], _boolean(entry["eligible"], "parent eligibility"))
+            Parent(entry["relationship"], _boolean(entry["eligible"], f"parent.{entry['relationship']}.eligible"))
         )
     return tuple(result)
 
@@ -144,10 +149,22 @@ def parse_profile(
     if not all(isinstance(value[key], list) for key in LISTS):
         raise ValueError("Profile record collections must be explicit lists; [] means no records")
     lists = {key: cast(list[object], value[key]) for key in LISTS}
+    unknown = {
+        "other_income": ("OTHER_INCOME_INPUT_REQUIRED", "ยังไม่ทราบรายได้อื่น"),
+        "retirement_usage": ("RETIREMENT_INPUT_REQUIRED", "ยังไม่ทราบเงินออมเกษียณ"),
+    }
+    blank = [name for name in unknown if scalars[name] == ""]
+    if blank:
+        raise DemoInputError(
+            " · ".join(unknown[name][1] for name in blank) + " โปรดตรวจสอบรายการนอกขอบเขต",
+            reason_codes=tuple(unknown[name][0] for name in blank),
+            missing_fact_ids=tuple(blank),
+        )
     if not amount(scalars["other_income"], "other income").is_zero():
-        raise ValueError("ยังไม่รองรับรายได้ประเภทอื่น ไม่เผยแพร่ภาษีเฉพาะเงินเดือนที่ตกหล่นรายได้")
-    if not amount(scalars["retirement_usage"], "retirement contributions").is_zero():
-        raise ValueError("ยังไม่รองรับโปรไฟล์ที่มีเงินออมเกษียณ: core ยังไม่หักรายการนี้จากฐานภาษี")
+        raise DemoInputError("ยังไม่รองรับรายได้ประเภทอื่น ไม่เผยแพร่ภาษีเฉพาะเงินเดือนที่ตกหล่นรายได้",
+                             code="BASELINE_NOT_READY", status="ADVANCED_TAX_PATH_REQUIRED",
+                             reason_codes=("UNSUPPORTED_INCOME",))
+    retirement = amount(scalars["retirement_usage"], "retirement contributions")
     benefits = ExistingTaxBenefits(
         personal_eligible=_boolean(scalars["personal_eligible"], "personal eligibility"),
         social_security_paid=social,
@@ -155,6 +172,8 @@ def parse_profile(
         children=_children(lists["children"]),
         mortgage_interest_paid=amount(scalars["mortgage_interest"], "mortgage interest"),
         mortgage_eligible=_boolean(scalars["mortgage_eligible"], "mortgage eligibility"),
+        retirement_contributions=(RetirementContribution("UNCLASSIFIED", retirement),)
+        if retirement.is_positive() else (),
     )
     financial = FinancialProfile(
         liquid_assets=assets,

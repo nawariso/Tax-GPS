@@ -6,12 +6,12 @@ from tax_gps.audit import create_audit_snapshot, replay
 from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.engine import ENGINE_VERSION, calculate_tax
-from tax_gps.profile.models import ExistingTaxBenefits, IncomeProfile, UserProfile
+from tax_gps.profile.models import ExistingTaxBenefits, IncomeProfile, OpportunityFacts, UserProfile
 from tests.support.policy import production_pack
 
 
 def _profile() -> UserProfile:
-    return UserProfile(
+    return UserProfile(opportunity_facts=OpportunityFacts(shared_limit_usage=()),
         profile_id="provenance",
         version="1",
         tax_year=TaxYear(2026),
@@ -71,4 +71,4 @@ def test_prov_04_sources_unrelated_to_applied_rules_are_excluded() -> None:
 
 
 def test_engine_version_identifies_material_provenance_contract() -> None:
-    assert ENGINE_VERSION == "tax-gps-core/0.1.1"
+    assert ENGINE_VERSION == "tax-gps-core/0.2.0"

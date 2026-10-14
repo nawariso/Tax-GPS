@@ -226,7 +226,7 @@ def test_gr_06_commitment_reduces_feasibility_to_cap() -> None:
 @pytest.mark.mandatory
 def test_gr_07_critical_debt_plus_intrinsic_purpose_requires_review() -> None:
     discovery = _discovery(
-        _tax_profile(facts=OpportunityFacts(solar_rooftop=SOLAR_FULLY_ASSERTED)),
+        _tax_profile(facts=OpportunityFacts(shared_limit_usage=(), solar_rooftop=SOLAR_FULLY_ASSERTED)),
         catalog=solar_ready_catalog(),
     )
     financial_profile = _financial_profile(
@@ -241,7 +241,7 @@ def test_gr_07_critical_debt_plus_intrinsic_purpose_requires_review() -> None:
 @pytest.mark.mandatory
 def test_gr_08_emergency_shortfall_plus_intrinsic_purpose_requires_review() -> None:
     discovery = _discovery(
-        _tax_profile(facts=OpportunityFacts(solar_rooftop=SOLAR_FULLY_ASSERTED)),
+        _tax_profile(facts=OpportunityFacts(shared_limit_usage=(), solar_rooftop=SOLAR_FULLY_ASSERTED)),
         catalog=solar_ready_catalog(),
     )
     financial_profile = _financial_profile(liquid_assets=100000, expenses=50000)

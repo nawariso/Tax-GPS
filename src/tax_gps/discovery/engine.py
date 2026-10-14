@@ -34,7 +34,7 @@ from tax_gps.policy.activation import ActivatedRulePack
 from tax_gps.policy.models import RuleSource
 from tax_gps.profile.models import UserProfile
 
-DISCOVERY_ENGINE_VERSION = "tax-gps-discovery/0.2.0"
+DISCOVERY_ENGINE_VERSION = "tax-gps-discovery/0.3.0"
 T = TypeVar("T")
 
 
@@ -86,7 +86,9 @@ def _existing_rights(
         opportunity_ids.CHILD_ALLOWANCE: state.allowances.children.is_positive(),
         opportunity_ids.SOCIAL_SECURITY: state.allowances.social_security.is_positive(),
         opportunity_ids.MORTGAGE_INTEREST: state.allowances.mortgage_interest.is_positive(),
-        opportunity_ids.RETIREMENT_SHARED_CAPACITY: bool(benefits.retirement_contributions),
+        # C01 rejects material retirement before discovery; standalone capacity
+        # functions remain available without presenting it as an applied right.
+        opportunity_ids.RETIREMENT_SHARED_CAPACITY: False,
     }
     rights: list[DiscoveredRight] = []
     for right_id in opportunity_ids.EXISTING_RIGHT_IDS:
@@ -108,30 +110,8 @@ def _existing_rights(
         elif check_effective_period(definition, context) is EffectivePeriodOutcome.OUTSIDE_PERIOD:
             status = OpportunityStatus.OUTSIDE_EFFECTIVE_PERIOD
             reasons = (DiscoveryReasonCode.OUTSIDE_EFFECTIVE_PERIOD,)
-        elif right_id == opportunity_ids.PARENT_ALLOWANCE:
-            missing = tuple(
-                f"parent.{parent.relationship}.eligible"
-                for parent in benefits.parents
-                if parent.eligible is None
-            )
-            if missing:
-                status = OpportunityStatus.REQUIRES_INPUT
-                reasons = (DiscoveryReasonCode.REQUIRES_INPUT,)
         remaining: Money | None = None
-        if right_id == opportunity_ids.RETIREMENT_SHARED_CAPACITY:
-            claimed = Money.sum(item.amount_used for item in benefits.retirement_contributions)
-            remaining = next(
-                (
-                    capacity.usable_amount
-                    for capacity in state.deduction_capacities
-                    if capacity.shared_group == definition.shared_limit_group
-                ),
-                Money.zero(),
-            )
-            if remaining.is_zero():
-                reasons += (DiscoveryReasonCode.NO_REMAINING_CAPACITY,)
-        else:
-            claimed = amount_by_id[right_id]
+        claimed = amount_by_id[right_id]
         rights.append(
             DiscoveredRight(
                 right_id=right_id,
@@ -342,7 +322,8 @@ def discover_opportunities(
     if len(years) != 1:
         raise ValueError("profile, tax state, policy, catalog, and context tax years must match")
     expected_state = calculate_tax(profile, pack)
-    if expected_state.output_hash != state.output_hash:
+    if (expected_state.output_hash != state.output_hash
+        or expected_state.material_dict() != state.material_dict()):
         raise ValueError("tax state does not match profile and activated policy")
     if state.status is not TaxStatus.READY:
         result = DiscoveryResult(
@@ -361,6 +342,9 @@ def discover_opportunities(
             catalog_version=catalog.version,
             engine_version=engine_version,
             discovery_hash="",
+            baseline_status=state.status.value,
+            baseline_reason_codes=state.reason_codes,
+            missing_fact_ids=state.missing_fact_ids,
         )
         return _with_hash(result)
     rights = _existing_rights(profile, state, pack, catalog, context)

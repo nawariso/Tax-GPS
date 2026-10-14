@@ -70,7 +70,7 @@ def replay(
         or snapshot.rule_pack_hash != pack.content_hash
     ):
         raise AuditReplayError("rule pack does not match")
-    if snapshot.engine_version != engine_version:
+    if engine_version != ENGINE_VERSION or snapshot.engine_version != engine_version:
         raise AuditReplayError("engine version does not match")
     state = calculate_tax(profile, pack, engine_version=engine_version)
     if snapshot.output_hash != state.output_hash:

@@ -16,6 +16,7 @@ from tax_gps.engine import calculate_tax
 from tax_gps.profile.models import (
     ExistingTaxBenefits,
     IncomeProfile,
+    OpportunityFacts,
     UnsupportedIncome,
     UserProfile,
 )
@@ -23,7 +24,7 @@ from tests.support.policy import production_pack
 
 
 def _profile(salary: int) -> UserProfile:
-    return UserProfile(
+    return UserProfile(opportunity_facts=OpportunityFacts(shared_limit_usage=()),
         profile_id="zero-value",
         version="1",
         tax_year=TaxYear(2026),

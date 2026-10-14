@@ -9,21 +9,19 @@ from tax_gps.calculation.models import (
     AllowanceCalculation,
     CalculationStep,
     CalculationTrace,
-    DeductionCapacity,
     ExistingRight,
     ExpenseCalculation,
     IncomeCalculation,
     TaxState,
     TaxStatus,
 )
+from tax_gps.calculation.readiness import assess_baseline
 from tax_gps.calculation.rules import (
     allowance_for_children,
     allowance_for_parents,
-    calculate_deduction_capacity,
     calculate_progressive_pit,
     calculate_section_40_1_expense,
     deductible_mortgage_interest,
-    limit_group,
     personal_allowance,
 )
 from tax_gps.core.canonical import canonical_json, sha256_hex
@@ -33,7 +31,7 @@ from tax_gps.policy.activation import ActivatedRulePack
 from tax_gps.policy.models import RuleSource
 from tax_gps.profile.models import UserProfile
 
-ENGINE_VERSION = "tax-gps-core/0.1.1"
+ENGINE_VERSION = "tax-gps-core/0.2.0"
 
 
 def _step(
@@ -72,17 +70,20 @@ def _sources(rule_ids_used: tuple[str, ...], pack: ActivatedRulePack) -> tuple[R
 def calculate_tax(
     profile: UserProfile, pack: ActivatedRulePack, *, engine_version: str = ENGINE_VERSION
 ) -> TaxState:
+    if engine_version != ENGINE_VERSION:
+        raise ValueError("engine version is not implemented by this artifact")
     if profile.tax_year != pack.pack.tax_year:
         raise ValueError("profile tax year must match the activated rule pack")
     material_unsupported = tuple(
         item for item in profile.income.unsupported if item.amount.is_positive()
     )
-    if material_unsupported:
+    readiness = assess_baseline(profile)
+    if readiness.status is not TaxStatus.READY:
         reasons = tuple(
             f"material unsupported income: {item.category}" for item in material_unsupported
         )
         state = TaxState(
-            TaxStatus.ADVANCED_TAX_PATH_REQUIRED,
+            readiness.status,
             profile.tax_year,
             IncomeCalculation(profile.income.section_40_1),
             ExpenseCalculation(Money.zero()),
@@ -103,6 +104,8 @@ def calculate_tax(
             reasons,
             "",
             pack,
+            reason_codes=readiness.reason_codes,
+            missing_fact_ids=readiness.missing_fact_ids,
         )
         return _with_hash(state)
 
@@ -120,32 +123,6 @@ def calculate_tax(
     )
     taxable_income = (income - expense_step.output_amount - allowances.total).floor_at_zero()
     pit = calculate_progressive_pit(taxable_income, pack)
-    retirement_capacities: tuple[DeductionCapacity, ...] = ()
-    retirement_rule_ids: tuple[str, ...] = ()
-    retirement_trace: tuple[CalculationStep, ...] = ()
-    if benefits.retirement_contributions:
-        retirement_used = Money.sum(item.amount_used for item in benefits.retirement_contributions)
-        retirement_group = limit_group("RETIREMENT", pack)
-        retirement_capacity = calculate_deduction_capacity(
-            category="RETIREMENT_SHARED_GROUP",
-            standalone_limit=retirement_group.cap,
-            amount_used=retirement_used,
-            shared_group=retirement_group.group_id,
-            shared_amount_used=retirement_used,
-            pack=pack,
-        )
-        retirement_capacities = (retirement_capacity,)
-        retirement_rule_ids = (rule_ids.RETIREMENT_SHARED_LIMIT,)
-        retirement_trace = (
-            _step(
-                step_id="retirement-shared-capacity",
-                description="Remaining shared retirement deduction capacity",
-                rule_id=rule_ids.RETIREMENT_SHARED_LIMIT,
-                input_amount=retirement_used,
-                output_amount=retirement_capacity.usable_amount,
-                pack=pack,
-            ),
-        )
     used = (
         rule_ids.SECTION_40_1_EXPENSE,
         rule_ids.PERSONAL_ALLOWANCE,
@@ -154,7 +131,6 @@ def calculate_tax(
         rule_ids.CHILD_ALLOWANCE,
         rule_ids.MORTGAGE_INTEREST,
         rule_ids.PIT_RATE_SCHEDULE,
-        *retirement_rule_ids,
     )
     trace = (
         _step(
@@ -214,7 +190,6 @@ def calculate_tax(
             output_amount=taxable_income,
             pack=pack,
         ),
-        *retirement_trace,
         *pit.steps,
     )
     rights: list[ExistingRight] = []
@@ -248,16 +223,6 @@ def calculate_tax(
                 rule_id=rule_ids.MORTGAGE_INTEREST,
             )
         )
-    rights.extend(
-        ExistingRight(
-            category=item.category,
-            eligible=True,
-            input_amount=item.amount_used,
-            deductible_amount=item.amount_used,
-            rule_id=rule_ids.RETIREMENT_SHARED_LIMIT,
-        )
-        for item in benefits.retirement_contributions
-    )
     state = TaxState(
         TaxStatus.READY,
         profile.tax_year,
@@ -268,7 +233,7 @@ def calculate_tax(
         pit.tax,
         pit.marginal_rate,
         tuple(rights),
-        retirement_capacities,
+        (),
         CalculationTrace(trace),
         used,
         _sources(used, pack),

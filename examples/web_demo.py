@@ -11,6 +11,7 @@ from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from examples.demo_errors import DemoInputError
 from examples.demo_profile import amount, parse_profile
 from tax_gps.candidate.activation import activate_allocation_policy, bundled_allocation_policy
 from tax_gps.candidate.engine import build_candidates
@@ -97,7 +98,18 @@ def calculate(data: object) -> dict[str, object]:
     catalog = activate_catalog(load_bundled_catalog())
     tax = calculate_tax(profile, pack)
     if tax.taxable_income is None or tax.pit is None:
-        raise ValueError("Tax state is unsupported; no demonstration outcome is published")
+        messages = {
+            "UNSUPPORTED_INCOME": "ยังไม่รองรับรายได้ประเภทอื่น",
+            "RETIREMENT_BASELINE_UNSUPPORTED": "ยังไม่รองรับเงินออมเกษียณในฐานภาษี",
+            "PRIOR_SHARED_USAGE_BASELINE_UNSUPPORTED": "ยังไม่รองรับยอดลงทุนเดิมที่ใช้สิทธิไปแล้วในฐานภาษี",
+            "PARENT_ELIGIBILITY_REQUIRED": "ยังไม่ทราบสิทธิบิดามารดา โปรดตรวจสอบ",
+            "SHARED_USAGE_REQUIRED": "ยังไม่ทราบยอดใช้วงเงินเดิม Thai ESG / ESGX โปรดตรวจสอบ",
+        }
+        raise DemoInputError(
+            " · ".join(messages[reason] for reason in tax.reason_codes),
+            code="BASELINE_NOT_READY", status=tax.status.value,
+            reason_codes=tax.reason_codes, missing_fact_ids=tax.missing_fact_ids,
+        )
     discovery = discover_opportunities(
         profile, tax, pack, catalog, DiscoveryContext(year, planning_date)
     )
@@ -142,6 +154,7 @@ class DemoHandler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
+        self.send_header("Connection", "close")
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
@@ -152,6 +165,21 @@ class DemoHandler(BaseHTTPRequestHandler):
         )
         self.end_headers()
         self.wfile.write(body)
+
+    def _discard_rejected_body(self) -> None:
+        """Drain only bounded, unambiguous bodies before closing a rejected POST.
+
+        Closing a socket with unread request bytes can reset it on Windows and
+        discard the rejection response. Never parse rejected JSON or wait beyond
+        a short timeout; oversized/ambiguous framing remains rejected as before.
+        """
+        try:
+            size = int(self.headers.get("Content-Length", "0"))
+            if 0 < size <= MAX_BODY and not self.headers.get("Transfer-Encoding"):
+                self.connection.settimeout(0.25)
+                self.rfile.read(size)
+        except (ValueError, OSError):
+            pass
 
     def _json(self, status: int, data: dict[str, object]) -> None:
         self._reply(
@@ -179,9 +207,11 @@ class DemoHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         if not self._local_request():
+            self._discard_rejected_body()
             self._json(403, {"error": "Local browser requests only"})
             return
         if self.path != "/api/calculate":
+            self._discard_rejected_body()
             self._json(404, {"error": "Not found"})
             return
         try:
@@ -191,8 +221,12 @@ class DemoHandler(BaseHTTPRequestHandler):
             self.connection.settimeout(5)
             data = json.loads(self.rfile.read(size))
             result = calculate(data)
-        except (ValueError, OSError) as exc:
-            self._json(400, {"error": str(exc)})
+        except DemoInputError as exc:
+            self._json(400, exc.to_dict())
+            return
+        except (ValueError, OSError):
+            self._json(400, {"error": "ข้อมูลไม่ถูกต้อง โปรดตรวจรูปแบบและขอบเขตของแต่ละรายการ",
+                             "code": "INVALID_INPUT"})
             return
         self._json(200, result)
 

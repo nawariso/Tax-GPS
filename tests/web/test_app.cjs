@@ -237,6 +237,29 @@ test('unsupported retirement input hides results and publishes an explicit error
   assert.match(app.get('error').textContent,/เกษียณ/);
 });
 
+test('C01 prior usage clears tax, selection and export and cannot be restored by an old selector',async()=>{
+  const app=harness();await app.resolve(0);
+  const old=app.latest();app.choose(old.outcomes.candidates[1].candidate_id);
+  app.get('shared_usage').value='100000';
+  const pending=app.recalculate();await app.resolve(1,400);await pending;
+  assert.equal(app.latest(),null);assert.equal(app.export(),null);
+  assert.equal(app.rows().length,0);assert.equal(app.get('result').hidden,true);
+  assert.match(app.get('error').textContent,/ลงทุนเดิม|วงเงินเดิม|ใช้สิทธิไปแล้ว/);
+  assert.doesNotMatch(app.get('error').textContent,/ตรวจจำนวนเงิน/);
+  assert.equal(app.choose(old.outcomes.candidates[1].candidate_id,true,old.outcomes.result_hash),false);
+});
+
+test('C01 unknown usage cannot publish a baseline after a late earlier response',async()=>{
+  const app=harness();app.get('shared_usage').value='';
+  const pending=app.recalculate();await app.resolve(1,400);await pending;
+  await app.resolve(0);
+  assert.equal(app.latest(),null);assert.equal(app.export(),null);
+  assert.equal(app.get('result').hidden,true);
+  assert.match(app.get('error').textContent,/ยังไม่ทราบ|ตรวจสอบ/);
+  assert.match(app.get('error').textContent,/ข้อมูลที่ยังขาด: opportunity_facts\.shared_limit_usage/);
+  assert.doesNotMatch(app.get('error').textContent,/ตรวจจำนวนเงิน/);
+});
+
 test('family scenario maps its records and normal scenario clears them',async()=>{
   const app=harness();app.scenario('family');await app.resolve(1);
   assert.equal(app.latest().tax_before,'42500.00');

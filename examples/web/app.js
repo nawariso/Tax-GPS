@@ -156,13 +156,18 @@ async function calculate() {
     if (version !== calculationVersion) return;
     const result = await response.json();
     if (version !== calculationVersion) return;
-    if (!response.ok) throw new Error(result.error || 'คำนวณไม่สำเร็จ');
+    if (!response.ok) throw Object.assign(new Error(result.error || 'คำนวณไม่สำเร็จ'), {envelope: result});
     render(result);
     latest = result;
     $('result').hidden = false;
   } catch (error) {
     if (version !== calculationVersion) return;
-    $('error').textContent = `ยังไม่แสดงผลคำนวณ: โปรดตรวจจำนวนเงิน (ไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง) งบต้องไม่เกินสินทรัพย์ที่ทราบ และวันที่ต้องอยู่ในปี 2026 ตรวจสิทธิที่ยังไม่ทราบและรายการนอกขอบเขตด้วย — ${error.message}`;
+    // Baseline/input envelopes name the exact item; generic format advice would misdirect.
+    const envelope = error.envelope;
+    const scoped = envelope && (envelope.code === 'BASELINE_NOT_READY' || envelope.code === 'INPUT_REQUIRED');
+    $('error').textContent = scoped
+      ? `ยังไม่แสดงผลคำนวณ: ${error.message}${envelope.missing_fact_ids?.length ? ` · ข้อมูลที่ยังขาด: ${envelope.missing_fact_ids.join(', ')}` : ''}`
+      : `ยังไม่แสดงผลคำนวณ: โปรดตรวจจำนวนเงิน (ไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง) งบต้องไม่เกินสินทรัพย์ที่ทราบ และวันที่ต้องอยู่ในปี 2026 ตรวจสิทธิที่ยังไม่ทราบและรายการนอกขอบเขตด้วย — ${error.message}`;
     $('error').hidden = false;
   } finally {
     if (version === calculationVersion) {

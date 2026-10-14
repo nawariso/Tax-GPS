@@ -8,9 +8,10 @@ from datetime import date
 from importlib.resources import files
 from typing import Any, Never, cast
 
-from tax_gps.core.canonical import JsonValue, freeze
+from tax_gps.core.canonical import JsonValue, canonical_json, freeze, sha256_hex
 from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
+from tax_gps.opportunity.activation import catalog_to_dict
 from tax_gps.opportunity.models import (
     EvidenceRequirement,
     LockupMetadata,
@@ -24,6 +25,7 @@ from tax_gps.policy.loader import PolicyValidationError
 from tax_gps.policy.models import RuleSource, RuleStatus, SourceAuthority
 
 BUNDLED_CATALOG_ID_2026 = "TH-OPPORTUNITY-2026-001"
+BUNDLED_CATALOG_VERSION_2026 = "1.0.1"
 _TOP_KEYS = {
     "schema_version",
     "catalog_id",
@@ -299,8 +301,18 @@ def parse_catalog(text: str) -> OpportunityCatalog:
     )
 
 
-def load_bundled_catalog(catalog_id: str = BUNDLED_CATALOG_ID_2026) -> OpportunityCatalog:
+def load_bundled_catalog(
+    catalog_id: str = BUNDLED_CATALOG_ID_2026, *, version: str | None = None,
+    expected_hash: str | None = None,
+) -> OpportunityCatalog:
     if catalog_id != BUNDLED_CATALOG_ID_2026:
         raise PolicyValidationError(f"unknown bundled catalog: {catalog_id}")
-    resource = files("tax_gps.opportunity.catalogs").joinpath(f"{catalog_id}.json")
-    return parse_catalog(resource.read_text(encoding="utf-8"))
+    selected = BUNDLED_CATALOG_VERSION_2026 if version is None else version
+    if selected not in {"1.0.0", BUNDLED_CATALOG_VERSION_2026}:
+        raise PolicyValidationError("unknown bundled catalog version")
+    suffix = "" if selected == "1.0.0" else f"@{selected}"
+    resource = files("tax_gps.opportunity.catalogs").joinpath(f"{catalog_id}{suffix}.json")
+    catalog = parse_catalog(resource.read_text(encoding="utf-8"))
+    if expected_hash is not None and sha256_hex(canonical_json(catalog_to_dict(catalog))) != expected_hash:
+        raise PolicyValidationError("catalog hash mismatch")
+    return catalog

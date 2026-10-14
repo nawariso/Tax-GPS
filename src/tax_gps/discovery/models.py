@@ -146,10 +146,16 @@ class DiscoveryResult:
     catalog_version: str
     engine_version: str
     discovery_hash: str
+    baseline_status: str = "READY"
+    baseline_reason_codes: tuple[str, ...] = ()
+    missing_fact_ids: tuple[str, ...] = ()
 
     def material_dict(self) -> dict[str, object]:
         return {
             "status": self.status.value,
+            "baseline_status": self.baseline_status,
+            "baseline_reason_codes": list(self.baseline_reason_codes),
+            "missing_fact_ids": list(self.missing_fact_ids),
             "profile_hash": self.profile_hash,
             "tax_state_hash": self.tax_state_hash,
             "rule_pack_hash": self.rule_pack_hash,

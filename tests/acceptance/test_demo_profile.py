@@ -12,7 +12,14 @@ from tax_gps.engine import calculate_tax
 from tax_gps.financial.profile import ProtectionProfile
 from tax_gps.policy.activation import activate_rule_pack
 from tax_gps.policy.loader import BUNDLED_PACK_ID_2026, load_bundled_rule_pack
-from tax_gps.profile.models import Child, ExistingTaxBenefits, IncomeProfile, Parent, UserProfile
+from tax_gps.profile.models import (
+    Child,
+    ExistingTaxBenefits,
+    IncomeProfile,
+    OpportunityFacts,
+    Parent,
+    UserProfile,
+)
 
 DEFAULTS = {
     "salary": "990500",
@@ -64,7 +71,7 @@ def test_family_uses_existing_core_tax_path() -> None:
     }
     result = _demo().calculate(DEFAULTS | {"profile": profile})
     expected = calculate_tax(
-        UserProfile(
+        UserProfile(opportunity_facts=OpportunityFacts(shared_limit_usage=()),
             profile_id="local-demo",
             version="1",
             tax_year=TaxYear(2026),
@@ -166,3 +173,42 @@ def test_protection_and_unknown_expenses() -> None:
     assert all(
         candidate["cash_outflow"] == "0.00" for candidate in result["outcomes"]["candidates"]
     )
+
+
+@pytest.mark.parametrize(
+    ("top", "changes", "code", "status", "reasons", "missing"),
+    [
+        ({"shared_usage": "100000"}, {}, "BASELINE_NOT_READY", "UNSUPPORTED",
+         ("PRIOR_SHARED_USAGE_BASELINE_UNSUPPORTED",), ()),
+        ({"shared_usage": ""}, {}, "BASELINE_NOT_READY", "REQUIRES_INPUT",
+         ("SHARED_USAGE_REQUIRED",), ("opportunity_facts.shared_limit_usage",)),
+        ({}, {"retirement_usage": "100000"}, "BASELINE_NOT_READY", "UNSUPPORTED",
+         ("RETIREMENT_BASELINE_UNSUPPORTED",), ()),
+        ({}, {"retirement_usage": ""}, "INPUT_REQUIRED", "REQUIRES_INPUT",
+         ("RETIREMENT_INPUT_REQUIRED",), ("retirement_usage",)),
+        ({}, {"other_income": ""}, "INPUT_REQUIRED", "REQUIRES_INPUT",
+         ("OTHER_INCOME_INPUT_REQUIRED",), ("other_income",)),
+        ({}, {"other_income": "100000"}, "BASELINE_NOT_READY", "ADVANCED_TAX_PATH_REQUIRED",
+         ("UNSUPPORTED_INCOME",), ()),
+        ({}, {"parents": [{"relationship": "father", "eligible": "unknown"}]},
+         "INPUT_REQUIRED", "REQUIRES_INPUT",
+         ("PARENT_ELIGIBILITY_REQUIRED",), ("parent.father.eligible",)),
+    ],
+)
+def test_c01_extended_profile_errors_are_structured_without_amounts(
+    top: dict[str, str],
+    changes: dict[str, object],
+    code: str,
+    status: str,
+    reasons: tuple[str, ...],
+    missing: tuple[str, ...],
+) -> None:
+    """C01-AC09/AC11: extended profiles close the baseline with machine reasons."""
+    with pytest.raises(ValueError) as caught:
+        _demo().calculate(DEFAULTS | top | {"profile": _profile() | changes})
+    error = caught.value
+    assert getattr(error, "code", None) == code
+    assert getattr(error, "status", None) == status
+    assert getattr(error, "reason_codes", None) == reasons
+    assert getattr(error, "missing_fact_ids", None) == missing
+    assert "100000" not in str(error)
