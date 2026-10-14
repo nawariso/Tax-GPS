@@ -60,6 +60,10 @@ function harness() {
   return {
     get, calls,
     latest: () => vm.runInContext('latest', context),
+    rows: () => vm.runInContext('comparisonRows(latest)', context),
+    export: () => vm.runInContext('comparisonExport()', context),
+    choose(id, checked = true, hash) { return vm.runInContext(`selectComparison(${JSON.stringify(id)},${JSON.stringify(checked)},${JSON.stringify(hash ?? this.latest().outcomes.result_hash)})`,context); },
+    detail(id) { return vm.runInContext(`comparisonOpportunityDetail(${JSON.stringify(id)},latest)`,context); },
     recalculate: () => vm.runInContext('calculate()', context),
     scenario(value) { get('scenario').value = value; get('scenario').listeners.change(); },
     record(group, values) { return vm.runInContext(`addRecord(${JSON.stringify(group)},${JSON.stringify(values)})`,context); },
@@ -73,6 +77,81 @@ function harness() {
   };
 }
 const settle = () => new Promise(resolve => setTimeout(resolve, 30));
+
+test('comparison starts with pinned NO_ACTION and no selected cash candidates',async()=>{
+  const app=harness();await app.resolve(0);
+  assert.equal(app.rows().length,1);
+  assert.equal(app.rows()[0],app.latest().outcomes.candidates[0]);
+  assert.equal(app.get('comparisonTableBody').children.length,1);
+  assert.deepEqual(Array.from(app.export().comparison_view.selected_candidate_ids),[]);
+});
+test('selection renders authoritative fields without mutating engine output',async()=>{
+  const app=harness();await app.resolve(0);const original=JSON.stringify(app.latest());
+  const candidate=app.latest().outcomes.candidates[1];assert.equal(app.choose(candidate.candidate_id),true);
+  assert.equal(app.rows()[1],candidate);assert.equal(JSON.stringify(app.latest()),original);
+  const cells=app.get('comparisonTableBody').children[1].children;
+  assert.equal(cells[1].textContent,'79,000.00 บาท');
+  assert.equal(cells[2].textContent,'60,500.00 บาท');
+  assert.equal(cells[3].textContent,'18,500.00 บาท');
+  assert.equal(cells[4].textContent,'100,000.00 บาท');
+  assert.equal(cells[5].textContent,'0.00 บาท');
+  assert.equal(cells[6].textContent,'250,000.00 บาท');
+  assert.equal(cells[7].textContent,'ยังไม่ทราบ');
+  assert.match(cells[8].textContent,/5 ปี/);
+  assert.equal(app.choose(candidate.candidate_id,false),true);assert.equal(app.rows().length,1);
+});
+test('baseline and unknown candidate IDs cannot become user selections',async()=>{
+  const app=harness();await app.resolve(0);
+  assert.equal(app.choose(app.latest().outcomes.candidates[0].candidate_id),false);
+  assert.equal(app.choose('not-a-candidate'),false);assert.equal(app.rows().length,1);
+});
+test('selection reset binds to result identity even for repeated candidate IDs',async()=>{
+  const app=harness();await app.resolve(0);const old=app.latest().outcomes;
+  app.choose(old.candidates[1].candidate_id);app.get('budget').value='25000';
+  app.get('planner').listeners.input();assert.equal(app.export(),null);
+  assert.equal(app.get('comparisonTableBody').children.length,0);
+  const pending=app.recalculate();await app.resolve(1);await pending;
+  assert.equal(app.rows().length,1);assert.equal(app.choose(old.candidates[1].candidate_id,true,old.result_hash),false);
+});
+test('recalculating an unchanged profile also clears presentation selections',async()=>{
+  const app=harness();await app.resolve(0);app.choose(app.latest().outcomes.candidates[1].candidate_id);
+  const pending=app.recalculate();await app.resolve(1);await pending;assert.equal(app.rows().length,1);
+});
+test('zero tax benefit remains selectable and is not ranked away',async()=>{
+  const app=harness();app.scenario('zero');await app.resolve(1);
+  const candidate=app.latest().outcomes.candidates[1];assert.equal(candidate.tax_saved,'0.00');
+  assert.equal(app.choose(candidate.candidate_id),true);assert.equal(app.rows().length,2);
+});
+test('NO_ACTION-only and partial financial results do not create alternatives',async()=>{
+  const app=harness();app.scenario('debt');await app.resolve(1);assert.equal(app.rows().length,1);
+  assert.match(app.get('comparisonSelectionStatus').textContent,/ไม่มีรายการใช้เงิน/);
+  app.scenario('unknown');await app.resolve(2);assert.equal(app.rows().length,1);
+  assert.equal(app.get('comparisonTableBody').children[0].children[6].textContent,'ยังไม่ทราบ');
+});
+test('missing lockup metadata is not described as no constraints',async()=>{
+  const app=harness();await app.resolve(0);
+  assert.match(app.detail('TH-OPP-SOLAR-ROOFTOP-2026'),/ไม่ระบุในข้อมูลที่ใช้/);
+});
+test('export keeps engine material intact and identifies user-selected presentation',async()=>{
+  const app=harness();await app.resolve(0);const candidate=app.latest().outcomes.candidates[1];app.choose(candidate.candidate_id);
+  const exported=app.export();assert.equal(exported.outcomes,app.latest().outcomes);
+  assert.equal(exported.comparison_view.result_hash,app.latest().outcomes.result_hash);
+  assert.equal(exported.comparison_view.kind,'USER_SELECTED_COMPARISON');
+  assert.deepEqual(Array.from(exported.comparison_view.selected_candidate_ids),[candidate.candidate_id]);
+});
+test('late real response cannot replace selections made on a newer result',async()=>{
+  const app=harness();app.scenario('zero');await app.resolve(1);
+  const id=app.latest().outcomes.candidates[1].candidate_id;app.choose(id);await app.resolve(0);
+  assert.equal(app.rows().length,2);assert.equal(app.rows()[1].candidate_id,id);assert.equal(app.latest().tax_before,'0.00');
+});
+
+
+test('a detached selector from an unchanged earlier calculation cannot restore selection',async()=>{
+  const app=harness();await app.resolve(0);
+  const oldInput=app.get('candidates').children[1].children[1].children.at(-1).children[0];
+  const pending=app.recalculate();await app.resolve(1);await pending;
+  oldInput.checked=true;oldInput.listeners.change();assert.equal(app.rows().length,1);
+});
 
 test('latest scenario wins when an earlier real response arrives later', async () => {
   const app = harness();

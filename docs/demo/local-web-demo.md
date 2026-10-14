@@ -28,7 +28,9 @@ uv run python -m examples.web_demo
 3. เปรียบเทียบ NO_ACTION กับทางเลือกที่ engine สร้าง:
    ภาษีหลังจัดสรร ภาษีที่ลดลง เงินจ่ายเพิ่ม งบที่ไม่ใช้ และสภาพคล่องที่เหลือ
 4. สลับไปดูสิทธิและเงื่อนไข พร้อมสถานะที่ยังไม่พร้อม กฎและ source IDs
-5. เปิดรายละเอียด hash หรือดาวน์โหลด JSON ผลคำนวณ
+5. เลือกช่องใต้รายการใช้เงินเพื่อนำมาเทียบในตาราง NO_ACTION แสดงเสมอ ไม่ใช่คำแนะนำ
+6. เลื่อนตารางซ้าย–ขวาเพื่อดูทุกคอลัมน์ เลือกหรือยกเลิกได้โดยไม่เปลี่ยนผล engine
+7. เปิดรายละเอียด hash หรือดาวน์โหลด JSON ผลคำนวณ พร้อม comparison_view ที่แยกการเลือกของผู้ใช้
 
 มีสถานการณ์สำเร็จรูป 7 แบบ: มีสภาพคล่อง, สภาพคล่องจำกัด,
 ยังไม่ทราบสินทรัพย์สภาพคล่อง, ฐานภาษีต่ำจนไม่มีผลประหยัดภาษี,
@@ -95,8 +97,10 @@ uv run pytest --cov=tax_gps --cov-branch --cov-report=term-missing -q
 uv build
 ```
 
-Stage 2 verification: 42 Python demo/profile tests; 650 total Python tests passed,
-plus 10 JavaScript lifecycle/profile regression tests using real HTTP/engine responses.
+Stage 3 verification: 42 Python demo/profile tests; 650 total Python tests passed,
+plus 21 JavaScript lifecycle/profile/comparison regression tests using real HTTP/engine responses.
+The separately approved [comparison contract](stage3-comparison-contract-draft.md) and
+[Stage 3 handoff](stage3-review.md) keep core acceptance gates unchanged.
 Strict mypy includes `examples/`. The frontend check requires Node.js 22+ only for
 verification; running the demo itself still needs only Python and uv. Its helper starts
 an isolated loopback server on an ephemeral port and shuts it down afterward.
@@ -126,6 +130,10 @@ Generated local evidence (Git-ignored, illustrative inputs only):
 - `examples/artifacts/stage2-browser-checks.json`
 - `examples/artifacts/stage2-export.json`
 - `examples/artifacts/stage2-desktop.png`
+- `examples/artifacts/stage3-browser-checks.json`
+- `examples/artifacts/stage3-export.json`
+- `examples/artifacts/stage3-desktop.png`
+- `examples/artifacts/stage3-mobile.png`
 
 These artifacts are local evidence, not fixtures consumed by the demo. A clean clone has no
 screenshots until browser verification is repeated. Remote CI for these demo changes is

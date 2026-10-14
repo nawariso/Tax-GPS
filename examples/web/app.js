@@ -26,7 +26,54 @@ function showTab(rights) {
 }
 $('comparisonTab').addEventListener('click', () => showTab(false));
 $('rightsTab').addEventListener('click', () => showTab(true));
+let comparisonResultHash = null;
+const comparisonSelection = new Set();
+function resetComparison() {
+  comparisonSelection.clear(); comparisonResultHash = null;
+  $('comparisonTableBody').replaceChildren();
+  $('comparisonSelectionStatus').textContent = 'ยังไม่มีผลคำนวณสำหรับเปรียบเทียบ';
+}
+function comparisonRows(data) {
+  if (!data || data.outcomes.result_hash !== comparisonResultHash) return [];
+  return data.outcomes.candidates.filter(candidate => candidate.allocations.length === 0 || comparisonSelection.has(candidate.candidate_id));
+}
+function comparisonOpportunityDetail(id, data) {
+  const item = data.discovery.opportunities.find(opportunity => opportunity.opportunity_id === id);
+  const name = labels[id] || item?.name || id;
+  const lock = item?.lockup_metadata;
+  const holding = lock ? `อย่างน้อย ${lock.minimum_holding_years} ปี · ${lock.measurement === 'purchase-date-to-purchase-date' ? 'นับจากวันที่ซื้อ' : lock.measurement}` : 'ไม่ระบุในข้อมูลที่ใช้';
+  return `${name}: ${holding} · กฎ: ${item?.rule_ids.join(', ') || 'ไม่ระบุ'} · แหล่งอ้างอิง: ${item?.source_ids.join(', ') || 'ไม่ระบุ'}`;
+}
+function renderComparison(data) {
+  const body = $('comparisonTableBody'); body.replaceChildren();
+  const rows = comparisonRows(data);
+  rows.forEach(candidate => {
+    const baseline = candidate.allocations.length === 0;
+    const tr = el('tr'); tr.setAttribute('data-candidate-id',candidate.candidate_id);
+    const title = baseline ? 'NO_ACTION · ไม่ใช้เงินเพิ่ม' : candidate.allocations.map(a => `${labels[a.opportunity_id] || data.discovery.opportunities.find(o => o.opportunity_id === a.opportunity_id)?.name || a.opportunity_id}: ${baht(a.amount)}`).join(' · ');
+    const heading = el('th', title); heading.setAttribute('scope','row');tr.append(heading);
+    ['tax_before','tax_after','tax_saved','cash_outflow','unused_budget','spendable_surplus_after','protection_gap'].forEach(key => tr.append(el('td',baht(candidate[key]))));
+    tr.append(el('td',baseline ? 'จุดอ้างอิง ไม่ใช้เงินเพิ่ม' : candidate.allocations.map(a => comparisonOpportunityDetail(a.opportunity_id,data)).join(' | ')));
+    const guardNotes = candidate.allocations.map(a => data.guardrails.assessments.find(g => g.opportunity_id === a.opportunity_id)).filter(Boolean).map(g => `${decisions[g.decision] || g.decision} · ${g.reason_codes.join(', ')}`).join(' · ');
+    tr.append(el('td',[candidate.reason_codes.map(code => reasons[code] || code).join(' · '),guardNotes].filter(Boolean).join(' · ')));
+    body.append(tr);
+  });
+  $('comparisonSelectionStatus').textContent = data.outcomes.candidates.every(c => c.allocations.length === 0) ? 'ไม่มีรายการใช้เงินที่ engine เปิดให้ทดลอง — แสดง NO_ACTION และเหตุผลจริง' : `เลือกมาเทียบ ${rows.filter(c => c.allocations.length > 0).length} รายการ · NO_ACTION แสดงเสมอ · เรียงตาม engine ไม่ใช่อันดับ`;
+}
+function selectComparison(id, checked, resultHash) {
+  if (!latest || typeof checked !== 'boolean' || resultHash !== comparisonResultHash || resultHash !== latest.outcomes.result_hash) return false;
+  const candidate = latest.outcomes.candidates.find(c => c.candidate_id === id && c.allocations.length > 0);
+  if (!candidate) return false;
+  if (checked) comparisonSelection.add(id); else comparisonSelection.delete(id);
+  renderComparison(latest);return true;
+}
+function comparisonExport() {
+  if (!latest || latest.outcomes.result_hash !== comparisonResultHash) return null;
+  return {...latest,comparison_view:{version:'1',kind:'USER_SELECTED_COMPARISON',result_hash:latest.outcomes.result_hash,selected_candidate_ids:comparisonRows(latest).filter(c => c.allocations.length > 0).map(c => c.candidate_id)}};
+}
 function render(data) {
+  resetComparison();comparisonResultHash = data.outcomes.result_hash;
+  renderComparison(data);
   renderProfile(data);
   $('tax').textContent = money(data.tax_before);
   $('taxable').textContent = money(data.taxable_income);
@@ -46,6 +93,13 @@ function render(data) {
     const dl = el('dl');
     dl.append(row('ภาษีหลังทางเลือกนี้', baht(candidate.tax_after)), row('เงินที่ต้องจ่ายเพิ่ม', baht(candidate.cash_outflow)), row('งบที่ยังไม่ใช้', baht(candidate.unused_budget)), row('สภาพคล่องใช้เพิ่มที่เหลือ', baht(candidate.spendable_surplus_after)), row('ช่องว่างความคุ้มครอง', baht(candidate.protection_gap)));
     body.append(saving, dl, el('div', candidate.reason_codes.map(code => reasons[code] || code).join(' · '), 'reason'));
+    if (!baseline) {
+      const picker = el('label',undefined,'comparison-picker');const input = el('input');
+      input.type = 'checkbox';input.id = `compare-${candidate.candidate_id}`;
+      input.checked = false;const selectionVersion = calculationVersion;
+      input.addEventListener('change',()=>{if(selectionVersion !== calculationVersion || !selectComparison(candidate.candidate_id,input.checked,data.outcomes.result_hash))input.checked=false;});
+      picker.append(input,el('span','เลือกมาเทียบในตาราง — ไม่ใช่คำสั่งซื้อ'));body.append(picker);
+    }
     card.append(head, body);
     $('candidates').append(card);
   });
@@ -72,6 +126,7 @@ function render(data) {
 }
 function invalidateResults() {
   calculationVersion++;
+  resetComparison();
   latest = null;
   $('result').hidden = true;
   $('error').hidden = true;
@@ -135,8 +190,9 @@ $('scenario').addEventListener('change', () => {
   calculate();
 });
 $('download').addEventListener('click', () => {
-  if (!latest) return;
-  const url = URL.createObjectURL(new Blob([JSON.stringify(latest,null,2)], {type:'application/json'}));
+  const exported = comparisonExport();
+  if (!exported) return;
+  const url = URL.createObjectURL(new Blob([JSON.stringify(exported,null,2)], {type:'application/json'}));
   const link = el('a');
   link.href = url;
   link.download = 'tax-gps-demo-2026.json';

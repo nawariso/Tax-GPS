@@ -31,7 +31,9 @@ uv run python -m examples.web_demo
 
 Open `http://127.0.0.1:8765/` in your browser. Stop with Ctrl+C. Use `--port 8766`
 if the default port is busy. The screen includes editable input, seven example scenarios,
-baseline versus feasible outcomes, rights/conditions, and JSON download.
+baseline versus feasible outcomes, a user-selected comparison table, rights/conditions,
+and JSON download. Choose the checkbox below a cash candidate to compare it with the
+pinned NO_ACTION row; this is neither ranking nor an investment instruction.
 
 The employee example calculates PIT 79,000 THB before and 60,500 THB after a 100,000 THB
 allocation: tax saving 18,500 THB, cash outflow 100,000 THB, remaining spendable surplus
@@ -57,7 +59,8 @@ Important boundaries:
 
 See [the demo guide](docs/demo/local-web-demo.md) for scope and test commands,
 and the [Stage 1 checkpoint handoff](docs/demo/checkpoint-review.md) plus
-[Stage 2 handoff](docs/demo/stage2-review.md) for review boundaries and remaining gates.
+[Stage 2 handoff](docs/demo/stage2-review.md) and
+[Stage 3 handoff](docs/demo/stage3-review.md) for review boundaries and remaining gates.
 
 ## Candidate allocations (P1-004)
 
