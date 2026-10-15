@@ -116,3 +116,58 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Reason: ให้ agent ต่างตัวทำงานด้วยมาตรฐาน คำสั่ง และขอบเขตเดียวกัน
 - Boundary: ไม่เปลี่ยน requirement, สถานะ milestone หรือสัญญาโค้ด; กติกาใน `AGENTS.md`
   สรุปจาก ROADMAP/DECISIONS/requirements ที่มีอยู่ ถ้าขัดกัน เอกสารต้นทางและ DEC ใหม่มีผลก่อน
+
+
+## DEC-011 — C01 IMPLEMENTED และจุดรับช่วงที่ไม่ทำงานเดิมซ้ำ
+
+- Date: `2026-10-15`
+- Status: `AGREED` สำหรับทำ C01 ส่วนที่เหลือต่อและ mark ความคืบหน้า; `IMPLEMENTATION_EVIDENCE` สำหรับผลตรวจในเครื่อง
+- Decision: บันทึก C01 เป็น IMPLEMENTED ตาม requirement v0.1/plan Task 1–5 พร้อม fresh-review fix-pass; ยังไม่ ACCEPTED และ F09 OPEN / acceptance conditional
+- Evidence: ผู้ใช้สั่ง “ช่วยทำที่เหลือหน่อย ส่วนตรงไหนที่ทำเสร็จแล้วก็ mark ไว้ด้วยว่าทำไว้แล้ว ... ถ้าทำโดยใช้วิธีอื่นก็เขียนหมายเหตุไว้ด้วย”; ผลจริง 694 Python tests, coverage 100% statements/branches, frontend 24/24, lint/format/strict mypy/build ผ่าน; reviewer พบ 2 Important แล้วแก้ด้วย RED→GREEN
+- Method: inline Windows + tracked ledger แทน POSIX bookkeeping; Git archive ของ pre-C01 เป็น engine เก่าสำหรับ replay แทนสลับไฟล์เดิมหรือสร้าง compatibility engine; characterization ของงานที่มีอยู่แล้วแยกจาก RED→GREEN
+- Reason: ให้ session ถัดไปรับช่วงจากหลักฐานและข้อค้างจริง ไม่ทำ Task 1–5 ซ้ำเพราะเอกสารเก่า/checklist ไม่อัปเดต
+- Boundary: F09 ยังไม่ยืนยันสาเหตุเดิม; ไม่ waive independent acceptance ของ C01/P1-004, ไม่รับรองกฎหมายทั้งหมดหรือ remote CI/Python 3.12/manual visual, ไม่อนุญาต push/merge และไม่เริ่ม C02 หรือเพิ่ม deduction treatment
+- Records: [implementation report](implementation-reports/TGPS-C01.md), [review disposition](implementation-reports/TGPS-C01-review.md), [progress ledger](implementation-reports/TGPS-C01-progress.md)
+
+## DEC-012 — ทิศทางปรับหน้าตาตาม fintech template
+
+- Date: `2026-10-15`
+- Status: `AGREED_DIRECTION` สำหรับใช้ reference; `AUTHORING_DETAIL / REQUIREMENT_REVIEW` สำหรับรายละเอียด layout ที่เสนอ
+- Direction: ผู้ใช้ขอปรับหน้าตา Tax GPS ให้ประมาณ [Fintech SaaS template ของ Kedhareswer](https://21st.dev/@kedhareswer/templates/fintech-saas-landing-page-template)
+- Evidence: “อยากให้ template ประมาณนี้ ลองเปลี่ยนให้หน่อย ได้ไหม ?” พร้อม URL
+- Proposal: งานนำเสนอแยก TGPS-UI01 ใช้ cream/forest frame, centered Thai hero, circuit accents และ dashboard panels ของเครื่องคำนวณจริง; ปุ่มเชื่อม input/scenario ที่มีอยู่
+- Boundary: ยังไม่ถือว่าผู้ใช้อนุมัติรายละเอียดทุกข้อ; ตาม AGENTS.md §5 จัด requirement ให้รีวิวก่อน product-code edits. ไม่เปลี่ยน C01/C02 tax contracts, readiness, guardrails, privacy, policy versions หรือ acceptance; C02–C06 ยังคงลำดับเดิม
+- Records: [UI01 requirement](requirements/TGPS-UI01-fintech-restyle.md), [UI01 progress](implementation-reports/TGPS-UI01-progress.md)
+
+## DEC-013 — เริ่ม UI01 ตามแบบที่ผู้ใช้อนุมัติ
+
+- Date: `2026-10-15`
+- Status: `AGREED`
+- Decision: ทำ UI01 v0.1 ต่อแบบ inline ตาม plan โดยไม่ถามอนุมัติแบบเดิมซ้ำ
+- Evidence: ผู้ใช้ตอบ “โอเครครับ ลุย!” หลังรับลิงก์ requirement และคำอธิบาย cream/forest frame, centered Thai hero, local CTAs และ dashboard panels
+- Method: คง checkout/งาน C01 เดิม; native HTML fragment links + CSS/SVG ในเครื่อง ไม่ย้าย framework หรือเพิ่ม runtime dependencies
+- Boundary: ไม่เปลี่ยนภาษี/readiness/guardrails/policy/acceptance ของ C01–C06; visual QA ที่ยังทำไม่ได้ต้องแสดง UNVERIFIED ไม่อ้างว่าผู้ใช้รับงานแล้ว
+- Records: [UI01 plan](superpowers/plans/2026-10-15-ui01-fintech-restyle.md), [UI01 progress](implementation-reports/TGPS-UI01-progress.md)
+
+
+## DEC-014 — UI01 implemented พร้อมแยก visual acceptance
+
+- Date: `2026-10-15`
+- Status: `IMPLEMENTATION_EVIDENCE`
+- Decision: UI01 v0.1 เป็น IMPLEMENTED จาก source review/automatic gates และ preview จริง; ยังไม่ ACCEPTED เพราะ rendered visual gates ไม่มีหลักฐาน
+- Evidence: Python695/coverage100%, frontend24, lint/format/mypy/buildผ่าน; source reviewerไม่มี Critical/Important/Minor ที่ยืนยันได้; preview64946 smoke9/9
+- Method: HTML fragment links แทน navigation JS, local CSS/SVG แทน framework/template import; original IDs/JS/assetsตรวจคงเดิม; no browser provider จึงไม่อ้าง screenshot/keyboard visual QA
+- Boundary: C01/C02–C06 tax contracts/acceptance/readiness/guardrails/pack/catalogไม่เปลี่ยน; F09ยังOPEN; remote CI/Python3.12ไม่ยืนยัน; ไม่มี commit/push/merge
+- Next review: ภาพ1440/390/360, Thai clipping/overflow, real focus/scroll และความใกล้เคียง reference โดยผู้ใช้/เครื่องมือที่เข้าถึง browserได้
+- Records: [UI01 report](implementation-reports/TGPS-UI01.md), [source review](implementation-reports/TGPS-UI01-review.md), [progress](implementation-reports/TGPS-UI01-progress.md)
+
+## DEC-015 — เก็บ checkpoint และร่าง C02 เพื่อรีวิว
+
+- Date: `2026-10-15`
+- Status: `AGREED` สำหรับงานรับช่วง/commit/ตรวจ Python3.12/ร่าง C02 ตามที่เสนอ; `AUTHORING_DETAIL / REQUIREMENT_REVIEW` สำหรับรายละเอียด C02
+- Evidence: ผู้ใช้ตอบ “โอเครครับ ลุย!” หลังเสนอ visual review, review C01/F09, commit/CI และร่าง C02; ย้ำ “if not please continoue” หลังการขัดจังหวะ
+- Decision: เก็บ C01/UI01 ที่ตรวจแล้วเป็น local checkpoint; C02 เปลี่ยนจาก PLANNED เป็น REQUIREMENT_REVIEW โดย implementation NOT_STARTED
+- Method: isolated Windows CPython3.12.14 แทนกล่าวอ้าง remote CI; 695 tests/100% coverage/frontend24 และทุก gate ผ่านทั้ง3.12/3.14. เก็บ raw outputs แยก; Node24.3.0 local ไม่ใช่ Node22/Ubuntu ของ CI. CUA ไม่มี provider จึง rendered review ยัง UNVERIFIED
+- Authoring detail: C02 เสนอ PVD → RMF → Thai ESG; แยกยอดจ่าย/เข้าเกณฑ์/ใช้จริง, ตรวจ exemption ordering และ authoritative shared usage, ไม่เลือก tax election แทนผู้ใช้; legal matrix และ numeric fixtures ยังเป็น gate
+- Boundary: ไม่มี treatment/readiness/rule changes ของ C02, ไม่ปิด F09 หรือ acceptance; ไม่ push/PR/merge ก่อนยืนยันตาม AGENTS §7 / tgps-git
+- Records: [C02 requirement](requirements/TGPS-C02-existing-rights.md), [C02 ledger](implementation-reports/TGPS-C02-progress.md), [local verification](implementation-reports/TGPS-handoff-verification.json)

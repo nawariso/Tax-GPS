@@ -47,3 +47,11 @@ and mismatched hashes. Current core 0.2.0 cannot impersonate core 0.1.1 for repl
 Historical catalog loading does not grant current candidate allocation authority.
 
 This implementation verification record is not independent milestone acceptance.
+
+## C01 completion recheck
+
+On 2026-10-15 the direct Gazette PDF and SEC Q&A PDF text were retrieved again during
+Task 3 verification. The same page/clause references above corroborate the bundled
+scope; released 1.0.0 and 1.0.1 JSON were not edited in this continuation. The SEC
+raw-file download/hash limitation remains. Historical byte comparisons and matching
+old-engine replay are recorded in `docs/implementation-reports/TGPS-C01.md`.

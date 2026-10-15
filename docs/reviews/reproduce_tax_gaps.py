@@ -31,7 +31,8 @@ from tax_gps.profile.models import (
 def main() -> None:
     pack = activate_rule_pack(load_bundled_rule_pack(BUNDLED_PACK_ID_2026))
     catalog = activate_catalog(load_bundled_catalog())
-    profile = UserProfile(opportunity_facts=OpportunityFacts(shared_limit_usage=()),
+    profile = UserProfile(
+        opportunity_facts=OpportunityFacts(shared_limit_usage=()),
         profile_id="synthetic-review",
         version="1",
         tax_year=TaxYear(2026),

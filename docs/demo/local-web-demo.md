@@ -48,9 +48,10 @@ uv run python -m examples.web_demo
   เพราะเส้นทางเงินเดือนยังไม่รองรับครบ ดู [input contract](input-coverage.md)
 - Legacy API เจ็ดช่องเดิมยังจำกัดที่ไม่มีหนี้/ภาระจ่าย/สิทธิครอบครัว และไม่ทราบความคุ้มครอง
   หน้าจอ Stage 2 ส่ง extended profile เสมอ ไม่ใช้ legacy defaults แทนข้อมูลที่ขาด
-- ช่องวงเงินกลุ่ม Thai ESG / ESGX ที่ใช้ไปแล้วเป็นข้อมูลตรวจความจุร่วม ไม่ใช่รายการ
-  ลดหย่อนใหม่ในฐานภาษีเริ่มต้น หากมีประวัติการใช้สิทธิจริง ต้องใช้โปรไฟล์เต็มที่รองรับ
-  ก่อนนำไปเป็นเครื่องมือสำหรับข้อมูลจริง
+- C01 ให้ domain ปิด baseline เมื่อยอดใช้สิทธิเดิม Thai ESG / ESGX เป็นบวก
+  (UNSUPPORTED) หรือยังไม่ทราบ (REQUIRES_INPUT); ต้องยืนยันศูนย์หรือรายการว่างที่ครบ
+  จึงใช้เส้นทางเงินเดือนที่รองรับได้ ไม่เผยภาษี/ผลประหยัด/candidates/export เมื่อไม่พร้อม
+  การหักลดหย่อนยอดซื้อเดิมจริงอยู่ C02
 - เว้นสินทรัพย์ ค่าใช้จ่าย ความคุ้มครอง หรือวงเงินร่วมว่าง = unknown ไม่ใช่ 0
 - ไม่มีการหักภาษี ณ ที่จ่าย ไม่มีจำนวนเงินคืน/ภาษีต้องชำระสุทธิ ไม่มีการยื่นแบบ
 - ไม่มีอันดับ คำแนะนำซื้อ/ขาย ผลตอบแทนคาดการณ์ หรือการเลือกกองทุน
@@ -138,3 +139,12 @@ Generated local evidence (Git-ignored, illustrative inputs only):
 These artifacts are local evidence, not fixtures consumed by the demo. A clean clone has no
 screenshots until browser verification is repeated. Remote CI for these demo changes is
 UNVERIFIED; existing P1-004 review/merge gates are unchanged.
+
+
+## UI01 visual restyle — 2026-10-15
+
+ปรับเป็นพื้นครีม/กรอบเขียวเข้ม หัวเรื่องไทยจัดกลาง ลาย circuit/compass จาก CSS/SVG
+ในเครื่อง พร้อมปุ่ม native links ไปช่องเงินเดือน/สถานการณ์ตัวอย่าง และการ์ดผลที่คง
+พฤติกรรมเดิมไว้. รายละเอียดอยู่ [UI01 report](../implementation-reports/TGPS-UI01.md).
+Automatic: Python695/coverage100%, frontend24; source reviewผ่าน. ยังไม่มี rendered
+desktop/mobile/keyboard QA เพราะ browser providerไม่พร้อม จึงยังไม่ถือว่า visual ACCEPTED.

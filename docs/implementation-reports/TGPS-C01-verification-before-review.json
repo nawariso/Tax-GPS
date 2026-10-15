@@ -1,0 +1,88 @@
+[
+  {
+    "command": [
+      "uv",
+      "sync",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 0.031,
+    "output": "Resolved 16 packages in 1ms\nChecked 16 packages in 1ms\n"
+  },
+  {
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "ruff",
+      "check",
+      "."
+    ],
+    "exit_code": 0,
+    "seconds": 0.067,
+    "output": "All checks passed!\n"
+  },
+  {
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "ruff",
+      "format",
+      "--check",
+      "."
+    ],
+    "exit_code": 0,
+    "seconds": 0.067,
+    "output": "138 files already formatted\n"
+  },
+  {
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "mypy",
+      "--strict"
+    ],
+    "exit_code": 0,
+    "seconds": 0.776,
+    "output": "Success: no issues found in 102 source files\n"
+  },
+  {
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "pytest",
+      "--cov=tax_gps",
+      "--cov-branch",
+      "--cov-report=term-missing",
+      "-q"
+    ],
+    "exit_code": 0,
+    "seconds": 10.156,
+    "output": "........................................................................ [ 10%]\n........................................................................ [ 20%]\n........................................................................ [ 31%]\n........................................................................ [ 41%]\n........................................................................ [ 52%]\n........................................................................ [ 62%]\n........................................................................ [ 73%]\n........................................................................ [ 83%]\n........................................................................ [ 94%]\n......................................                                   [100%]\n=============================== tests coverage ================================\n_______________ coverage: platform win32, python 3.14.3-final-0 _______________\n\nName                                           Stmts   Miss Branch BrPart  Cover   Missing\n------------------------------------------------------------------------------------------\nsrc\\tax_gps\\__init__.py                            0      0      0      0   100%\nsrc\\tax_gps\\audit.py                              37      0      8      0   100%\nsrc\\tax_gps\\calculation\\__init__.py                0      0      0      0   100%\nsrc\\tax_gps\\calculation\\models.py                115      0      2      0   100%\nsrc\\tax_gps\\calculation\\readiness.py              37      0     18      0   100%\nsrc\\tax_gps\\calculation\\rules.py                 139      0     46      0   100%\nsrc\\tax_gps\\candidate\\__init__.py                  0      0      0      0   100%\nsrc\\tax_gps\\candidate\\activation.py              121      0     58      0   100%\nsrc\\tax_gps\\candidate\\audit.py                    24      0      2      0   100%\nsrc\\tax_gps\\candidate\\engine.py                  132      0     64      0   100%\nsrc\\tax_gps\\candidate\\models.py                   91      0     10      0   100%\nsrc\\tax_gps\\core\\__init__.py                       0      0      0      0   100%\nsrc\\tax_gps\\core\\canonical.py                     44      0     20      0   100%\nsrc\\tax_gps\\core\\decimal_context.py               35      0     16      0   100%\nsrc\\tax_gps\\core\\errors.py                         5      0      0      0   100%\nsrc\\tax_gps\\core\\money.py                         93      0     26      0   100%\nsrc\\tax_gps\\core\\percentage.py                    33      0      8      0   100%\nsrc\\tax_gps\\core\\tax_year.py                      30      0      8      0   100%\nsrc\\tax_gps\\discovery\\__init__.py                  0      0      0      0   100%\nsrc\\tax_gps\\discovery\\audit.py                    52      0     20      0   100%\nsrc\\tax_gps\\discovery\\capacity.py                 33      0     14      0   100%\nsrc\\tax_gps\\discovery\\context.py                   7      0      0      0   100%\nsrc\\tax_gps\\discovery\\effective_period.py          9      0      0      0   100%\nsrc\\tax_gps\\discovery\\eligibility.py              18      0      4      0   100%\nsrc\\tax_gps\\discovery\\engine.py                  118      0     44      0   100%\nsrc\\tax_gps\\discovery\\facts.py                    16      0      4      0   100%\nsrc\\tax_gps\\discovery\\intent.py                   14      0      4      0   100%\nsrc\\tax_gps\\discovery\\models.py                   91      0      0      0   100%\nsrc\\tax_gps\\engine.py                             62      0     18      0   100%\nsrc\\tax_gps\\financial\\__init__.py                  0      0      0      0   100%\nsrc\\tax_gps\\financial\\audit.py                    57      0     20      0   100%\nsrc\\tax_gps\\financial\\decisions.py                68      0     28      0   100%\nsrc\\tax_gps\\financial\\engine.py                   40      0     14      0   100%\nsrc\\tax_gps\\financial\\models.py                   46      0      0      0   100%\nsrc\\tax_gps\\financial\\policy.py                  115      0     32      0   100%\nsrc\\tax_gps\\financial\\profile.py                 115      0     34      0   100%\nsrc\\tax_gps\\financial\\reason_codes.py             17      0      0      0   100%\nsrc\\tax_gps\\financial\\state.py                   136      0     24      0   100%\nsrc\\tax_gps\\opportunity\\__init__.py                2      0      0      0   100%\nsrc\\tax_gps\\opportunity\\activation.py             63      0     30      0   100%\nsrc\\tax_gps\\opportunity\\catalogs\\__init__.py       0      0      0      0   100%\nsrc\\tax_gps\\opportunity\\loader.py                163      0     52      0   100%\nsrc\\tax_gps\\opportunity\\models.py                 99      0      4      0   100%\nsrc\\tax_gps\\opportunity\\opportunity_ids.py        17      0      0      0   100%\nsrc\\tax_gps\\opportunity\\readiness.py              73      0     40      0   100%\nsrc\\tax_gps\\policy\\__init__.py                     0      0      0      0   100%\nsrc\\tax_gps\\policy\\activation.py                  26      0      2      0   100%\nsrc\\tax_gps\\policy\\loader.py                     132      0     38      0   100%\nsrc\\tax_gps\\policy\\models.py                      71      0      2      0   100%\nsrc\\tax_gps\\policy\\packs\\__init__.py               0      0      0      0   100%\nsrc\\tax_gps\\policy\\readiness.py                   77      0     36      0   100%\nsrc\\tax_gps\\policy\\rule_ids.py                     9      0      0      0   100%\nsrc\\tax_gps\\profile\\__init__.py                    0      0      0      0   100%\nsrc\\tax_gps\\profile\\models.py                    160      0     46      0   100%\n------------------------------------------------------------------------------------------\nTOTAL                                           2842      0    796      0   100%\nRequired test coverage of 100.0% reached. Total coverage: 100.00%\n686 passed in 9.12s\n"
+  },
+  {
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "python",
+      "-m",
+      "examples.check_web_demo"
+    ],
+    "exit_code": 0,
+    "seconds": 3.769,
+    "output": "✔ comparison starts with pinned NO_ACTION and no selected cash candidates (161.6858ms)\n✔ selection renders authoritative fields without mutating engine output (66.8333ms)\n✔ baseline and unknown candidate IDs cannot become user selections (76.6874ms)\n✔ selection reset binds to result identity even for repeated candidate IDs (123.0814ms)\n✔ recalculating an unchanged profile also clears presentation selections (121.8527ms)\n✔ zero tax benefit remains selectable and is not ranked away (63.2744ms)\n✔ NO_ACTION-only and partial financial results do not create alternatives (123.2339ms)\n✔ missing lockup metadata is not described as no constraints (62.1351ms)\n✔ export keeps engine material intact and identifies user-selected presentation (62.9371ms)\n✔ late real response cannot replace selections made on a newer result (124.6152ms)\n✔ a detached selector from an unchanged earlier calculation cannot restore selection (125.6586ms)\n✔ latest scenario wins when an earlier real response arrives later (123.74ms)\n✔ an older request cannot clear the latest pending UI state (121.4333ms)\n✔ an older failure cannot overwrite the latest successful result (91.6917ms)\n✔ invalid input cancels publication of an already pending response (78.589ms)\n✔ editing financial input invalidates displayed and exported results (155.7006ms)\n✔ extended coverage fields reach the real engine (91.7676ms)\n✔ adding a debt invalidates results and blocks tax-motivated allocation (188.6164ms)\n✔ unsupported retirement input hides results and publishes an explicit error (139.5976ms)\n✔ C01 prior usage clears tax, selection and export and cannot be restored by an old selector (123.2413ms)\n✔ C01 unknown usage cannot publish a baseline after a late earlier response (124.1412ms)\n✔ family scenario maps its records and normal scenario clears them (216.8422ms)\n✔ removing a debt clears its guardrail effect after recalculation (122.7317ms)\nℹ tests 23\nℹ suites 0\nℹ pass 23\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2783.3553\n"
+  },
+  {
+    "command": [
+      "uv",
+      "build"
+    ],
+    "exit_code": 0,
+    "seconds": 0.338,
+    "output": "Building source distribution...\nBuilding wheel from source distribution...\nSuccessfully built dist\\tax_gps_core-0.2.0.tar.gz\nSuccessfully built dist\\tax_gps_core-0.2.0-py3-none-any.whl\n"
+  }
+]

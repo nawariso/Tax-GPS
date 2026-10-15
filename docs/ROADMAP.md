@@ -3,7 +3,17 @@
 Version: `0.1`  
 Updated: `2026-10-15` (Asia/Bangkok)  
 Direction: **AGREED**  
-Current work: **C01 implementation IN_PROGRESS — Task 1–2 เสร็จ, Task 3–4 บางส่วน, Task 5 ยังไม่เริ่ม**
+Current work: **C01 IMPLEMENTED — Task 1–5 ทำ/ตรวจ/รายงานแล้ว; Python 694, coverage 100%, frontend 24/24; F09 OPEN / acceptance conditional, ยังไม่ ACCEPTED**
+
+Presentation work: **TGPS-UI01 IMPLEMENTED / VISUAL_REVIEW_PENDING** — restyle และ automatic/source verification เสร็จแล้ว;
+ดู [ข้อเสนอ UI01](requirements/TGPS-UI01-fintech-restyle.md) / [DEC-012](DECISIONS.md#dec-012--ทิศทางปรับหน้าตาตาม-fintech-template).
+เปลี่ยนเฉพาะ presentation และไม่เปลี่ยนสถานะ/ลำดับ C01–C06
+
+Handoff: Windows Python3.14.3 และ isolated3.12.14 ผ่าน 695 tests, coverage100%,
+frontend24/24 และทุก quality gate; remote Ubuntu/Node22 CI ยังไม่ได้รัน
+([หลักฐาน](implementation-reports/TGPS-handoff-verification.json)).
+C02 มี [requirement v0.1-draft](requirements/TGPS-C02-existing-rights.md)
+เป็น **REQUIREMENT_REVIEW / implementation NOT_STARTED** ตาม DEC-015
 
 ## 1. ข้อตกลงและเป้าหมาย
 
@@ -39,8 +49,8 @@ MVP แรกเริ่มที่พนักงานเงินเดื�
 
 | ID | ช่วง | ขอบเขตหลัก | เกณฑ์ออกจากช่วง | สถานะ |
 | --- | --- | --- | --- | --- |
-| TGPS-C01 | ความถูกต้องของฐานปัจจุบัน | ปิดความไม่สอดคล้อง retirement, shared usage, unknown eligibility, provenance และตรวจ HTTP failure | core/UI ปิดผลที่ไม่ครบตรงกัน, supported golden cases ถูกต้อง, version/replay ตรวจได้, failure มีข้อสรุปและหลักฐาน | IN_PROGRESS (Task 1–2/5 เสร็จ; ดู [plan](superpowers/plans/2026-10-15-c01-baseline-integrity.md)) |
-| TGPS-C02 | สิทธิเดิมของพนักงาน | รายการสิทธิที่จ่ายแล้ว เริ่ม PVD/RMF/Thai ESG; ต่อประกันและสิทธิครอบครัวเป็นงานย่อย | รายการที่รองรับลดฐานภาษีและใช้ capacity ครั้งเดียว; ระบุ missing/unsupported coverage; fixtures ตรวจตัวเลขโดยอิสระ | PLANNED |
+| TGPS-C01 | ความถูกต้องของฐานปัจจุบัน | ปิดความไม่สอดคล้อง retirement, shared usage, unknown eligibility, provenance และตรวจ HTTP failure | core/UI ปิดผลที่ไม่ครบตรงกัน, supported golden cases ถูกต้อง, version/replay ตรวจได้, failure มีข้อสรุปและหลักฐาน | IMPLEMENTED (Task 1–5 ตรวจแล้ว; F09 OPEN / acceptance conditional; [report](implementation-reports/TGPS-C01.md), [review](implementation-reports/TGPS-C01-review.md)) |
+| TGPS-C02 | สิทธิเดิมของพนักงาน | รายการสิทธิที่จ่ายแล้ว เริ่ม PVD/RMF/Thai ESG; ต่อประกันและสิทธิครอบครัวเป็นงานย่อย | รายการที่รองรับลดฐานภาษีและใช้ capacity ครั้งเดียว; ระบุ missing/unsupported coverage; fixtures ตรวจตัวเลขโดยอิสระ | REQUIREMENT_REVIEW / implementation NOT_STARTED ([draft](requirements/TGPS-C02-existing-rights.md)) |
 | TGPS-C03 | ประมาณการภาษีทั้งปี | actual/forecast, โบนัส, withholding ที่รองรับ | แสดง annual PIT แยกยอดชำระเพิ่ม/คืน; unknown ไม่เป็นศูนย์; forecast ไม่แก้ actual | PLANNED |
 | TGPS-C04 | ทดลองใช้เงินก้อนใหม่ | จำนวนเงินที่ผู้ใช้เลือกบน budget เดิม; เพิ่มทางเลือก Thai ESG/RMF/ordinary investment/โปะหนี้ทีละประเภท | ทุก action มี tax/asset/debt treatment ตรงประเภท; เงินที่ไม่ใช้คงอยู่; ข้อจำกัดเงินสำรองยังทำงาน | PLANNED |
 | TGPS-C05 | ความคุ้มตามเวลา | horizon, unlock dates, fees, cash-flow scenarios และ break-even | ใช้ horizon เดียวกัน, ไม่บวก tax cash ซ้ำหรือใช้ก่อนมีจริง, แสดง assumption/risk และทางเลือกตามเป้าหมาย | PLANNED |
@@ -79,9 +89,10 @@ C02 แบ่งเป็น requirement ย่อยได้; ต้องก�
 แก้ความถูกต้องและขอบเขตการเผยผลของความสามารถปัจจุบัน
 การรองรับ deduction จริงประเภทใหม่อยู่ C02 ไม่ควรแทรกเข้ามาโดยไม่มี requirement
 
-ก่อนลงโค้ดให้รีวิว requirement C01 และจัดทำ implementation plan ที่ผูกกับ acceptance IDs
-เลือก implementation เองได้ภายในพฤติกรรมที่ระบุ แต่การเปลี่ยนผลภาษี ขอบเขตผู้ใช้
-สถานะความพร้อม หรือกติกาการใช้สิทธิต้องบันทึกเป็นการเปลี่ยนสัญญา
+C01 ทำ implementation/verification และ fresh review fix-pass แล้วตาม [report](implementation-reports/TGPS-C01.md)
+จุดรับช่วงคือ review/acceptance และติดตาม F09 ที่ยัง OPEN; ไม่ต้องเริ่ม Task 1–5 ใหม่
+เพียงเพราะ milestone ยังไม่ ACCEPTED. C02 จัดร่าง requirement สิทธิเดิมแล้ว; ต้องรีวิว
+ขอบเขต/หลักฐานก่อนเพิ่ม treatment; การเปลี่ยนผลภาษี ขอบเขต หรือ readiness ต้องมี DEC ใหม่
 
 ## 6. ความสัมพันธ์กับ milestone เดิม
 
@@ -109,3 +120,5 @@ acceptance cases, dependencies และ change log
 | --- | --- | --- | --- |
 | 2026-10-15 | 0.1 | บันทึก roadmap หกช่วง, MVP boundaries และ C01 เป็นงานแรก | ผู้ใช้ตกลงทิศทางในบทสนทนา; [DEC-001](DECISIONS.md#dec-001--roadmap-และผู้ใช้กลุ่มแรก) |
 | 2026-10-15 | 0.1 | C01 เป็น IN_PROGRESS ตามหลักฐานใน ledger; ไม่เปลี่ยนลำดับหรือขอบเขต | [DEC-009](DECISIONS.md#dec-009--เริ่ม-implementation-c01-และการติดตามความคืบหน้า) |
+| 2026-10-15 | 0.1 | C01 IMPLEMENTED ตาม local gates/fresh-review fix-pass; F09 OPEN และ acceptance conditional, C02 ยัง PLANNED | [DEC-011](DECISIONS.md#dec-011--c01-implemented-และจุดรับช่วงที่ไม่ทำงานเดิมซ้ำ) |
+| 2026-10-15 | 0.1 | เพิ่ม local Python3.12 evidence และ C02 REQUIREMENT_REVIEW; ไม่เพิ่ม treatment หรือปิด acceptance | DEC-015 / handoff verification |

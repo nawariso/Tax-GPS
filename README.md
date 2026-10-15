@@ -19,9 +19,12 @@ The candidate implementation report is
 ## Product roadmap and requirements
 
 The agreed product direction is recorded in the [roadmap](docs/ROADMAP.md) and
-[decision log](docs/DECISIONS.md). The next milestone is
+[decision log](docs/DECISIONS.md). The current milestone is
 [TGPS-C01: baseline integrity](docs/requirements/TGPS-C01-baseline-integrity.md).
-Its scope is agreed and implementation is in progress (Tasks 1–2 of 5 done); see the
+Its implementation is complete (Tasks 1–5, including fresh-review fixes); acceptance
+is conditional with F09 OPEN, not ACCEPTED. Final local checks: 694 Python tests, 100%
+statement/branch coverage, frontend 24/24 and build 0.2.0. See the
+[C01 report](docs/implementation-reports/TGPS-C01.md) and
 [C01 plan](docs/superpowers/plans/2026-10-15-c01-baseline-integrity.md) for per-task status. These records distinguish agreed direction, implementation evidence,
 and milestone acceptance.
 
@@ -69,8 +72,10 @@ Important boundaries:
 - Positive or unknown other income and retirement contributions block the demo: the current
   core does not deduct retirement contributions from PIT taxable income. No incomplete tax
   result is published for these profiles. See [input coverage](docs/demo/input-coverage.md).
-- Shared Thai ESG/ESGX usage is a capacity fact only, not an additional deduction in the
-  demo baseline. Blank shared usage remains unknown and prevents new allocation.
+- C01 gates the baseline in the domain: positive retirement or prior Thai ESG/ESGX usage
+  is UNSUPPORTED; unknown shared usage is REQUIRES_INPUT. Neither publishes PIT, savings,
+  candidates or stale exports. Explicit known zero/complete empty usage preserves the
+  supported salary path. Actual treatment of existing purchases is deferred to C02.
 - No ranking, recommendation, product choice, return forecast, tax withholding reconciliation,
   filing, authentication or persistence. Downloaded JSON contains submitted financial facts.
 - Loopback-only HTTP server and explicit asset allowlist; no repository-wide file server,
@@ -87,7 +92,7 @@ and the [Stage 1 checkpoint handoff](docs/demo/checkpoint-review.md) plus
 
 `tax_gps.candidate.engine.build_candidates(tax, discovery, financial, guardrails, policy)`
 produces feasible, bounded allocation compositions and deterministic outcomes only. It does
-not rank, select, or recommend a candidate. `NO_ACTION` is always present, and tax savings
+not rank, select, or recommend a candidate. `NO_ACTION` is present for READY tax baselines, and tax savings
 come from the existing progressive PIT core, not a marginal-rate approximation. The caller
 must pass an `ActivatedAllocationPolicy` bound by `activate_allocation_policy(raw_policy,
 profile, tax, discovery, catalog)`. Build the raw production policy with
@@ -125,8 +130,8 @@ In scope:
 - generic standalone and shared deduction capacity;
 - explicit unsupported-income states instead of approximation;
 - material calculation trace, rule/source provenance, and deterministic SHA-256 audit replay.
-- existing-right-first discovery for personal, parent, child, social-security, mortgage, and
-  retirement-shared-capacity rights;
+- existing-right-first discovery for supported personal, parent, child, social-security and
+  mortgage rights; standalone retirement capacity math does not authorize baseline deduction;
 - a versioned opportunity catalog for Thai ESG, artwork, and Solar Rooftop;
 - explicit intent, missing-input, effective-period, policy-readiness, and shared-pool decisions;
 - immutable discovery snapshots and deterministic replay.
@@ -158,7 +163,7 @@ from tax_gps.core.tax_year import TaxYear
 from tax_gps.engine import calculate_tax
 from tax_gps.policy.activation import activate_rule_pack
 from tax_gps.policy.loader import BUNDLED_PACK_ID_2026, load_bundled_rule_pack
-from tax_gps.profile.models import ExistingTaxBenefits, IncomeProfile, UserProfile
+from tax_gps.profile.models import ExistingTaxBenefits, IncomeProfile, OpportunityFacts, UserProfile
 
 pack = activate_rule_pack(load_bundled_rule_pack(BUNDLED_PACK_ID_2026))
 
@@ -168,6 +173,7 @@ profile = UserProfile(
     tax_year=TaxYear(2026),
     income=IncomeProfile(section_40_1=Money.of(990_500)),
     benefits=ExistingTaxBenefits(social_security_paid=Money.of(10_500)),
+    opportunity_facts=OpportunityFacts(shared_limit_usage=()),  # confirmed no prior usage
 )
 
 state = calculate_tax(profile, pack)
@@ -229,7 +235,10 @@ are isolated so they map cleanly to the corresponding DMN decisions; no workflow
 ## Policy packs
 
 Tax constants live only in versioned policy packs, never in calculation code. The bundled
-production pack is `src/tax_gps/policy/packs/TH-PIT-2026-001.json`.
+production pack is `src/tax_gps/policy/packs/TH-PIT-2026-001@1.0.1.json`; the catalog
+current version is also 1.0.1. Unsuffixed 1.0.0 resources remain historical and unchanged.
+Load them explicitly with `version="1.0.0"` and optionally `expected_hash`; loading an old
+catalog does not grant current allocation authority. See [C01 migration and replay](docs/implementation-reports/TGPS-C01.md).
 
 Every material activated rule carries `rule_id`, `version`, `tax_year`, `effective_from`,
 `effective_to`, `status`, `source_id`, and `verified_at`. Rule status follows
@@ -264,8 +273,29 @@ uv build
 
 Coverage is gated at 100% statements and branches.
 
-Engine and package version `0.1.1` expands calculation provenance to include every applied
+Historical engine and package version `0.1.1` expands calculation provenance to include every applied
 rule's primary source followed by supplementary sources in Rule Pack order, deduplicated at
 first reference. Because sources are part of canonical material output, hashes differ from
 `0.1.0`; new `0.1.1` calculations and replay remain deterministic. Historical snapshots require
 the matching `0.1.0` engine artifact.
+
+
+Current C01 package/core is 0.2.0; discovery/candidates are 0.3.0. Incomplete baselines
+carry machine reasons/missing IDs instead of usable PIT/savings/candidates. Parser errors
+identify code-owned scalar paths or record indices; arbitrary parent identity is never
+reflected in error metadata. This changes output hashes intentionally. Historical replay
+must use the retained pre-C01 engine artifact described in the C01 report.
+
+
+The approved [UI01 restyle](docs/implementation-reports/TGPS-UI01.md) gives the local
+demo a cream/forest frame, centered Thai hero, native links into the real calculator,
+and matching dashboard panels using only local HTML/CSS/SVG. Existing calculation JS
+and domain rules are unchanged. Automatic/source verification passed (695 Python tests,
+100% core coverage, frontend24); rendered desktop/mobile acceptance remains pending.
+
+Handoff checks also passed in isolated local Windows Python3.12.14: 695 tests,
+100% core coverage, frontend24 and all quality gates. Ubuntu/Node22 remote CI has
+not run. See [verification](docs/implementation-reports/TGPS-handoff-verification.json).
+The [C02 requirement](docs/requirements/TGPS-C02-existing-rights.md) is drafted for
+review; no C02 treatment is implemented. Its [ledger](docs/implementation-reports/TGPS-C02-progress.md)
+records the legal evidence and approval gates still pending.

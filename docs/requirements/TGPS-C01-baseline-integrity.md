@@ -4,7 +4,9 @@ Version: `0.1`
 Created: `2026-10-15` (Asia/Bangkok)  
 Scope: **AGREED_DIRECTION**  
 Detailed requirement: **REQUIREMENT_REVIEW**  
-Implementation: **IN_PROGRESS** (ดู [plan](../superpowers/plans/2026-10-15-c01-baseline-integrity.md) และ [ledger](../implementation-reports/TGPS-C01-progress.md))  
+Implementation: **IMPLEMENTED** (local evidence; F09 OPEN / acceptance conditional; not ACCEPTED)
+
+ดู [plan](../superpowers/plans/2026-10-15-c01-baseline-integrity.md) และ [ledger](../implementation-reports/TGPS-C01-progress.md)
 Priority: correctness before C02  
 Jurisdiction/year: Thailand, 2026 / พ.ศ. 2569  
 Initial taxpayer: Section 40(1) employment income
@@ -286,3 +288,4 @@ explicit shared unknown และ migration เป็น proposal ที่ผ�
 | --- | --- | --- | --- |
 | 2026-10-15 | 0.1 | เขียนรายละเอียด C01 จาก roadmap ที่ผู้ใช้ตกลง พร้อม acceptance/migration boundaries | REQUIREMENT_REVIEW; implementation NOT_STARTED |
 | 2026-10-15 | 0.1 | สถานะ implementation เป็น IN_PROGRESS; Task 1 เสร็จ, Task 2–3 บางส่วน; เนื้อหา requirement ไม่เปลี่ยน | [DEC-009](../DECISIONS.md#dec-009--เริ่ม-implementation-c01-และการติดตามความคืบหน้า) |
+| 2026-10-15 | 0.1 | Implementation Task 1–5 + fresh-review fixes ตรวจแล้ว; 694 tests, coverage 100%, frontend 24/24; F09 OPEN / acceptance conditional; ไม่เปลี่ยนขอบเขตหรือถือว่า ACCEPTED | [DEC-011](../DECISIONS.md#dec-011--c01-implemented-และจุดรับช่วงที่ไม่ทำงานเดิมซ้ำ) |

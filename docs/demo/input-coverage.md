@@ -5,7 +5,9 @@ and CI remain pending. This exception permits development only, not milestone ac
 merge, release, legal-policy certification, or production use.
 
 Base: `d15d840c4ee3f1ae50321ffb948a9f5f2be75c9a`; branch `feature/demo-stage2-profile`.
-Keep `src/tax_gps/`, policy packs, catalogs and governed milestone status unchanged.
+The original Stage 2 authorization kept core/artifacts unchanged. The separately authorized
+C01 requirement now governs baseline readiness and artifact 1.0.1; this contract is updated
+to describe that current behavior without retroactively changing Stage 2 acceptance.
 
 ## Input-to-domain mapping
 
@@ -20,9 +22,9 @@ Keep `src/tax_gps/`, policy packs, catalogs and governed milestone status unchan
 | Debt records | Debt | ID, category, outstanding balance, APR percentage, minimum monthly payment, secured yes/no; APR is converted exactly to a ratio, with no invented 100% upper bound |
 | Committed payments | CommittedCashNeed | ID, amount, due date, mandatory flag and description; existing engine alone decides near-term reserve inclusion |
 | Needed / existing life cover | ProtectionProfile | Blank remains unknown; both known values permit the core gap calculation; no automatic insurance need estimate |
-| Thai ESG shared usage | SharedLimitUsage | Capacity fact only; blank stays unknown |
+| Thai ESG shared usage | SharedLimitUsage | Known zero/complete empty list permits supported baseline; positive → domain UNSUPPORTED; blank/None → REQUIRES_INPUT; no PIT/savings/candidates/export for either blocked state |
 | Other income | IncomeProfile.unsupported | Positive or unknown value blocks the salary-only demo, not silently ignored |
-| Retirement contributions | ExistingTaxBenefits.retirement_contributions | Positive or unknown value blocks this demo: current calculate_tax reports capacity but does not deduct contributions from PIT taxable income |
+| Retirement contributions | ExistingTaxBenefits.retirement_contributions | Positive value → domain UNSUPPORTED; unknown → parser REQUIRES_INPUT; known zero permits supported salary baseline. Standalone capacity math does not deduct contributions from PIT taxable income |
 
 Empty record lists explicitly mean no such records for this experiment. The screen must
 say this; users who have not checked whether their lists are complete must not treat an
@@ -57,3 +59,15 @@ Eligibility selections are caller assertions, not legal verification. The applic
 not infer legal eligibility from age, birth order, relationship or payment receipts and
 does not collect identity documents. Current legal freshness is not established by this UI.
 No ranking, persistence, external services, automatic recommendation or filing is added.
+
+
+## C01 error identity (2026-10-15)
+
+Malformed values use structured INVALID_INPUT with a code-owned field path; unknown
+booleans use canonical scalar or indexed record paths, e.g. children[1].legally_eligible,
+debts[1].secured, commitments[1].mandatory (zero-based indices). Standard parent role IDs
+remain parent.father.eligible / parent.mother.eligible; caller-defined relationship text
+is replaced by parent[index].eligible in errors. Submitted financial values and arbitrary
+record labels are not copied into error text/IDs. Constructor errors retain safe row or
+profile scope. These are adapter/evidence fixes; domain readiness and deduction scope
+are unchanged. Final automated frontend lifecycle: 24/24; Python suite: 694 tests.
