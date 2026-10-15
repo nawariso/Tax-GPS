@@ -302,7 +302,9 @@ def parse_catalog(text: str) -> OpportunityCatalog:
 
 
 def load_bundled_catalog(
-    catalog_id: str = BUNDLED_CATALOG_ID_2026, *, version: str | None = None,
+    catalog_id: str = BUNDLED_CATALOG_ID_2026,
+    *,
+    version: str | None = None,
     expected_hash: str | None = None,
 ) -> OpportunityCatalog:
     if catalog_id != BUNDLED_CATALOG_ID_2026:
@@ -313,6 +315,9 @@ def load_bundled_catalog(
     suffix = "" if selected == "1.0.0" else f"@{selected}"
     resource = files("tax_gps.opportunity.catalogs").joinpath(f"{catalog_id}{suffix}.json")
     catalog = parse_catalog(resource.read_text(encoding="utf-8"))
-    if expected_hash is not None and sha256_hex(canonical_json(catalog_to_dict(catalog))) != expected_hash:
+    if (
+        expected_hash is not None
+        and sha256_hex(canonical_json(catalog_to_dict(catalog))) != expected_hash
+    ):
         raise PolicyValidationError("catalog hash mismatch")
     return catalog

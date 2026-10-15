@@ -48,11 +48,36 @@ def _profile(
 @pytest.mark.parametrize(
     ("user", "status", "codes", "missing"),
     [
-        (_profile(usage=None), "REQUIRES_INPUT", ["SHARED_USAGE_REQUIRED"], ["opportunity_facts.shared_limit_usage"]),
-        (_profile(usage=(SharedLimitUsage(THAI_ESG_2026_POOL, Money.of(1)),)), "UNSUPPORTED", ["PRIOR_SHARED_USAGE_BASELINE_UNSUPPORTED"], []),
-        (_profile(retirement=(RetirementContribution("RMF", Money.of(100000)),)), "UNSUPPORTED", ["RETIREMENT_BASELINE_UNSUPPORTED"], []),
-        (_profile(retirement=(RetirementContribution("PVD", Money.of(1)),)), "UNSUPPORTED", ["RETIREMENT_BASELINE_UNSUPPORTED"], []),
-        (_profile(parents=(Parent("father", None),)), "REQUIRES_INPUT", ["PARENT_ELIGIBILITY_REQUIRED"], ["parent.father.eligible"]),
+        (
+            _profile(usage=None),
+            "REQUIRES_INPUT",
+            ["SHARED_USAGE_REQUIRED"],
+            ["opportunity_facts.shared_limit_usage"],
+        ),
+        (
+            _profile(usage=(SharedLimitUsage(THAI_ESG_2026_POOL, Money.of(1)),)),
+            "UNSUPPORTED",
+            ["PRIOR_SHARED_USAGE_BASELINE_UNSUPPORTED"],
+            [],
+        ),
+        (
+            _profile(retirement=(RetirementContribution("RMF", Money.of(100000)),)),
+            "UNSUPPORTED",
+            ["RETIREMENT_BASELINE_UNSUPPORTED"],
+            [],
+        ),
+        (
+            _profile(retirement=(RetirementContribution("PVD", Money.of(1)),)),
+            "UNSUPPORTED",
+            ["RETIREMENT_BASELINE_UNSUPPORTED"],
+            [],
+        ),
+        (
+            _profile(parents=(Parent("father", None),)),
+            "REQUIRES_INPUT",
+            ["PARENT_ELIGIBILITY_REQUIRED"],
+            ["parent.father.eligible"],
+        ),
     ],
 )
 def test_incomplete_baseline_cannot_publish_tax_or_impact(
@@ -60,7 +85,9 @@ def test_incomplete_baseline_cannot_publish_tax_or_impact(
 ) -> None:
     state = calculate_tax(user, production_pack())
     assert state.status.value == status
-    assert state.pit is state.taxable_income is state.marginal_rate is None
+    assert state.pit is None
+    assert state.taxable_income is None
+    assert state.marginal_rate is None
     assert state.to_dict()["reason_codes"] == codes
     assert state.to_dict()["missing_fact_ids"] == missing
     with pytest.raises(ValueError, match="unavailable"):
@@ -141,8 +168,21 @@ def test_discovery_keeps_baseline_evidence_without_opportunities() -> None:
     assert result.opportunities == ()
     assert result.to_dict()["baseline_status"] == "REQUIRES_INPUT"
     assert result.to_dict()["baseline_reason_codes"] == [
-        "PARENT_ELIGIBILITY_REQUIRED", "SHARED_USAGE_REQUIRED"
+        "PARENT_ELIGIBILITY_REQUIRED",
+        "SHARED_USAGE_REQUIRED",
     ]
     assert result.to_dict()["missing_fact_ids"] == [
-        "parent.father.eligible", "opportunity_facts.shared_limit_usage"
+        "parent.father.eligible",
+        "opportunity_facts.shared_limit_usage",
     ]
+
+
+def test_c01_ac09_parent_missing_ids_do_not_reflect_submitted_identity() -> None:
+    """An arbitrary parent label must not copy financial/private text into an error ID."""
+    state = calculate_tax(
+        _profile(parents=(Parent("990500.00-private", None),)),
+        production_pack(),
+    )
+    assert state.status.value == "REQUIRES_INPUT"
+    assert state.missing_fact_ids == ("parent[0].eligible",)
+    assert "990500.00-private" not in repr(state.missing_fact_ids)

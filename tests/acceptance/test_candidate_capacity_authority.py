@@ -150,13 +150,23 @@ def test_r2_e_nonzero_usage_cannot_activate_a_candidate_baseline() -> None:
 def test_r2_f_rehashed_prior_usage_profile_cannot_reuse_a_ready_tax_baseline() -> None:
     profile, tax, discovery, _, _ = _case(_profile())
     usage = (SharedLimitUsage(opportunity_ids.THAI_ESG_2026_POOL, Money.of(25000)),)
-    profile = replace(profile, opportunity_facts=replace(profile.opportunity_facts, shared_limit_usage=usage))
+    profile = replace(
+        profile, opportunity_facts=replace(profile.opportunity_facts, shared_limit_usage=usage)
+    )
     prior = _thai_esg(discovery)
-    adjusted = replace(prior, remaining_capacity=Money.of(272150),
-                       maximum_tax_saving_at_capacity=tax.tax_impact(Money.of(272150)).saving)
-    forged = replace(discovery, profile_hash=profile.profile_hash(),
-                     opportunities=tuple(adjusted if item.opportunity_id == prior.opportunity_id else item
-                                         for item in discovery.opportunities))
+    adjusted = replace(
+        prior,
+        remaining_capacity=Money.of(272150),
+        maximum_tax_saving_at_capacity=tax.tax_impact(Money.of(272150)).saving,
+    )
+    forged = replace(
+        discovery,
+        profile_hash=profile.profile_hash(),
+        opportunities=tuple(
+            adjusted if item.opportunity_id == prior.opportunity_id else item
+            for item in discovery.opportunities
+        ),
+    )
     forged = replace(forged, discovery_hash=sha256_hex(canonical_json(forged.material_dict())))
     with pytest.raises(ValueError, match="tax state does not match"):
         bundled_allocation_policy(profile, tax, forged, production_catalog())
@@ -183,7 +193,9 @@ def test_r2_h_unknown_usage_has_no_authoritative_candidate_baseline() -> None:
 @pytest.mark.negative
 def test_r2_unknown_usage_cannot_be_promoted_to_available_by_rehashing() -> None:
     profile, tax, discovery, _, _ = _case(_profile())
-    profile = replace(profile, opportunity_facts=replace(profile.opportunity_facts, shared_limit_usage=None))
+    profile = replace(
+        profile, opportunity_facts=replace(profile.opportunity_facts, shared_limit_usage=None)
+    )
     item = _thai_esg(discovery)
     forged_item = replace(
         item,
@@ -208,9 +220,16 @@ def test_r2_unknown_usage_cannot_be_promoted_to_available_by_rehashing() -> None
 def test_r2_d_governed_capacity_is_a_fact_not_an_applied_deduction() -> None:
     catalog = production_catalog().catalog
     definition = catalog.definition(opportunity_ids.THAI_ESG)
-    profile = _profile(shared_limit_usage=(SharedLimitUsage(opportunity_ids.THAI_ESG_2026_POOL, Money.of(25000)),))
+    profile = _profile(
+        shared_limit_usage=(SharedLimitUsage(opportunity_ids.THAI_ESG_2026_POOL, Money.of(25000)),)
+    )
     _, tax, discovery, _, _ = _case(profile)
-    governed = calculate_opportunity_capacity(definition, catalog, assessable_income=tax.income.assessable_income, shared_amount_used=Money.of(25000))
+    governed = calculate_opportunity_capacity(
+        definition,
+        catalog,
+        assessable_income=tax.income.assessable_income,
+        shared_amount_used=Money.of(25000),
+    )
     assert governed.standalone_limit == Money.of(300000)
     assert governed.shared_limit == Money.of(297150)
     assert governed.remaining_capacity == Money.of(272150)
@@ -227,10 +246,12 @@ def test_c01_build_rejects_non_ready_tax_even_with_a_previously_valid_policy(
     usage: tuple[SharedLimitUsage, ...] | None,
 ) -> None:
     """C01-AC09: build cannot emit NO_ACTION/PIT rows for a closed baseline."""
-    profile, tax, discovery, financial, guards = _case(_profile())
+    profile, tax, discovery, financial, _guards = _case(_profile())
     raw = bundled_allocation_policy(profile, tax, discovery, production_catalog())
     active = activate_allocation_policy(raw, profile, tax, discovery, production_catalog())
-    closed, closed_tax, closed_discovery, _, closed_guards = _case(_profile(shared_limit_usage=usage))
+    closed, closed_tax, closed_discovery, _, closed_guards = _case(
+        _profile(shared_limit_usage=usage)
+    )
     assert closed_tax.status.value != "READY"
     # Matching profile isolates the readiness gate from the profile-hash check.
     forged = replace(active, profile=closed)

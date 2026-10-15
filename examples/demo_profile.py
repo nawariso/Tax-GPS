@@ -7,7 +7,7 @@ from datetime import date
 from decimal import Decimal
 from typing import cast
 
-from examples.demo_errors import DemoInputError
+from examples.demo_errors import DemoInputError, field_label, input_scope, invalid_input
 from tax_gps.core.decimal_context import EXACT
 from tax_gps.core.money import Money
 from tax_gps.financial.profile import (
@@ -17,7 +17,13 @@ from tax_gps.financial.profile import (
     FinancialProfile,
     ProtectionProfile,
 )
-from tax_gps.profile.models import Child, ExistingTaxBenefits, Parent, RetirementContribution
+from tax_gps.profile.models import (
+    Child,
+    ExistingTaxBenefits,
+    Parent,
+    RetirementContribution,
+    parent_eligibility_fact_id,
+)
 
 SCALARS = frozenset(
     {
@@ -35,7 +41,7 @@ LISTS = frozenset({"parents", "children", "debts", "commitments"})
 
 def amount(value: object, name: str) -> Money:
     if not isinstance(value, str) or not re.fullmatch(r"[0-9]{1,12}(?:\.[0-9]{1,2})?", value):
-        raise ValueError(f"{name}: enter a known nonnegative THB amount with at most two decimals")
+        raise invalid_input(name)
     return Money.of(value)
 
 
@@ -45,109 +51,123 @@ def _strings(value: object, fields: frozenset[str], name: str) -> dict[str, str]
         or set(value) != fields
         or not all(isinstance(v, str) for v in value.values())
     ):
-        raise ValueError(f"{name}: supply exactly the documented string fields")
+        raise invalid_input(name)
     return cast(dict[str, str], value)
 
 
 def _boolean(value: str, name: str) -> bool:
     if value not in {"true", "false"}:
-        reason = "PARENT_ELIGIBILITY_REQUIRED" if name.startswith("parent.") else "ELIGIBILITY_REQUIRED"
+        reason = (
+            "PARENT_ELIGIBILITY_REQUIRED" if name.startswith("parent") else "ELIGIBILITY_REQUIRED"
+        )
         raise DemoInputError(
-            f"{name}: ยังไม่ทราบสิทธิหรือข้อเท็จจริง จึงยังไม่เผยแพร่ผลคำนวณ",
-            reason_codes=(reason,), missing_fact_ids=(name,),
+            f"{field_label(name)}: ยังไม่ทราบสิทธิหรือข้อเท็จจริง จึงยังไม่เผยแพร่ผลคำนวณ",
+            reason_codes=(reason,),
+            missing_fact_ids=(name,),
         )
     return value == "true"
 
 
 def _integer(value: str, name: str) -> int:
     if not re.fullmatch(r"[0-9]{1,4}", value):
-        raise ValueError(f"{name}: use an explicit integer")
+        raise invalid_input(name)
     return int(value)
 
 
 def _parents(items: list[object]) -> tuple[Parent, ...]:
     result = []
-    for item in items:
-        entry = _strings(item, frozenset({"relationship", "eligible"}), "parent")
-        result.append(
-            Parent(entry["relationship"], _boolean(entry["eligible"], f"parent.{entry['relationship']}.eligible"))
-        )
+    for index, item in enumerate(items):
+        row = f"parents[{index}]"
+        with input_scope(row):
+            entry = _strings(item, frozenset({"relationship", "eligible"}), f"parents[{index}]")
+            result.append(
+                Parent(
+                    entry["relationship"],
+                    _boolean(
+                        entry["eligible"], parent_eligibility_fact_id(entry["relationship"], index)
+                    ),
+                )
+            )
     return tuple(result)
 
 
 def _children(items: list[object]) -> tuple[Child, ...]:
     result = []
-    for item in items:
-        entry = _strings(
-            item, frozenset({"child_id", "order", "birth_year", "legally_eligible"}), "child"
-        )
-        result.append(
-            Child(
-                entry["child_id"],
-                _boolean(entry["legally_eligible"], "child eligibility"),
-                _integer(entry["birth_year"], "birth year"),
-                order=_integer(entry["order"], "legal child order"),
+    for index, item in enumerate(items):
+        row = f"children[{index}]"
+        with input_scope(row):
+            entry = _strings(
+                item, frozenset({"child_id", "order", "birth_year", "legally_eligible"}), row
             )
-        )
+            result.append(
+                Child(
+                    entry["child_id"],
+                    _boolean(entry["legally_eligible"], f"{row}.legally_eligible"),
+                    _integer(entry["birth_year"], f"{row}.birth_year"),
+                    order=_integer(entry["order"], f"{row}.order"),
+                )
+            )
     return tuple(result)
 
 
 def _debts(items: list[object]) -> tuple[Debt, ...]:
     result = []
-    for item in items:
-        entry = _strings(
-            item,
-            frozenset(
-                {"debt_id", "category", "balance", "apr_percent", "minimum_payment", "secured"}
-            ),
-            "debt",
-        )
-        apr = entry["apr_percent"]
-        if not re.fullmatch(r"[0-9]{1,12}(?:\.[0-9]{1,4})?", apr):
-            raise ValueError(
-                "debt APR: enter a known nonnegative percentage, at most four decimals"
+    for index, item in enumerate(items):
+        row = f"debts[{index}]"
+        with input_scope(row):
+            entry = _strings(
+                item,
+                frozenset(
+                    {"debt_id", "category", "balance", "apr_percent", "minimum_payment", "secured"}
+                ),
+                row,
             )
-        result.append(
-            Debt(
-                entry["debt_id"],
-                DebtCategory(entry["category"]),
-                amount(entry["balance"], "debt balance"),
-                EXACT.divide(Decimal(apr), Decimal(100)),
-                amount(entry["minimum_payment"], "minimum payment"),
-                _boolean(entry["secured"], "secured debt"),
+            apr = entry["apr_percent"]
+            if not re.fullmatch(r"[0-9]{1,12}(?:\.[0-9]{1,4})?", apr):
+                raise invalid_input(f"{row}.apr_percent")
+            result.append(
+                Debt(
+                    entry["debt_id"],
+                    DebtCategory(entry["category"]),
+                    amount(entry["balance"], f"{row}.balance"),
+                    EXACT.divide(Decimal(apr), Decimal(100)),
+                    amount(entry["minimum_payment"], f"{row}.minimum_payment"),
+                    _boolean(entry["secured"], f"{row}.secured"),
+                )
             )
-        )
     return tuple(result)
 
 
 def _commitments(items: list[object]) -> tuple[CommittedCashNeed, ...]:
     result = []
-    for item in items:
-        entry = _strings(
-            item,
-            frozenset({"need_id", "amount", "due_date", "mandatory", "description"}),
-            "commitment",
-        )
-        result.append(
-            CommittedCashNeed(
-                entry["need_id"],
-                amount(entry["amount"], "committed cash"),
-                date.fromisoformat(entry["due_date"]),
-                _boolean(entry["mandatory"], "mandatory payment"),
-                entry["description"],
+    for index, item in enumerate(items):
+        row = f"commitments[{index}]"
+        with input_scope(row):
+            entry = _strings(
+                item,
+                frozenset({"need_id", "amount", "due_date", "mandatory", "description"}),
+                row,
             )
-        )
+            result.append(
+                CommittedCashNeed(
+                    entry["need_id"],
+                    amount(entry["amount"], f"{row}.amount"),
+                    date.fromisoformat(entry["due_date"]),
+                    _boolean(entry["mandatory"], f"{row}.mandatory"),
+                    entry["description"],
+                )
+            )
     return tuple(result)
 
 
-def parse_profile(
+def _parse_profile(
     value: object, *, assets: Money | None, expenses: Money | None, social: Money
 ) -> tuple[ExistingTaxBenefits, FinancialProfile]:
     if not isinstance(value, dict) or set(value) != SCALARS | LISTS:
-        raise ValueError("Supply exactly the documented extended profile fields")
+        raise invalid_input("profile")
     scalars = _strings({key: value[key] for key in SCALARS}, SCALARS, "profile")
     if not all(isinstance(value[key], list) for key in LISTS):
-        raise ValueError("Profile record collections must be explicit lists; [] means no records")
+        raise invalid_input("profile")
     lists = {key: cast(list[object], value[key]) for key in LISTS}
     unknown = {
         "other_income": ("OTHER_INCOME_INPUT_REQUIRED", "ยังไม่ทราบรายได้อื่น"),
@@ -160,20 +180,24 @@ def parse_profile(
             reason_codes=tuple(unknown[name][0] for name in blank),
             missing_fact_ids=tuple(blank),
         )
-    if not amount(scalars["other_income"], "other income").is_zero():
-        raise DemoInputError("ยังไม่รองรับรายได้ประเภทอื่น ไม่เผยแพร่ภาษีเฉพาะเงินเดือนที่ตกหล่นรายได้",
-                             code="BASELINE_NOT_READY", status="ADVANCED_TAX_PATH_REQUIRED",
-                             reason_codes=("UNSUPPORTED_INCOME",))
-    retirement = amount(scalars["retirement_usage"], "retirement contributions")
+    if not amount(scalars["other_income"], "other_income").is_zero():
+        raise DemoInputError(
+            "ยังไม่รองรับรายได้ประเภทอื่น ไม่เผยแพร่ภาษีเฉพาะเงินเดือนที่ตกหล่นรายได้",
+            code="BASELINE_NOT_READY",
+            status="ADVANCED_TAX_PATH_REQUIRED",
+            reason_codes=("UNSUPPORTED_INCOME",),
+        )
+    retirement = amount(scalars["retirement_usage"], "retirement_usage")
     benefits = ExistingTaxBenefits(
-        personal_eligible=_boolean(scalars["personal_eligible"], "personal eligibility"),
+        personal_eligible=_boolean(scalars["personal_eligible"], "personal_eligible"),
         social_security_paid=social,
         parents=_parents(lists["parents"]),
         children=_children(lists["children"]),
-        mortgage_interest_paid=amount(scalars["mortgage_interest"], "mortgage interest"),
-        mortgage_eligible=_boolean(scalars["mortgage_eligible"], "mortgage eligibility"),
+        mortgage_interest_paid=amount(scalars["mortgage_interest"], "mortgage_interest"),
+        mortgage_eligible=_boolean(scalars["mortgage_eligible"], "mortgage_eligible"),
         retirement_contributions=(RetirementContribution("UNCLASSIFIED", retirement),)
-        if retirement.is_positive() else (),
+        if retirement.is_positive()
+        else (),
     )
     financial = FinancialProfile(
         liquid_assets=assets,
@@ -181,12 +205,19 @@ def parse_profile(
         debts=_debts(lists["debts"]),
         committed_cash_needs=_commitments(lists["commitments"]),
         protection=ProtectionProfile(
-            required_life_coverage=amount(scalars["required_coverage"], "required coverage")
+            required_life_coverage=amount(scalars["required_coverage"], "required_coverage")
             if scalars["required_coverage"] != ""
             else None,
-            existing_life_coverage=amount(scalars["existing_coverage"], "existing coverage")
+            existing_life_coverage=amount(scalars["existing_coverage"], "existing_coverage")
             if scalars["existing_coverage"] != ""
             else None,
         ),
     )
     return benefits, financial
+
+
+def parse_profile(
+    value: object, *, assets: Money | None, expenses: Money | None, social: Money
+) -> tuple[ExistingTaxBenefits, FinancialProfile]:
+    with input_scope("profile"):
+        return _parse_profile(value, assets=assets, expenses=expenses, social=social)

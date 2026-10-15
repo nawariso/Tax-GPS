@@ -259,7 +259,9 @@ def rule_pack_content_hash(pack: RulePack) -> str:
 
 
 def load_bundled_rule_pack(
-    rule_pack_id: str = BUNDLED_PACK_ID_2026, *, version: str | None = None,
+    rule_pack_id: str = BUNDLED_PACK_ID_2026,
+    *,
+    version: str | None = None,
     expected_hash: str | None = None,
 ) -> RulePack:
     if rule_pack_id != BUNDLED_PACK_ID_2026:

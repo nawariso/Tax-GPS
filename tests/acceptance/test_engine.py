@@ -24,7 +24,8 @@ from tests.support.policy import production_pack
 
 
 def profile(salary: int, sso: int = 10500) -> UserProfile:
-    return UserProfile(opportunity_facts=OpportunityFacts(shared_limit_usage=()),
+    return UserProfile(
+        opportunity_facts=OpportunityFacts(shared_limit_usage=()),
         profile_id="persona",
         version="1",
         tax_year=TaxYear(2026),
@@ -212,15 +213,20 @@ def test_supported_family_rights_have_independent_tax_golden() -> None:
 
 def test_retirement_capacity_does_not_authorize_an_incomplete_baseline() -> None:
     benefits = ExistingTaxBenefits(
-        retirement_contributions=(RetirementContribution("PVD", Money.of(400000)),
-                                  RetirementContribution("eligible_retirement_pension", Money.of(100000))),
+        retirement_contributions=(
+            RetirementContribution("PVD", Money.of(400000)),
+            RetirementContribution("eligible_retirement_pension", Money.of(100000)),
+        ),
     )
     state = calculate_tax(replace(profile(2800000), benefits=benefits), production_pack())
     assert state.status is TaxStatus.UNSUPPORTED
     assert state.pit is None
     capacity = calculate_deduction_capacity(
-        category="RETIREMENT_SHARED_GROUP", standalone_limit=Money.of(500000),
-        amount_used=Money.of(500000), shared_group="RETIREMENT",
-        shared_amount_used=Money.of(500000), pack=production_pack(),
+        category="RETIREMENT_SHARED_GROUP",
+        standalone_limit=Money.of(500000),
+        amount_used=Money.of(500000),
+        shared_group="RETIREMENT",
+        shared_amount_used=Money.of(500000),
+        pack=production_pack(),
     )
     assert capacity.usable_amount == Money.zero()

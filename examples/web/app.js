@@ -164,7 +164,7 @@ async function calculate() {
     if (version !== calculationVersion) return;
     // Baseline/input envelopes name the exact item; generic format advice would misdirect.
     const envelope = error.envelope;
-    const scoped = envelope && (envelope.code === 'BASELINE_NOT_READY' || envelope.code === 'INPUT_REQUIRED');
+    const scoped = envelope && ['BASELINE_NOT_READY','INPUT_REQUIRED','INVALID_INPUT'].includes(envelope.code);
     $('error').textContent = scoped
       ? `ยังไม่แสดงผลคำนวณ: ${error.message}${envelope.missing_fact_ids?.length ? ` · ข้อมูลที่ยังขาด: ${envelope.missing_fact_ids.join(', ')}` : ''}`
       : `ยังไม่แสดงผลคำนวณ: โปรดตรวจจำนวนเงิน (ไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง) งบต้องไม่เกินสินทรัพย์ที่ทราบ และวันที่ต้องอยู่ในปี 2026 ตรวจสิทธิที่ยังไม่ทราบและรายการนอกขอบเขตด้วย — ${error.message}`;

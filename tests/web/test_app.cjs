@@ -280,3 +280,13 @@ test('removing a debt clears its guardrail effect after recalculation',async()=>
   assert.equal(app.latest().financial.critical_debt_balance,'0.00');
   assert.equal(app.latest().outcomes.candidates[1].cash_outflow,'100000.00');
 });
+
+test('C01 malformed amount names its field and clears output without echoing the amount',async()=>{
+  const app=harness();await app.resolve(0);
+  app.get('mortgage_interest').value='-987654321';
+  const pending=app.recalculate();await app.resolve(1,400);await pending;
+  assert.equal(app.latest(),null);assert.equal(app.export(),null);
+  assert.equal(app.get('result').hidden,true);
+  assert.match(app.get('error').textContent,/mortgage_interest/);
+  assert.doesNotMatch(app.get('error').textContent,/987654321|ตรวจจำนวนเงิน/);
+});

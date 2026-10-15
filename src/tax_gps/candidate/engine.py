@@ -316,6 +316,8 @@ def build_candidates(
     engine_version: str = CANDIDATE_ENGINE_VERSION,
 ) -> CandidateResult:
     """Publish only with policy re-verified against the accepted production bundle."""
+    if engine_version != CANDIDATE_ENGINE_VERSION:
+        raise ValueError("candidate engine version does not match current implementation")
     if type(policy) is not ActivatedAllocationPolicy:
         raise ValueError("activated allocation policy required")
     expected = activate_allocation_policy(

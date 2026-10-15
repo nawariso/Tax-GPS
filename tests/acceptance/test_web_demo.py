@@ -3,13 +3,19 @@
 import importlib.util
 import json
 from collections.abc import Iterator
+from html.parser import HTMLParser
 from http.client import HTTPConnection
 from http.server import ThreadingHTTPServer
 from pathlib import Path
-from threading import Thread, Event
+from threading import Event, Thread
 from types import ModuleType
+from typing import override
 
 import pytest
+from examples.demo_errors import DemoInputError
+from examples.web_demo import DemoHandler
+
+from tests.acceptance.test_demo_profile import _profile as _extended_profile
 
 DEFAULTS = {
     "salary": "990500",
@@ -82,14 +88,17 @@ def test_demo_rejects_invalid_inputs(changes: dict[str, object]) -> None:
         _demo().calculate(DEFAULTS | changes)
 
 
-@pytest.mark.parametrize(("usage", "status", "reason"), [
-    ("", "REQUIRES_INPUT", "SHARED_USAGE_REQUIRED"),
-    ("100000", "UNSUPPORTED", "PRIOR_SHARED_USAGE_BASELINE_UNSUPPORTED"),
-])
+@pytest.mark.parametrize(
+    ("usage", "status", "reason"),
+    [
+        ("", "REQUIRES_INPUT", "SHARED_USAGE_REQUIRED"),
+        ("100000", "UNSUPPORTED", "PRIOR_SHARED_USAGE_BASELINE_UNSUPPORTED"),
+    ],
+)
 def test_c01_shared_usage_errors_are_structured_without_pit(
     usage: str, status: str, reason: str
 ) -> None:
-    with pytest.raises(ValueError) as caught:
+    with pytest.raises(DemoInputError) as caught:
         _demo().calculate(DEFAULTS | {"shared_usage": usage})
     error = caught.value
     assert getattr(error, "code", None) == "BASELINE_NOT_READY"
@@ -103,8 +112,12 @@ def test_c01_http_baseline_error_exposes_codes_and_missing_fields(
 ) -> None:
     connection = HTTPConnection("127.0.0.1", demo_server.server_port, timeout=5)
     try:
-        connection.request("POST", "/api/calculate", json.dumps(DEFAULTS | {"shared_usage": ""}),
-                           {"Content-Type": "application/json"})
+        connection.request(
+            "POST",
+            "/api/calculate",
+            json.dumps(DEFAULTS | {"shared_usage": ""}),
+            {"Content-Type": "application/json"},
+        )
         response = connection.getresponse()
         assert response.status == 400
         error = json.loads(response.read())
@@ -163,7 +176,8 @@ def test_rejected_post_consumes_its_bounded_body_before_connection_close() -> No
     observed: list[bytes] = []
     finished = Event()
 
-    class MeasuredHandler(_demo().DemoHandler):
+    class MeasuredHandler(DemoHandler):
+        @override
         def do_POST(self) -> None:
             super().do_POST()
             self.connection.settimeout(0.1)
@@ -179,7 +193,9 @@ def test_rejected_post_consumes_its_bounded_body_before_connection_close() -> No
         thread.start()
         connection = HTTPConnection("127.0.0.1", server.server_port, timeout=5)
         try:
-            connection.request("POST", "/api/calculate", "{}", {"Origin": "https://untrusted.example"})
+            connection.request(
+                "POST", "/api/calculate", "{}", {"Origin": "https://untrusted.example"}
+            )
             response = connection.getresponse()
             assert response.status == 403
             response.read()
@@ -255,3 +271,149 @@ def test_c01_ready_copy_is_scoped_and_names_unsupported_items() -> None:
     exclusions = page.split("ยังไม่รวม:", 1)[1].split("</p>", 1)[0]
     for item in ("เงินออมเกษียณ", "PVD", "RMF", "Thai ESG", "รายได้อื่น"):
         assert item in exclusions, item
+
+
+@pytest.mark.parametrize(
+    ("top", "profile", "field"),
+    [
+        ({"salary": "-987654321"}, {}, "salary"),
+        ({}, {"mortgage_interest": "-987654321"}, "mortgage_interest"),
+        (
+            {},
+            {
+                "debts": [
+                    {
+                        "debt_id": "private",
+                        "category": "CREDIT_CARD",
+                        "balance": "-987654321",
+                        "apr_percent": "24",
+                        "minimum_payment": "1",
+                        "secured": "false",
+                    }
+                ]
+            },
+            "debts[0].balance",
+        ),
+    ],
+)
+def test_c01_ac09_http_malformed_amount_identifies_field_without_echoing_value(
+    demo_server: ThreadingHTTPServer,
+    top: dict[str, str],
+    profile: dict[str, object],
+    field: str,
+) -> None:
+    connection = HTTPConnection("127.0.0.1", demo_server.server_port, timeout=5)
+    try:
+        connection.request(
+            "POST",
+            "/api/calculate",
+            json.dumps(DEFAULTS | top | {"profile": _extended_profile() | profile}),
+            {"Content-Type": "application/json"},
+        )
+        response = connection.getresponse()
+        assert response.status == 400
+        error = json.loads(response.read())
+        assert error["code"] == "INVALID_INPUT"
+        assert error["missing_fact_ids"] == [field]
+        assert field in error["error"]
+        assert "987654321" not in json.dumps(error)
+        assert "tax_before" not in error
+    finally:
+        connection.close()
+
+
+def test_c01_ac09_parser_parent_error_does_not_echo_private_relationship() -> None:
+    data = _extended_profile() | {
+        "parents": [{"relationship": "990500.00-private", "eligible": "unknown"}],
+    }
+    with pytest.raises(DemoInputError) as caught:
+        _demo().calculate(DEFAULTS | {"profile": data})
+    envelope = caught.value.to_dict()
+    assert envelope["missing_fact_ids"] == ["parent[0].eligible"]
+    assert "990500.00-private" not in json.dumps(envelope)
+
+
+@pytest.mark.parametrize("group", ["commitments", "children", "debts"])
+def test_c01_ac09_unknown_record_names_the_record_and_flag(group: str) -> None:
+    if group == "children":
+        records = [
+            {"child_id": "first", "order": "1", "birth_year": "2015", "legally_eligible": "true"},
+            {
+                "child_id": "private",
+                "order": "2",
+                "birth_year": "2020",
+                "legally_eligible": "unknown",
+            },
+        ]
+        flag = "legally_eligible"
+    elif group == "debts":
+        records = [
+            {
+                "debt_id": "first",
+                "category": "CREDIT_CARD",
+                "balance": "1",
+                "apr_percent": "24",
+                "minimum_payment": "1",
+                "secured": "false",
+            },
+            {
+                "debt_id": "private",
+                "category": "CREDIT_CARD",
+                "balance": "1",
+                "apr_percent": "24",
+                "minimum_payment": "1",
+                "secured": "unknown",
+            },
+        ]
+        flag = "secured"
+    else:
+        records = [
+            {
+                "need_id": "first",
+                "amount": "1",
+                "due_date": "2026-11-01",
+                "mandatory": "true",
+                "description": "",
+            },
+            {
+                "need_id": "private",
+                "amount": "1",
+                "due_date": "2026-11-01",
+                "mandatory": "unknown",
+                "description": "",
+            },
+        ]
+        flag = "mandatory"
+    data = _extended_profile() | {group: records}
+    with pytest.raises(DemoInputError) as caught:
+        _demo().calculate(DEFAULTS | {"profile": data})
+    assert caught.value.missing_fact_ids == (f"{group}[1].{flag}",)
+
+
+def test_ui01_ac02_hero_actions_resolve_to_existing_focusable_controls(
+    demo_server: ThreadingHTTPServer,
+) -> None:
+    """Native fragment navigation must reach working controls, never placeholders."""
+    controls: dict[str, str] = {}
+    actions: list[str] = []
+
+    class PageLinks(HTMLParser):
+        def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+            data = dict(attrs)
+            identity = data.get("id")
+            if identity and tag in {"input", "select"} and data.get("type") != "hidden":
+                controls[identity] = tag
+            if tag == "a" and "data-hero-action" in data:
+                actions.append(data.get("href") or "")
+
+    connection = HTTPConnection("127.0.0.1", demo_server.server_port, timeout=5)
+    try:
+        connection.request("GET", "/")
+        response = connection.getresponse()
+        assert response.status == 200
+        PageLinks().feed(response.read().decode("utf-8"))
+    finally:
+        connection.close()
+    assert set(actions) == {"#salary", "#scenario"}
+    for href in actions:
+        assert controls[href.removeprefix("#")] in {"input", "select"}

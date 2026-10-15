@@ -24,7 +24,8 @@ from tests.support.policy import production_pack
 
 
 def _profile(salary: int) -> UserProfile:
-    return UserProfile(opportunity_facts=OpportunityFacts(shared_limit_usage=()),
+    return UserProfile(
+        opportunity_facts=OpportunityFacts(shared_limit_usage=()),
         profile_id="zero-value",
         version="1",
         tax_year=TaxYear(2026),

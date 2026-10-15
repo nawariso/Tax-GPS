@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from tax_gps.calculation.models import TaxStatus
 from tax_gps.core.errors import InvalidValueError
 from tax_gps.opportunity.opportunity_ids import THAI_ESG_2026_POOL
-from tax_gps.profile.models import UserProfile
+from tax_gps.profile.models import UserProfile, parent_eligibility_fact_id
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,7 +22,9 @@ def assess_baseline(profile: UserProfile) -> BaselineReadiness:
     reasons: list[str] = []
     missing: list[str] = []
     unsupported_income = any(item.amount.is_positive() for item in profile.income.unsupported)
-    retirement = any(item.amount_used.is_positive() for item in profile.benefits.retirement_contributions)
+    retirement = any(
+        item.amount_used.is_positive() for item in profile.benefits.retirement_contributions
+    )
     prior_usage = usage is not None and any(item.amount_used.is_positive() for item in usage)
     if unsupported_income:
         reasons.append("UNSUPPORTED_INCOME")
@@ -31,8 +33,8 @@ def assess_baseline(profile: UserProfile) -> BaselineReadiness:
     if prior_usage:
         reasons.append("PRIOR_SHARED_USAGE_BASELINE_UNSUPPORTED")
     unknown_parents = tuple(
-        f"parent.{parent.relationship}.eligible"
-        for parent in profile.benefits.parents
+        parent_eligibility_fact_id(parent.relationship, index)
+        for index, parent in enumerate(profile.benefits.parents)
         if parent.eligible is None
     )
     if unknown_parents:

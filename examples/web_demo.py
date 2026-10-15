@@ -11,7 +11,7 @@ from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from examples.demo_errors import DemoInputError
+from examples.demo_errors import DemoInputError, input_scope, invalid_input
 from examples.demo_profile import amount, parse_profile
 from tax_gps.candidate.activation import activate_allocation_policy, bundled_allocation_policy
 from tax_gps.candidate.engine import build_candidates
@@ -55,17 +55,18 @@ def _money(data: dict[str, str], name: str) -> Money:
     return amount(data[name], name)
 
 
-def calculate(data: object) -> dict[str, object]:
+def _calculate(data: object) -> dict[str, object]:
     """Compose the existing production activation path, never duplicate tax rules."""
     if (
         not isinstance(data, dict)
         or set(data) not in (FIELDS, FIELDS | {"profile"})
         or not all(isinstance(data.get(key), str) for key in FIELDS)
     ):
-        raise ValueError("Supply exactly the seven demo fields as strings")
-    planning_date = date.fromisoformat(data["planning_date"])
+        raise invalid_input("request")
+    with input_scope("planning_date"):
+        planning_date = date.fromisoformat(data["planning_date"])
     if planning_date.year != 2026:
-        raise ValueError("This demo supports the bundled 2026 policy only")
+        raise invalid_input("planning_date")
     year = TaxYear(2026)
     usage = data["shared_usage"]
     benefits = ExistingTaxBenefits(social_security_paid=_money(data, "social_security"))
@@ -107,19 +108,22 @@ def calculate(data: object) -> dict[str, object]:
         }
         raise DemoInputError(
             " · ".join(messages[reason] for reason in tax.reason_codes),
-            code="BASELINE_NOT_READY", status=tax.status.value,
-            reason_codes=tax.reason_codes, missing_fact_ids=tax.missing_fact_ids,
+            code="BASELINE_NOT_READY",
+            status=tax.status.value,
+            reason_codes=tax.reason_codes,
+            missing_fact_ids=tax.missing_fact_ids,
         )
     discovery = discover_opportunities(
         profile, tax, pack, catalog, DiscoveryContext(year, planning_date)
     )
     context = FinancialPlanningContext(planning_date, _money(data, "budget"))
     financial_policy = activate_financial_policy(bundled_financial_policy(year))
-    financial = compute_financial_state(
-        financial_profile,
-        financial_policy,
-        context,
-    )
+    with input_scope("budget"):
+        financial = compute_financial_state(
+            financial_profile,
+            financial_policy,
+            context,
+        )
     guards = evaluate_guardrails(discovery, financial, financial_policy, context)
     policy = activate_allocation_policy(
         bundled_allocation_policy(profile, tax, discovery, catalog),
@@ -142,6 +146,11 @@ def calculate(data: object) -> dict[str, object]:
         if "profile" in data
         else "EMPLOYEE_40_1_ONLY_NO_DEBT_NO_COMMITMENTS_UNKNOWN_PROTECTION",
     }
+
+
+def calculate(data: object) -> dict[str, object]:
+    with input_scope("profile"):
+        return _calculate(data)
 
 
 class DemoHandler(BaseHTTPRequestHandler):
@@ -225,8 +234,7 @@ class DemoHandler(BaseHTTPRequestHandler):
             self._json(400, exc.to_dict())
             return
         except (ValueError, OSError):
-            self._json(400, {"error": "ข้อมูลไม่ถูกต้อง โปรดตรวจรูปแบบและขอบเขตของแต่ละรายการ",
-                             "code": "INVALID_INPUT"})
+            self._json(400, invalid_input("request").to_dict())
             return
         self._json(200, result)
 

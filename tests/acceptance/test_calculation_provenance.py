@@ -11,7 +11,8 @@ from tests.support.policy import production_pack
 
 
 def _profile() -> UserProfile:
-    return UserProfile(opportunity_facts=OpportunityFacts(shared_limit_usage=()),
+    return UserProfile(
+        opportunity_facts=OpportunityFacts(shared_limit_usage=()),
         profile_id="provenance",
         version="1",
         tax_year=TaxYear(2026),
