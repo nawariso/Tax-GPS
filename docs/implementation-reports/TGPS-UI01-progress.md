@@ -99,3 +99,9 @@ Status: IMPLEMENTED — automatic/source verification complete; visual acceptanc
 - Local code checkpoint: `4774983` on feature/tgps-c01-baseline-integrity; verified
   code delta matches handoff JSON fingerprint. Documentation is a separate checkpoint;
   preview rechecked9/9 at64946. No push/PR/merge; rendered visual QA remains UNVERIFIED.
+- Remote handoff: user authorized push/draft PR; pushed c4527c9e2a2c3b041ff72e96ac5f404c06a94170,
+  opened PR#4 (draft, not merged). CI run38765573860/job116527763633 SUCCESS:
+  Ubuntu24.04.5, Python3.12.15, Node22.23.3; Python695/100%/frontend24/24,
+  lint/format147/mypy102/build clean. Tested merge ref b9015a3ba9103664a2d143ec40677e029ab81214
+  for that exact head; evidence TGPS-remote-ci.json. Rendered visual review remains
+  UNVERIFIED, not ACCEPTED. Following checkpoint changes documentation only.

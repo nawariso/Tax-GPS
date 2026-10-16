@@ -67,3 +67,29 @@ Spec: TGPS-C01 v0.1. User authorized implementation after receiving the detailed
 - Local code checkpoint: `4774983` on feature/tgps-c01-baseline-integrity; verified
   code delta matches handoff JSON fingerprint. Documentation is a separate checkpoint;
   preview rechecked9/9. No push/PR/merge; remote CI and F09 remain open.
+- Remote handoff: user authorized push/draft PR; pushed c4527c9e2a2c3b041ff72e96ac5f404c06a94170,
+  opened PR#4 (draft, not merged). CI run38765573860/job116527763633 SUCCESS:
+  Ubuntu24.04.5, Python3.12.15, Node22.23.3; Python695/100%/frontend24/24,
+  lint/format147/mypy102/build clean. Checkout tested merge ref b9015a3ba9103664a2d143ec40677e029ab81214
+  for that exact head, not a later commit. Evidence TGPS-remote-ci.json; F09 OPEN,
+  acceptance conditional. Following commit changes documentation only, not tax code.
+
+- Status check 2026-10-16 (no product-code changes): `uv sync --locked` passed;
+  `uv run --locked pytest -q` passed 695 tests in 10.47s;
+  `uv run --locked python -m examples.check_web_demo` passed 24/24, zero failures/skips.
+  Commands required escalation after sandbox launcher `helper_unknown_error: setup refresh had errors`.
+  Git log confirms HEAD c4527c9; status shows existing documentation updates and
+  untracked Stage 4 draft/remote-CI evidence, preserved. Full lint/format/mypy/coverage/build
+  and remote PR/CI state were not rechecked this session; previous evidence remains
+  scoped to its recorded SHA/runtime. C01 IMPLEMENTED, F09 OPEN, UI01 visual review
+  pending, C02 REQUIREMENT_REVIEW / NOT_STARTED; no acceptance or scope changes.
+
+- Handoff checkpoint 2026-10-16: user explicitly requested a continuation note and
+  commit/push. Added ordered resume checklist to TGPS-handoff.md; included existing
+  remote-CI documentation/evidence, excluding unrelated Stage4 draft. No product-code,
+  requirement, readiness or milestone-acceptance changes.
+  Full pre-commit gates on Windows CPython3.14.3: locked sync passed; ruff clean;
+  format148 files clean; strict mypy102 files clean; pytest695 passed in11.63s;
+  coverage100% (2846 statements/798 branches, zero misses); fresh-server frontend24/24,
+  zero failures/skips; sdist/wheel0.2.0 built. These are local results, not remote CI
+  for the forthcoming documentation commit. F09/visual acceptance remain open.

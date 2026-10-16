@@ -299,3 +299,10 @@ not run. See [verification](docs/implementation-reports/TGPS-handoff-verificatio
 The [C02 requirement](docs/requirements/TGPS-C02-existing-rights.md) is drafted for
 review; no C02 treatment is implemented. Its [ledger](docs/implementation-reports/TGPS-C02-progress.md)
 records the legal evidence and approval gates still pending.
+
+Remote follow-up: [draft PR #4](https://github.com/nawariso/Tax-GPS/pull/4) now has
+[successful CI run 10](https://github.com/nawariso/Tax-GPS/actions/runs/38765573860)
+for head c4527c9 (merge ref b9015a3): Ubuntu24.04.5, Python3.12.15, Node22.23.3,
+695 tests, 100% core coverage, frontend24/24 and all gates pass. See
+[exact SHA/runtime evidence](docs/implementation-reports/TGPS-remote-ci.json).
+This does not close F09 or rendered visual acceptance; the PR remains draft.

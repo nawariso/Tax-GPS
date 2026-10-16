@@ -59,3 +59,40 @@ statement/branch coverage, fresh-server frontend24/24 and lint/format/mypy/build
 C01 F09 remains OPEN, rendered visual acceptance is pending and remote CI is not yet
 verified. C02 is documentation for requirement review only; it adds no treatment.
 This draft does not request merge or imply milestone acceptance.
+
+## Remote follow-up — หลังผู้ใช้อนุญาต
+
+- [x] Push head c4527c9e2a2c3b041ff72e96ac5f404c06a94170 และเปิด
+  [draft PR#4](https://github.com/nawariso/Tax-GPS/pull/4), ยังไม่ merge
+- [x] [CI run10](https://github.com/nawariso/Tax-GPS/actions/runs/38765573860)
+  SUCCESS: Ubuntu24.04.5/Python3.12.15/Node22.23.3, Python695,
+  100% statements/branches, frontend24/24, lint/format/mypy/build ผ่านทั้งหมด
+- [x] ตรวจ log ว่า checkout merge-ref b9015a3ba9103664a2d143ec40677e029ab81214
+  ของ head ข้างต้นจริง; [evidence](TGPS-remote-ci.json) ไม่กล่าวอ้างผลนี้กับ head ใหม่
+- [ ] F09 และ rendered visual acceptance ยังคงเปิด; C02 ยังคง REQUIREMENT_REVIEW
+
+ข้อความ “ยังไม่ push/remote CI ยังไม่รัน” ข้างบนเป็นสถานะ ณ checkpoint เดิม
+เพิ่ม follow-up นี้โดยไม่ลบประวัติ. Commit ต่อจากนี้บันทึกเอกสารล้วน;
+จะตรวจ CI ของ head ที่อัปเดตแยกก่อนรายงานผลสุดท้าย
+
+## จุดรับช่วง 2026-10-16 — กลับมาทำต่อจากตรงนี้
+
+ผู้ใช้ขอให้โน้ตงานไว้แล้ว commit/push บน branch เดิม;
+ไม่มีการอนุมัติ merge หรือเปลี่ยนสถานะ acceptance ในคำสั่งนี้
+
+- [x] C01 Task 1–5 IMPLEMENTED แล้ว ไม่ต้องเริ่ม implementation เดิมซ้ำ
+- [x] UI01 restyle IMPLEMENTED แล้ว
+- [ ] ตรวจ rendered UI ที่ 1440/390/360px: ภาษาไทยล้น/ถูกตัด, scroll,
+  keyboard focus และความใกล้เคียง reference; ยังไม่มี visual acceptance
+- [ ] รีวิวรับงาน C01 โดยรักษา F09 OPEN / acceptance conditional:
+  WinError10053 เดิมยัง reproduce ไม่ได้; probes ที่ผ่านไม่ยืนยันสาเหตุเดิม
+- [ ] รีวิว C02 v0.1-draft กับผู้ใช้ → legal evidence matrix + independent
+  numeric fixtures → implementation plan → RED/GREEN; ลำดับเสนอ PVD → RMF → Thai ESG
+  ห้ามเพิ่ม treatment/readiness ก่อนผ่าน requirement/evidence gates
+- [ ] C03–C06 ยังไม่เริ่ม; MVP ดูภาษีทั้งปีอยู่ปลาย C03
+
+Baseline สดรอบสรุปสถานะ: Python695 ผ่านใน10.47s, fresh-server frontend24/24
+ไม่มี fail/skip. ผล full gates ก่อน checkpoint บันทึกใน C01 ledger.
+เอกสาร remote-CI เดิมอ้าง head c4527c9 เท่านั้น ไม่ใช่ผล CI ของ checkpoint ใหม่นี้.
+คง Stage4 draft ที่ไม่เกี่ยวข้องไว้นอก commit. เริ่ม session ถัดไปด้วย
+`tgps-session-start` แล้วตรวจ Git/CI ของ SHA ปัจจุบันก่อนกล่าวอ้างผลใหม่.

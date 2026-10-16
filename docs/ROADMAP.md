@@ -15,6 +15,12 @@ frontend24/24 และทุก quality gate; remote Ubuntu/Node22 CI ยัง
 C02 มี [requirement v0.1-draft](requirements/TGPS-C02-existing-rights.md)
 เป็น **REQUIREMENT_REVIEW / implementation NOT_STARTED** ตาม DEC-015
 
+Remote follow-up: [draft PR#4](https://github.com/nawariso/Tax-GPS/pull/4),
+[CI run10](https://github.com/nawariso/Tax-GPS/actions/runs/38765573860) SUCCESS
+สำหรับ head c4527c9 (merge-ref b9015a3), Ubuntu24.04.5/Python3.12.15/Node22.23.3:
+695 tests/coverage100%/frontend24 และทุก gate ผ่าน. เป็นหลักฐานเพิ่มหลัง handoff เดิม;
+ไม่เปลี่ยน F09/visual acceptance หรือสถานะ C02. ดู [CI evidence](implementation-reports/TGPS-remote-ci.json)
+
 ## 1. ข้อตกลงและเป้าหมาย
 
 ผู้ใช้ตกลง roadmap หกช่วงและให้จัดทำ requirement ช่วงแรกในบทสนทนาวันที่

@@ -171,3 +171,12 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Authoring detail: C02 เสนอ PVD → RMF → Thai ESG; แยกยอดจ่าย/เข้าเกณฑ์/ใช้จริง, ตรวจ exemption ordering และ authoritative shared usage, ไม่เลือก tax election แทนผู้ใช้; legal matrix และ numeric fixtures ยังเป็น gate
 - Boundary: ไม่มี treatment/readiness/rule changes ของ C02, ไม่ปิด F09 หรือ acceptance; ไม่ push/PR/merge ก่อนยืนยันตาม AGENTS §7 / tgps-git
 - Records: [C02 requirement](requirements/TGPS-C02-existing-rights.md), [C02 ledger](implementation-reports/TGPS-C02-progress.md), [local verification](implementation-reports/TGPS-handoff-verification.json)
+
+## DEC-016 — อนุญาต push และ draft PR เพื่อตรวจ remote CI
+
+- Date: `2026-10-15`
+- Status: `AGREED`
+- Evidence: ผู้ใช้ตอบ “โอเครครับ ลุย!” หลังถามชัดเจนเรื่อง push branch และเปิด draft PR เพื่อรัน CI
+- Decision: push feature/tgps-c01-baseline-integrity และเปิด draft PR เข้า main; ตรวจและบันทึก CI ตาม SHA จริง
+- Result: ส่ง c4527c9e2a2c3b041ff72e96ac5f404c06a94170 และเปิด [draft PR #4](https://github.com/nawariso/Tax-GPS/pull/4); GitHub ตรวจว่า mergeable แต่ยังไม่ได้ merge
+- Boundary: อนุญาตการ push ของงานนี้และอัปเดตหลักฐานต่อเนื่อง ไม่ได้อนุญาต merge, เปลี่ยนเป็น ready-for-review, รับงาน C01/UI01 หรือเริ่ม treatment C02; F09/visual acceptance ยังคงเดิม
