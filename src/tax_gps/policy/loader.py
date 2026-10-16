@@ -15,6 +15,7 @@ from tax_gps.core.tax_year import TaxYear
 from tax_gps.policy.models import RulePack, RuleSource, RuleStatus, SourceAuthority, TaxRule
 
 BUNDLED_PACK_ID_2026 = "TH-PIT-2026-001"
+BUNDLED_PACK_VERSION_2026 = "1.0.1"
 _SCHEMA_VERSION = "1"
 _TOP_KEYS = {
     "schema_version",
@@ -257,8 +258,20 @@ def rule_pack_content_hash(pack: RulePack) -> str:
     return sha256_hex(canonical_json(rule_pack_to_dict(pack)))
 
 
-def load_bundled_rule_pack(rule_pack_id: str = BUNDLED_PACK_ID_2026) -> RulePack:
+def load_bundled_rule_pack(
+    rule_pack_id: str = BUNDLED_PACK_ID_2026,
+    *,
+    version: str | None = None,
+    expected_hash: str | None = None,
+) -> RulePack:
     if rule_pack_id != BUNDLED_PACK_ID_2026:
         raise PolicyValidationError(f"unknown bundled rule pack: {rule_pack_id}")
-    resource = files("tax_gps.policy.packs").joinpath(f"{rule_pack_id}.json")
-    return parse_rule_pack(resource.read_text(encoding="utf-8"))
+    selected = BUNDLED_PACK_VERSION_2026 if version is None else version
+    if selected not in {"1.0.0", BUNDLED_PACK_VERSION_2026}:
+        raise PolicyValidationError("unknown bundled rule pack version")
+    suffix = "" if selected == "1.0.0" else f"@{selected}"
+    resource = files("tax_gps.policy.packs").joinpath(f"{rule_pack_id}{suffix}.json")
+    pack = parse_rule_pack(resource.read_text(encoding="utf-8"))
+    if expected_hash is not None and rule_pack_content_hash(pack) != expected_hash:
+        raise PolicyValidationError("rule pack hash mismatch")
+    return pack

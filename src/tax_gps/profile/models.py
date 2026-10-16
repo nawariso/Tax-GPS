@@ -31,6 +31,13 @@ class Parent:
         _optional_bool(self.eligible, "parent eligible")
 
 
+def parent_eligibility_fact_id(relationship: str, index: int) -> str:
+    """Keep standard role IDs; never reflect caller-defined identity in error metadata."""
+    if relationship in {"father", "mother"}:
+        return f"parent.{relationship}.eligible"
+    return f"parent[{index}].eligible"
+
+
 @dataclass(frozen=True, slots=True, init=False)
 class Child:
     child_id: str

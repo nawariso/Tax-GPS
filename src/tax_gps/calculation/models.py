@@ -14,6 +14,7 @@ from tax_gps.policy.models import RuleSource
 
 class TaxStatus(StrEnum):
     READY = "READY"
+    REQUIRES_INPUT = "REQUIRES_INPUT"
     UNSUPPORTED = "UNSUPPORTED"
     ADVANCED_TAX_PATH_REQUIRED = "ADVANCED_TAX_PATH_REQUIRED"
 
@@ -143,9 +144,12 @@ class TaxState:
     unsupported_reasons: tuple[str, ...]
     output_hash: str
     _activated_pack: ActivatedRulePack = field(repr=False, compare=False)
+    reason_codes: tuple[str, ...] = ()
+    missing_fact_ids: tuple[str, ...] = ()
+    calculation_scope: str = "EMPLOYEE_40_1_SUPPORTED_RIGHTS_2026"
 
     def tax_impact(self, additional_deduction: Money) -> TaxImpact:
-        if self.taxable_income is None:
+        if self.status is not TaxStatus.READY or self.taxable_income is None:
             raise ValueError("tax impact is unavailable for unsupported tax state")
         from tax_gps.calculation.rules import calculate_tax_saving  # noqa: PLC0415
 
@@ -154,6 +158,9 @@ class TaxState:
     def material_dict(self) -> dict[str, object]:
         return {
             "status": self.status.value,
+            "reason_codes": list(self.reason_codes),
+            "missing_fact_ids": list(self.missing_fact_ids),
+            "calculation_scope": self.calculation_scope,
             "tax_year": self.tax_year.gregorian,
             "income": {"assessable_income": self.income.assessable_income.canonical()},
             "expenses": {"section_40_1": self.expenses.section_40_1.canonical()},
