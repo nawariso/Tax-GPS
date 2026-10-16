@@ -93,3 +93,7 @@ Spec: TGPS-C01 v0.1. User authorized implementation after receiving the detailed
   coverage100% (2846 statements/798 branches, zero misses); fresh-server frontend24/24,
   zero failures/skips; sdist/wheel0.2.0 built. These are local results, not remote CI
   for the forthcoming documentation commit. F09/visual acceptance remain open.
+- Push receipt 2026-10-16: documentation checkpoint `a906737` successfully pushed
+  to origin/feature/tgps-c01-baseline-integrity (previous remote head `c4527c9`).
+  This receipt is a documentation-only follow-up; no remote CI result claimed for
+  these new commits and no PR merge performed.
