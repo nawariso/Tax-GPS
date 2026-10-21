@@ -21,14 +21,17 @@ class Element {
     this.classList = {toggle() {}};
     this.attributes = {};
   }
-  set textContent(value) { this.text = String(value); }
+  set textContent(value) { this.text = String(value); this.children = []; }
   get textContent() { return this.text + this.children.map(node => node.textContent).join(' '); }
   get innerText() { return this.textContent; }
   append(...nodes) { this.children.push(...nodes); }
   replaceChildren(...nodes) { this.children = nodes; this.text = ''; }
   setAttribute(name, value) { this.attributes[name] = value; }
+  getAttribute(name) { return this.attributes[name] ?? null; }
+  removeAttribute(name) { delete this.attributes[name]; }
   addEventListener(name, fn) { this.listeners[name] = fn; }
   reportValidity() { return this.valid; }
+  checkValidity() { return this.valid; }
   click() { this.listeners.click?.(); }
   remove() { this.removed = true; }
 }
@@ -36,7 +39,7 @@ class Element {
 function harness() {
   const elements = new Map();
   const get = id => {
-    if (!elements.has(id)) elements.set(id, new Element());
+    if (!elements.has(id)) {const element=new Element();element.id=id;elements.set(id,element);}
     return elements.get(id);
   };
   const values = {salary:'990500', social_security:'10500', assets:'500000',
@@ -45,10 +48,14 @@ function harness() {
   Object.entries({personal_eligible:'true', mortgage_interest:'0', mortgage_eligible:'false',
     required_coverage:'', existing_coverage:'', other_income:'0', retirement_usage:'0'}).forEach(([key,value])=>{get(key).value=value;});
   const calls = [];
+  const timers = new Map();
+  let timerSequence = 0;
   const context = vm.createContext({
     document: {getElementById:get, createElement:() => new Element(),
       querySelector:selector => get(selector)},
-    Intl, Number, Object, Map, String, Blob, URL, setTimeout,
+    Intl, Number, Object, Map, String, Blob, URL,
+    setTimeout: (fn, delay) => {const id = ++timerSequence;timers.set(id,{fn,delay});return id;},
+    clearTimeout: id => timers.delete(id),
     FormData: class extends Map {
       constructor() { super(Object.keys(values).map(key => [key, get(key).value])); }
     },
@@ -59,6 +66,8 @@ function harness() {
   vm.runInContext(source, context);
   return {
     get, calls,
+    timers,
+    async advanceTimers() {const batch=[...timers.values()];timers.clear();for(const timer of batch)timer.fn();await settle();},
     latest: () => vm.runInContext('latest', context),
     rows: () => vm.runInContext('comparisonRows(latest)', context),
     export: () => vm.runInContext('comparisonExport()', context),
@@ -289,4 +298,108 @@ test('C01 malformed amount names its field and clears output without echoing the
   assert.equal(app.get('result').hidden,true);
   assert.match(app.get('error').textContent,/mortgage_interest/);
   assert.doesNotMatch(app.get('error').textContent,/987654321|ตรวจจำนวนเงิน/);
+});
+
+test('UI02-AC03 rapid edits debounce once for 450ms and send the latest values',async()=>{
+  const app=harness();await app.resolve(0);
+  for(const value of ['2','250','25000']) {app.get('budget').value=value;app.get('planner').listeners.input();}
+  assert.equal(app.calls.length,1);
+  assert.equal(app.timers.size,1);assert.equal([...app.timers.values()][0].delay,450);
+  await app.advanceTimers();assert.equal(app.calls.length,2);
+  assert.equal(JSON.parse(app.calls[1].options.body).budget,'25000');
+  await app.resolve(1);assert.equal(app.latest().outcomes.candidates[1].tax_saved,'5000.00');
+});
+
+test('UI02-AC04 editing keeps a pending shell without exposing old results or export',async()=>{
+  const app=harness();await app.resolve(0);app.get('salary').value='200000';app.get('planner').listeners.input();
+  assert.equal(app.get('liveShell').hidden,false);assert.equal(app.get('result').hidden,true);
+  assert.equal(app.latest(),null);assert.equal(app.export(),null);
+  assert.match(app.get('inputStatus').textContent,/อัปเดต/);
+  await app.advanceTimers();await app.resolve(1);
+  assert.equal(app.get('liveShell').hidden,true);assert.equal(app.get('result').hidden,false);
+});
+
+test('UI02-AC03 immediate submit cancels a scheduled calculation',async()=>{
+  const app=harness();await app.resolve(0);app.get('budget').value='25000';app.get('planner').listeners.input();
+  app.get('planner').listeners.submit({preventDefault(){}});
+  assert.equal(app.calls.length,2);assert.equal(app.timers.size,0);
+  await app.advanceTimers();assert.equal(app.calls.length,2);await app.resolve(1);
+});
+
+test('UI02-AC05 change and input for the same edit do not double submit',async()=>{
+  const app=harness();await app.resolve(0);app.get('planning_date').value='2026-10-20';
+  app.get('planner').listeners.input();app.get('planner').listeners.change();
+  await app.advanceTimers();assert.equal(app.calls.length,2);await app.resolve(1);
+  app.get('planner').listeners.change();await app.advanceTimers();assert.equal(app.calls.length,2);
+});
+
+test('UI02-AC05 automatic invalid input stays blocked without reportValidity popups',async()=>{
+  const app=harness();await app.resolve(0);app.get('planner').valid=false;
+  app.get('planner').reportValidity=()=>{throw Error('unsolicited popup');};
+  app.get('salary').value='';app.get('planner').listeners.input();await app.advanceTimers();
+  assert.equal(app.calls.length,1);assert.equal(app.latest(),null);
+  assert.equal(app.get('result').hidden,true);assert.equal(app.get('error').hidden,false);
+});
+
+test('UI02-AC05 an automatic response cannot publish after a newer incomplete edit',async()=>{
+  const app=harness();await app.resolve(0);app.get('budget').value='25000';app.get('planner').listeners.input();
+  await app.advanceTimers();app.get('salary').value='';app.get('planner').valid=false;app.get('planner').listeners.input();
+  await app.resolve(1);assert.equal(app.latest(),null);assert.equal(app.get('result').hidden,true);
+  await app.advanceTimers();assert.equal(app.calls.length,2);
+});
+
+test('UI02-AC03 record addition and removal both recalculate automatically',async()=>{
+  const app=harness();await app.resolve(0);
+  const entry=app.record('debts',{debt_id:'d',category:'CREDIT_CARD',balance:'120000',apr_percent:'24',minimum_payment:'5000',secured:'false'});
+  await app.advanceTimers();await app.resolve(1);assert.equal(app.latest().financial.critical_debt_balance,'120000.00');
+  entry.card.children.at(-1).click();await app.advanceTimers();await app.resolve(2);
+  assert.equal(app.latest().financial.critical_debt_balance,'0.00');
+});
+
+test('UI02-AC05 automatic unsupported input hides all old output and clears busy',async()=>{
+  const app=harness();await app.resolve(0);app.get('retirement_usage').value='10000';app.get('planner').listeners.input();
+  await app.advanceTimers();await app.resolve(1,400);
+  assert.equal(app.latest(),null);assert.equal(app.get('result').hidden,true);
+  assert.equal(app.get('error').hidden,false);assert.match(app.get('error').textContent,/เกษียณ/);
+  assert.equal(app.get('.results').attributes['aria-busy'],'false');
+});
+
+test('UI02-AC01 real HTML FormData names match the server request contract',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../../examples/web/index.html'),'utf8');
+  const names=Array.from(html.matchAll(/<(?:input|select)\b[^>]*\bname="([^"]+)"/g),match=>match[1]).sort();
+  assert.deepEqual(names,['salary','social_security','assets','expenses','budget','shared_usage','planning_date'].sort());
+});
+
+test('UI02-AC05 semantic parent error links open the collapsed group and focus its field',async()=>{
+  const app=harness();await app.resolve(0);
+  const entry=app.record('parents',{relationship:'father',eligible:'unknown'});
+  const details={tagName:'DETAILS',open:false,parentElement:null};let focused=false;
+  entry.fields.eligible.parentElement=details;entry.fields.eligible.focus=()=>{focused=true;};
+  const pending=app.recalculate();await app.resolve(1,400);await pending;
+  const link=app.get('error').children.find(child=>child.href===`#${entry.fields.eligible.id}`);
+  assert.ok(link,'semantic father error must resolve to the eligibility field');
+  link.listeners.click({preventDefault(){}});assert.equal(details.open,true);assert.equal(focused,true);
+});
+
+test('UI02-AC05 row-level engine error links back to the affected child record',async()=>{
+  const app=harness();await app.resolve(0);
+  const entry=app.record('children',{child_id:'c',order:'0',birth_year:'2015',legally_eligible:'true'});
+  const pending=app.recalculate();await app.resolve(1,400);await pending;
+  assert.ok(app.get('error').children.some(child=>child.href===`#${entry.fields.child_id.id}`));
+});
+
+test('UI02-AC05 field errors are accessible and clear when the profile changes',async()=>{
+  const app=harness();await app.resolve(0);app.get('salary').setAttribute('aria-describedby','salaryHint');
+  app.get('salary').value='invalid';const pending=app.recalculate();await app.resolve(1,400);await pending;
+  assert.equal(app.get('salary').getAttribute('aria-invalid'),'true');
+  assert.equal(app.get('salary').getAttribute('aria-describedby'),'salaryHint error');
+  app.get('salary').value='990500';app.get('planner').listeners.input();
+  assert.equal(app.get('salary').getAttribute('aria-invalid'),null);
+  assert.equal(app.get('salary').getAttribute('aria-describedby'),'salaryHint');
+});
+
+test('UI02-AC04 cleared comparison selection is explained after the update',async()=>{
+  const app=harness();await app.resolve(0);app.choose(app.latest().outcomes.candidates[1].candidate_id);
+  app.get('budget').value='25000';app.get('planner').listeners.input();await app.advanceTimers();await app.resolve(1);
+  assert.match(app.get('inputStatus').textContent,/เลือก.*เปรียบเทียบใหม่/);
 });

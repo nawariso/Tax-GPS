@@ -3,6 +3,10 @@ const $ = id => document.getElementById(id);
 const form = $('planner');
 let latest = null;
 let calculationVersion = 0;
+let calculationTimer = null;
+let lastInputSnapshot = null;
+const errorFields = new Map();
+let comparisonNeedsReselection = false;
 const money = value => value === null ? 'ยังไม่ทราบ' : new Intl.NumberFormat('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(Number(value));
 const baht = value => value === null ? 'ยังไม่ทราบ' : `${money(value)} บาท`;
 const labels = {'TH-RIGHT-PERSONAL-ALLOWANCE':'ค่าลดหย่อนส่วนตัว','TH-RIGHT-SOCIAL-SECURITY':'เงินสมทบประกันสังคม','TH-OPP-THAI-ESG-2026':'วงเงินลดหย่อน Thai ESG','TH-OPP-ARTWORK-2025-2027':'การซื้อผลงานศิลปะ','TH-OPP-SOLAR-ROOFTOP-2026':'โซลาร์รูฟท็อปสำหรับที่อยู่อาศัย'};
@@ -124,31 +128,96 @@ function render(data) {
   const hashes = {result_hash: data.outcomes.result_hash, input_hash:data.outcomes.input_hash, policy_hash:data.outcomes.policy_hash, engine_version:data.outcomes.engine_version};
   Object.entries(hashes).forEach(([key,value]) => $('hashes').append(el('dt', key), el('dd', value)));
 }
-function invalidateResults() {
+function inputSnapshot() {
+  return JSON.stringify({...Object.fromEntries(new FormData(form)),profile:collectProfile()});
+}
+function updateStatus(text) {
+  $('inputStatus').textContent = text;
+  $('liveStatus').textContent = text;
+  $('loading').textContent = text;
+}
+function clearPublishedResults() {
+  clearTimeout(calculationTimer);
+  calculationTimer = null;
   calculationVersion++;
+  const height = $('result').hidden ? 0 : $('result').getBoundingClientRect?.().height;
+  if (height && $('liveShell').style) $('liveShell').style.minHeight = `${height}px`;
+  if (comparisonSelection.size) comparisonNeedsReselection = true;
   resetComparison();
+  errorFields.forEach((description,input)=>{
+    input.removeAttribute('aria-invalid');
+    if (description === null) input.removeAttribute('aria-describedby');
+    else input.setAttribute('aria-describedby',description);
+  });
+  errorFields.clear();
   latest = null;
+  $('download').disabled = true;
   $('result').hidden = true;
+  $('liveShell').hidden = false;
   $('error').hidden = true;
-  $('loading').textContent = 'ข้อมูลเปลี่ยนแล้ว กดคำนวณเพื่อดูผลล่าสุด';
-  $('loading').hidden = false;
+  $('loading').hidden = true;
   $('calculate').disabled = false;
-  document.querySelector('.results').setAttribute('aria-busy','false');
+  document.querySelector('.results').setAttribute('aria-busy','true');
+}
+function invalidateResults() {
+  const snapshot = inputSnapshot();
+  if (snapshot === lastInputSnapshot) return;
+  lastInputSnapshot = snapshot;
+  clearPublishedResults();
+  updateStatus('กำลังรออัปเดต · คำนวณอัตโนมัติเมื่อหยุดพิมพ์');
+  updateGroupSummaries();
+  calculationTimer = setTimeout(() => calculate(),450);
 }
 form.addEventListener('input', invalidateResults);
-async function calculate() {
-  invalidateResults();
+form.addEventListener('change', invalidateResults);
+
+const fieldNames = {salary:'รายได้จากเงินเดือนทั้งปี',social_security:'ประกันสังคมที่จ่ายแล้ว',assets:'สินทรัพย์สภาพคล่อง',expenses:'ค่าใช้จ่ายจำเป็นต่อเดือน',budget:'งบทดลอง',shared_usage:'ยอด Thai ESG / ESGX ที่ใช้ไปแล้ว',planning_date:'วันที่วางแผน',personal_eligible:'สิทธิส่วนตัว',mortgage_interest:'ดอกเบี้ยบ้าน',mortgage_eligible:'เงื่อนไขสิทธิดอกเบี้ยบ้าน',required_coverage:'ความคุ้มครองที่ต้องการ',existing_coverage:'ความคุ้มครองที่มีอยู่',other_income:'รายได้อื่น',retirement_usage:'เงินออมเกษียณ'};
+function fieldForFact(fact) {
+  if (fact === 'opportunity_facts.shared_limit_usage') return $('shared_usage');
+  const parent = fact.match(/^parent\.(father|mother)\.eligible$/);
+  if (parent) return profileRecords.parents.find(entry=>entry.fields.relationship.value === parent[1])?.fields.eligible;
+  const record = fact.match(/^(parent|parents|children|debts|commitments)\[(\d+)\](?:\.(.+))?$/);
+  if (record) {
+    const fields=profileRecords[record[1] === 'parent' ? 'parents' : record[1]]?.[Number(record[2])]?.fields;
+    return fields ? record[3] ? fields[record[3]] : Object.values(fields)[0] : null;
+  }
+  const key = fact.split('.').at(-1);
+  return Object.hasOwn(fieldNames,key) ? $(key) : null;
+}
+function revealField(input) {
+  if (!input) return;
+  let parent = input.parentElement;
+  while (parent) {if (parent.tagName === 'DETAILS') parent.open = true;parent = parent.parentElement;}
+  input.focus?.();
+  input.scrollIntoView?.({block:'center'});
+}
+function addErrorLink(input, label) {
+  if (!input) return;
+  if (!errorFields.has(input)) errorFields.set(input,input.getAttribute('aria-describedby'));
+  input.setAttribute('aria-invalid','true');
+  input.setAttribute('aria-describedby',[errorFields.get(input),'error'].filter(Boolean).join(' '));
+  const link = el('a',label,'error-link');link.href = `#${input.id}`;
+  link.addEventListener('click',event=>{event.preventDefault();revealField(input);});
+  $('error').append(link);
+}
+async function calculate(manual = false) {
+  clearPublishedResults();
+  lastInputSnapshot = inputSnapshot();
+  updateGroupSummaries();
   const version = calculationVersion;
-  if (!form.reportValidity()) {
+  if (!form.checkValidity()) {
+    updateStatus('ยังมีข้อมูลที่ต้องกรอก · ดูช่องที่ระบุด้านล่าง');
+    $('error').textContent = 'กรอกข้อมูลที่จำเป็นให้ครบก่อน ระบบจะคำนวณต่อให้อัตโนมัติ';
+    const invalid = Array.from(form.elements || []).filter(input=>input.willValidate && !input.validity.valid);
+    invalid.forEach(input=>addErrorLink(input,fieldNames[input.id] || input.labels?.[0]?.textContent || 'ตรวจรายการที่เพิ่ม'));
+    $('error').hidden = false;
+    if (manual) revealField(invalid[0]);
     $('loading').hidden = true;
+    document.querySelector('.results').setAttribute('aria-busy','false');
     return;
   }
-  $('loading').textContent = 'กำลังคำนวณจาก engine…';
-  $('result').hidden = true;
-  $('error').hidden = true;
-  $('loading').hidden = false;
+  updateStatus('กำลังอัปเดตผลคำนวณ…');
   $('calculate').disabled = true;
-  document.querySelector('.results').setAttribute('aria-busy','true');
   try {
     const data = Object.fromEntries(new FormData(form));
     data.profile = collectProfile();
@@ -159,7 +228,11 @@ async function calculate() {
     if (!response.ok) throw Object.assign(new Error(result.error || 'คำนวณไม่สำเร็จ'), {envelope: result});
     render(result);
     latest = result;
+    $('liveShell').hidden = true;
+    $('download').disabled = false;
     $('result').hidden = false;
+    updateStatus(comparisonNeedsReselection ? 'อัปเดตแล้ว · โปรดเลือกรายการเปรียบเทียบใหม่หลังเปลี่ยนข้อมูล' : 'อัปเดตแล้ว · ผลคำนวณตรงกับข้อมูลล่าสุด');
+    comparisonNeedsReselection = false;
   } catch (error) {
     if (version !== calculationVersion) return;
     // Baseline/input envelopes name the exact item; generic format advice would misdirect.
@@ -169,6 +242,11 @@ async function calculate() {
       ? `ยังไม่แสดงผลคำนวณ: ${error.message}${envelope.missing_fact_ids?.length ? ` · ข้อมูลที่ยังขาด: ${envelope.missing_fact_ids.join(', ')}` : ''}`
       : `ยังไม่แสดงผลคำนวณ: โปรดตรวจจำนวนเงิน (ไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง) งบต้องไม่เกินสินทรัพย์ที่ทราบ และวันที่ต้องอยู่ในปี 2026 ตรวจสิทธิที่ยังไม่ทราบและรายการนอกขอบเขตด้วย — ${error.message}`;
     $('error').hidden = false;
+    (envelope?.missing_fact_ids || []).forEach(fact=>{
+      const input=fieldForFact(fact);
+      addErrorLink(input,input ? fieldNames[input.id] || input.labels?.[0]?.textContent || 'ตรวจรายการนี้' : '');
+    });
+    updateStatus('ยังแสดงผลไม่ได้ · ตรวจข้อมูลที่ระบุด้านล่าง');
   } finally {
     if (version === calculationVersion) {
       $('loading').hidden = true;
@@ -177,7 +255,7 @@ async function calculate() {
     }
   }
 }
-form.addEventListener('submit', event => { event.preventDefault(); calculate(); });
+form.addEventListener('submit', event => { event.preventDefault(); calculate(true); });
 $('scenario').addEventListener('change', () => {
   resetProfile();
   const defaults = {salary:'990500',social_security:'10500',assets:'500000',expenses:'50000',budget:'100000',shared_usage:'0',planning_date:'2026-10-14'};

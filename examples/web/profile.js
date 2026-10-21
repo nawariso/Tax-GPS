@@ -48,6 +48,12 @@ function resetProfile() {
 function initProfile() {
   Object.keys(profileRecords).forEach(group=>{$('add'+group).addEventListener('click',()=>addRecord(group));});
 }
+function updateGroupSummaries() {
+  const rights = profileRecords.parents.length + profileRecords.children.length;
+  const obligations = profileRecords.debts.length + profileRecords.commitments.length;
+  $('rightsCount').textContent = `${rights} รายการครอบครัว · ${$('mortgage_eligible').value === 'true' ? 'ใช้สิทธิดอกเบี้ยบ้าน' : $('mortgage_eligible').value === 'unknown' ? 'สิทธิดอกเบี้ยบ้านยังไม่ทราบ' : 'ไม่ใช้สิทธิดอกเบี้ยบ้าน'}`;
+  $('financeCount').textContent = `${obligations} รายการหนี้ / ภาระจ่าย · ${$('assets').value === '' || $('expenses').value === '' ? 'สภาพคล่องยังไม่ทราบ' : 'ตรวจตามข้อมูลที่กรอก'}`;
+}
 function renderProfile(data) {
   const dl=$('profileBreakdown');dl.replaceChildren();
   const financial=data.financial;
