@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-20",
+  "url": "http://127.0.0.1:57955/",
+  "red": [
+    {
+      "ac": "UI01-AC05",
+      "clientWidth": 345,
+      "scrollWidth": 355,
+      "viewport": 360,
+      "pass": false
+    },
+    {
+      "ac": "UI01-AC05",
+      "clientWidth": 375,
+      "scrollWidth": 385,
+      "viewport": 390,
+      "pass": false
+    }
+  ],
+  "green": [
+    {
+      "ac": "UI01-AC05",
+      "clientWidth": 345,
+      "scrollWidth": 345,
+      "viewport": 360,
+      "pass": true
+    },
+    {
+      "ac": "UI01-AC05",
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "viewport": 390,
+      "pass": true
+    },
+    {
+      "viewport": 1440,
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "pass": true
+    }
+  ],
+  "keyboard": {
+    "skipLink": "Tab then Enter focuses salary; visible outline; settled top51.7px",
+    "heroActions": "Enter focuses salary/scenario",
+    "disclosure": "Enter toggles additional inputs",
+    "table": "ArrowRight changes scrollLeft 0 to40; page scrollX0; content1316/client268"
+  },
+  "largeMoney": {
+    "viewport": 360,
+    "metricClientWidth": 117,
+    "metricScrollWidth": 117,
+    "wrapsAcrossLines": true
+  },
+  "reducedMotion": {
+    "current": false,
+    "sourceRuleReviewed": true,
+    "reduceModeRenderedTest": false
+  },
+  "reference": "Compared with tmp/ui01-reference.png downloaded 2026-10-15; approximate direction, not pixel equality",
+  "acceptance": "NOT_ACCEPTED; user visual acceptance pending"
+}

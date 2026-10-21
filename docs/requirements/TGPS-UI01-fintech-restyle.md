@@ -87,7 +87,9 @@ than claiming screenshots were reviewed. Prepare a fresh local demo for user tes
 - [x] Write implementation plan and perform restyle after review.
 - [x] Verify automatic gates, mark completed work/methods and provide updated local demo.
   ↳ 695 Python tests / 100% coverage, frontend24, smoke9/9; fresh source review clean.
-- [ ] Rendered desktop/mobile/keyboard visual review (UNVERIFIED: browser provider unavailable).
+- [ ] **PARTIAL:** Rendered desktop/mobile/keyboard review completed 2026-10-20;
+  reduced-motion mode and user visual acceptance remain pending. See
+  [rendered review](../implementation-reports/TGPS-UI01-visual-review-2026-10-20.md).
 
 ## Change log
 
@@ -95,3 +97,4 @@ than claiming screenshots were reviewed. Prepare a fresh local demo for user tes
 | --- | --- | --- | --- |
 | 2026-10-15 | 0.1 | Initial proposal based on user reference; no product-code edits | REQUIREMENT_REVIEW |
 | 2026-10-15 | 0.1 | User approved; implemented local HTML/CSS with native links, automatic/source review passed; visual gates remain UNVERIFIED | IMPLEMENTED, not ACCEPTED |
+| 2026-10-20 | 0.1 | Chrome rendered1440/390/360 and keyboard review; fixed decorative-dot mobile overflow with rendered RED/GREEN, full gates passed; reduced-motion mode/user acceptance pending | IMPLEMENTED, not ACCEPTED |

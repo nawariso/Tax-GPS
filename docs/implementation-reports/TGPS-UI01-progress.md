@@ -105,3 +105,27 @@ Status: IMPLEMENTED — automatic/source verification complete; visual acceptanc
   lint/format147/mypy102/build clean. Tested merge ref b9015a3ba9103664a2d143ec40677e029ab81214
   for that exact head; evidence TGPS-remote-ci.json. Rendered visual review remains
   UNVERIFIED, not ACCEPTED. Following checkpoint changes documentation only.
+
+- 2026-10-20 follow-up: user approved proceeding after the status summary; resumed
+  at rendered review rather than repeating the restyle. Chrome provider available.
+  Used computer-use browser API, systematic-debugging, tgps-implement-task for the
+  scoped AC05 correction, tgps-verify and tgps-mark-progress. Session baseline from
+  this conversation: Python695/10.37s, fresh-server frontend24/24.
+- Rendered RED: UI01-AC05 at390 client375/scroll385 and360 client345/scroll355.
+  Root cause: fixed19px inset puts circuit dots outside narrow spans, reflected
+  toward the page edge by the right circuit. Changed only that inset to clamp.
+  Rendered GREEN after reload:390=375/375,360=345/345,1440=1425/1425.
+  One-off browser geometry check/screenshots, not a new CI test or CSS-string test.
+- Checked hero/reference direction, Thai copy/default results/unknown alerts,
+  skip link, both CTA targets, disclosure keyboard activation, visible focus and
+  internal table scrolling. Large synthetic amounts wrap without clipping but
+  can break across digit groups. Reduced-motion mode NOT RUN (current reduce=false);
+  source rule reviewed only. Viewport reset and default sample restored.
+- Full locked gates passed: sync/ruff/format148/mypy102 clean; Python695 in11.61s,
+  coverage100% (2846 statements/798 branches, zero misses); frontend24/24 with0fail/skip;
+  build0.2.0 passed. Runtime Windows CPython3.14.3/Node24.3.0, not new remote CI.
+- Fresh source reviewer ui01_visual_fix_review:0Critical/Important/Minor for the
+  one-line CSS delta, no independent rerun/acceptance. Task2 follow-up PARTIAL:
+  rendered reduced-motion mode and user acceptance pending; C01 F09 OPEN;
+  C02 implementation NOT_STARTED. No commit/push/merge or tax-contract changes.
+  [Report and artifacts](TGPS-UI01-visual-review-2026-10-20.md).

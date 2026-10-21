@@ -180,3 +180,22 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Decision: push feature/tgps-c01-baseline-integrity และเปิด draft PR เข้า main; ตรวจและบันทึก CI ตาม SHA จริง
 - Result: ส่ง c4527c9e2a2c3b041ff72e96ac5f404c06a94170 และเปิด [draft PR #4](https://github.com/nawariso/Tax-GPS/pull/4); GitHub ตรวจว่า mergeable แต่ยังไม่ได้ merge
 - Boundary: อนุญาตการ push ของงานนี้และอัปเดตหลักฐานต่อเนื่อง ไม่ได้อนุญาต merge, เปลี่ยนเป็น ready-for-review, รับงาน C01/UI01 หรือเริ่ม treatment C02; F09/visual acceptance ยังคงเดิม
+
+## DEC-017 — UI02 guided form และ automatic calculation
+
+- Date: `2026-10-20`
+- Status: `AGREED` / `IMPLEMENTATION_EVIDENCE`; not ACCEPTED
+- Evidence: ผู้ใช้เลือกทำด้วย Codex, ยืนยันโปรเจกต์ tax-gps และอนุมัติแบบ UI02 ด้วย “โอเครครับ ลุย!” หลังอ่านข้อเสนอ
+- Decision: ขยาย presentation JS จาก UI01 เป็น UI02 แยก: guided inputs, auto450ms, stable pending shell, destination-value motion, error navigation และแจ้ง selection reset. ไม่แสดง stale output และยังใช้ domain readiness เดิม
+- Result: Python695/coverage100%/frontend37, full locked gates/source review/fix pass และ Chrome1440/390/360 ผ่านตามหลักฐาน; reduced-motion runtime/user acceptance pending
+- Boundary: ไม่เปลี่ยน C01 F09/C02–C06, legal treatment, policies/catalogs, guardrails, privacy/storage; no commit/push/merge
+- Records: [requirement](requirements/TGPS-UI02-guided-live-calculation.md), [plan](superpowers/plans/2026-10-20-ui02-guided-live-calculation.md), [report](implementation-reports/TGPS-UI02.md)
+
+## DEC-018 — เก็บ UI checkpoint และตรวจ CI ของชุดใหม่
+
+- Date: `2026-10-21`
+- Status: `AGREED` สำหรับ checkpoint/CI และเตรียมรีวิว C01/C02
+- Evidence: ผู้ใช้ตอบ “โอเครครับ ลุย!” หลังเสนอเก็บ checkpoint งานปัจจุบัน แล้วรีวิว C01 และเตรียม C02
+- Decision: commit งาน UI01 follow-up/UI02 และเอกสารที่ตรวจแล้วบน feature branch เดิม; push เข้า draft PR เดิมเพื่อตรวจ CI ของ SHA ใหม่ แยก code/documentation commits และเว้น unrelated Stage4 draft
+- Reason: เก็บงานที่ผ่าน local verification/reduced-motion runtime แล้ว ก่อนเดินต่อ requirement/evidence gates
+- Boundary: supersedes ข้อ no commit/push ของ DEC-017 เฉพาะ checkpoint นี้; ไม่ merge, ไม่เปลี่ยน draft status, ไม่ถือว่าผู้ใช้รับงาน UI/C01 และไม่อนุมัติ C02 treatment/readiness หรือปิด F09

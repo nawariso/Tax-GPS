@@ -96,3 +96,30 @@ Baseline สดรอบสรุปสถานะ: Python695 ผ่านใ�
 เอกสาร remote-CI เดิมอ้าง head c4527c9 เท่านั้น ไม่ใช่ผล CI ของ checkpoint ใหม่นี้.
 คง Stage4 draft ที่ไม่เกี่ยวข้องไว้นอก commit. เริ่ม session ถัดไปด้วย
 `tgps-session-start` แล้วตรวจ Git/CI ของ SHA ปัจจุบันก่อนกล่าวอ้างผลใหม่.
+
+## ตรวจสถานะ 2026-10-20 — ยังไม่เริ่ม implementation เพิ่ม
+
+- [x] อ่าน roadmap/decisions, C01/UI01 plans/review/ledgers และ C02 draft/ledger;
+  จุดรับช่วงยังเป็น visual review, C01 acceptance/F09 และ C02 requirement/evidence gates
+- [x] Baseline บน HEAD `da8e5c9`, Windows Python3.14.3 / Node24.3.0:
+  `uv sync --locked` ผ่าน; `uv run --locked pytest -q` = 695 passed ใน10.37s;
+  `uv run --locked python -m examples.check_web_demo` = 24 passed, 0 failed/skip
+- uv sync ครั้งแรกติดสิทธิ์อ่าน cache นอก workspace; รันซ้ำด้วย escalation แล้วผ่าน
+- รอบนี้ไม่ได้รัน coverage/lint/format/mypy/build หรือ remote CI ซ้ำ;
+  remote evidence เดิมอ้าง head c4527c9 เท่านั้น ไม่ใช่สถานะ GitHub ปัจจุบัน
+- Git diff c4527c9..da8e5c9 เป็นเอกสารเท่านั้น; ก่อนบันทึกรอบนี้ working tree
+  มี untracked `docs/demo/stage4-local-profile-contract-draft.md` ซึ่งคงไว้ตามเดิม
+- ไม่มี product-code edits, commit/push/merge หรือการเปลี่ยนสถานะ acceptance;
+  ขั้นถัดไปที่เสนอคือ rendered UI review ก่อน แล้ว C01/F09 review และ C02 ตาม gates
+
+### UI01 follow-up หลังผู้ใช้สั่งทำต่อ
+
+- [x] Chrome rendered1440/390/360, keyboard focus/CTA/skip link/table scroll และ
+  Thai/default/error views ตรวจแล้ว; แก้ mobile overflow จากจุดวงจรตกแต่งหนึ่งจุด
+- [x] Full local gates: Python695/11.61s, coverage100%2846/798, frontend24/24,
+  lint/format148/mypy102/buildผ่าน; fresh source review0findings
+- [ ] Reduced-motion-mode rendered check และ user visual acceptance ยังค้าง;
+  C01 acceptance/F09 และ C02 requirement/evidence gates ไม่เปลี่ยน
+- หลักฐาน/ภาพ/ข้อจำกัดอยู่ใน [UI01 rendered report](TGPS-UI01-visual-review-2026-10-20.md).
+  Preview ใหม่ http://127.0.0.1:57955/ (serverของsessionนี้); คืน viewport/default sampleแล้ว.
+  ยังไม่มีcommit/push/merge; Stage4 draft คงเดิม

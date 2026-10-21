@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-21",
+  "url": "http://127.0.0.1:59650/",
+  "method": "Native Chrome DevTools command: Emulate CSS prefers-reduced-motion: reduce; observed browser accessibility tree, not injected JavaScript.",
+  "applied_css": [
+    "762 text (prefers-reduced-motion: reduce)",
+    "776 tree item (selectable) CSS property name: scroll-behavior : CSS property value: auto !important ;",
+    "777 group CSS property name: scroll-behavior",
+    "780 tree item (selectable) CSS property name: animation : CSS property value: auto ease 0s 1 normal none running none !important ;",
+    "781 group CSS property name: animation",
+    "784 tree item (selectable) CSS property name: transition : CSS property value: none !important ;",
+    "785 group CSS property name: transition",
+    "901 text (prefers-reduced-motion: reduce)",
+    "915 tree item (selectable) CSS property name: scroll-behavior : CSS property value: auto !important ;",
+    "916 group CSS property name: scroll-behavior",
+    "919 tree item (selectable) CSS property name: animation : CSS property value: auto ease 0s 1 normal none running none !important ;",
+    "920 group CSS property name: animation",
+    "923 tree item (selectable) CSS property name: transition : CSS property value: none !important ;",
+    "924 group CSS property name: transition",
+    "935 text (prefers-reduced-motion: reduce)",
+    "949 tree item (selectable) CSS property name: scroll-behavior : CSS property value: auto !important ;",
+    "950 group CSS property name: scroll-behavior",
+    "953 tree item (selectable) CSS property name: animation : CSS property value: auto ease 0s 1 normal none running none !important ;",
+    "954 group CSS property name: animation",
+    "957 tree item (selectable) CSS property name: transition : CSS property value: none !important ;",
+    "958 group CSS property name: transition"
+  ],
+  "after_edit": [
+    "92 edit (settable, string) รายได้จากเงินเดือนทั้งปี จำเป็นต่อฐานภาษี Value: 200000 ID: salary",
+    "977 text อัปเดตแล้ว · ผลคำนวณตรงกับข้อมูลล่าสุด",
+    "985 text 0.00",
+    "989 text 29,500.00",
+    "1008 text 0.00",
+    "1032 text 0.00"
+  ],
+  "pending_observed": true,
+  "baseline": {
+    "salary": "990500",
+    "pit": "79000.00",
+    "saving": "18500.00"
+  },
+  "limitations": [
+    "No frame-by-frame animation timing measurement",
+    "User visual acceptance pending",
+    "No tax law or remote CI verification"
+  ],
+  "restored_default": {
+    "salary": "990500",
+    "pit": "79000.00",
+    "saving": "18500.00"
+  },
+  "media_override_cleared": true
+}

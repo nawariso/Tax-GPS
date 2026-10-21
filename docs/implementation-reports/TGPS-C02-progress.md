@@ -22,3 +22,11 @@ Status: **REQUIREMENT_REVIEW / implementation NOT_STARTED**
 รายละเอียดที่ผู้เขียนเสนอแยกจากข้อตกลงผู้ใช้. ไม่มี product code ของ C02,
 ไม่มี C02 RED/GREEN หรือ test pass ที่จะรายงาน; regression ที่ผ่านเป็น C01/UI01
 ตาม [handoff verification](TGPS-handoff-verification.json)
+
+## 2026-10-21 — เตรียมรีวิวรายละเอียด
+
+- [x] จัด [review brief](../requirements/TGPS-C02-review-brief.md) ย่อ v0.1-draft:
+  PVD ลูกจ้าง → RMF → Thai ESG, authoritative baseline/capacity, unknown/readiness,
+  versioning และ evidence/fixture gates. ไม่เปลี่ยน requirement หรือยืนยันกฎหมายใหม่
+- [ ] อนุมัติรายละเอียด v0.1-draft หลังอ่าน requirement/brief; ยังไม่มี treatment code,
+  implementation plan หรือการเปลี่ยน milestone เป็น IN_PROGRESS

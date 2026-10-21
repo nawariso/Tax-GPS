@@ -4,6 +4,12 @@ Date: 2026-10-15. Requirement v0.1 approved by user “โอเครครั�
 Status: **IMPLEMENTED** — automatic gates/source review complete; visual acceptance pending.
 Independent acceptance: NOT ACCEPTED. Rendered desktop/mobile visual QA: UNVERIFIED.
 
+2026-10-20 update: rendered1440/390/360 and keyboard checks now have
+[real screenshots and measurements](TGPS-UI01-visual-review-2026-10-20.md).
+Fixed one decorative-dot overflow; all local gates pass. Reduced-motion mode and
+user acceptance remain pending. UNVERIFIED statements below describe the original
+2026-10-15 report, not the newer checks.
+
 ## Changes
 
 - `examples/web/index.html`: centered Thai hero, dark forest/cream identity, real

@@ -9,6 +9,11 @@ Presentation work: **TGPS-UI01 IMPLEMENTED / VISUAL_REVIEW_PENDING** — restyle
 ดู [ข้อเสนอ UI01](requirements/TGPS-UI01-fintech-restyle.md) / [DEC-012](DECISIONS.md#dec-012--ทิศทางปรับหน้าตาตาม-fintech-template).
 เปลี่ยนเฉพาะ presentation และไม่เปลี่ยนสถานะ/ลำดับ C01–C06
 
+UI01 follow-up2026-10-20: ตรวจ rendered1440/390/360 และ keyboard แล้ว,
+แก้ลายตกแต่งทำให้ mobile overflow; local695/coverage100%/frontend24 และทุก gate ผ่าน.
+ยังรอ reduced-motion-mode check และ user visual acceptance;
+ดู [rendered review](implementation-reports/TGPS-UI01-visual-review-2026-10-20.md).
+
 Handoff: Windows Python3.14.3 และ isolated3.12.14 ผ่าน 695 tests, coverage100%,
 frontend24/24 และทุก quality gate; remote Ubuntu/Node22 CI ยังไม่ได้รัน
 ([หลักฐาน](implementation-reports/TGPS-handoff-verification.json)).
@@ -128,3 +133,19 @@ acceptance cases, dependencies และ change log
 | 2026-10-15 | 0.1 | C01 เป็น IN_PROGRESS ตามหลักฐานใน ledger; ไม่เปลี่ยนลำดับหรือขอบเขต | [DEC-009](DECISIONS.md#dec-009--เริ่ม-implementation-c01-และการติดตามความคืบหน้า) |
 | 2026-10-15 | 0.1 | C01 IMPLEMENTED ตาม local gates/fresh-review fix-pass; F09 OPEN และ acceptance conditional, C02 ยัง PLANNED | [DEC-011](DECISIONS.md#dec-011--c01-implemented-และจุดรับช่วงที่ไม่ทำงานเดิมซ้ำ) |
 | 2026-10-15 | 0.1 | เพิ่ม local Python3.12 evidence และ C02 REQUIREMENT_REVIEW; ไม่เพิ่ม treatment หรือปิด acceptance | DEC-015 / handoff verification |
+
+## UI02 presentation follow-up — 2026-10-20
+
+TGPS-UI02 **IMPLEMENTED / USER_VISUAL_ACCEPTANCE_PENDING**: guided form, auto450ms, stable pending shell และ motion ทำแล้วตามแบบที่อนุมัติ; Python695/coverage100%/frontend37/full gates ผ่าน. Chrome1440/390/360 ตรวจแล้ว; reduced-motion runtime pending. ไม่เปลี่ยน C01/C02–C06. ดู [รายงาน UI02](implementation-reports/TGPS-UI02.md).
+
+UI02 follow-up 2026-10-21: reduced-motion runtime ตรวจผ่านใน Chrome DevTools
+reduce emulation แล้ว พร้อม active CSS และ auto recalculation; คืน media/default
+หลังตรวจ. Local Python695/coverage100%/frontend37 และทุก gate ผ่านบน source เดิม.
+ยังรอ user visual acceptance; C01 F09/C02–C06 ไม่เปลี่ยน.
+ดู [หลักฐานรอบติดตาม](implementation-reports/TGPS-UI02-follow-up-2026-10-21.md).
+
+Checkpoint follow-up 2026-10-21 (DEC-018): UI code committed as `805e2d9`;
+pre-commit Python695/frontend37 ผ่าน. C01 มี
+[acceptance handoff review](implementation-reports/TGPS-C01-review-follow-up-2026-10-21.md)
+และ C02 มี [review brief](requirements/TGPS-C02-review-brief.md) พร้อมรีวิวรายละเอียด;
+สถานะ acceptance/F09/C02 implementation ไม่เปลี่ยน. Remote CI ของ checkpoint ใหม่รอตรวจ

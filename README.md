@@ -306,3 +306,12 @@ for head c4527c9 (merge ref b9015a3): Ubuntu24.04.5, Python3.12.15, Node22.23.3,
 695 tests, 100% core coverage, frontend24/24 and all gates pass. See
 [exact SHA/runtime evidence](docs/implementation-reports/TGPS-remote-ci.json).
 This does not close F09 or rendered visual acceptance; the PR remains draft.
+
+## UI02 — กรอกง่ายและคำนวณต่อเนื่อง
+
+หน้า local demo แบ่งข้อมูลเป็น3หมวด พร้อมตัวอย่างและคำนวณอัตโนมัติหลังหยุดพิมพ์450ms. พื้นที่ผลลัพธ์คงอยู่ขณะตรวจข้อมูล; แสดงเฉพาะยอดล่าสุดจาก engine พร้อม motion เบา ๆ. รายละเอียด/ผลตรวจ/ข้อค้าง reduced-motion runtime และ user acceptance: [UI02 report](docs/implementation-reports/TGPS-UI02.md).
+
+Follow-up 2026-10-21: reduced-motion runtime ตรวจแล้ว; ยังรอ user visual acceptance.
+UI code checkpoint `805e2d9`, local Python695/coverage100%/frontend37 ผ่าน.
+C01/F09 review และ [C02 scope review brief](docs/requirements/TGPS-C02-review-brief.md)
+พร้อมอ่านต่อ; ยังไม่เริ่ม C02 treatment. ดู DEC-018 สำหรับ checkpoint/CI authorization

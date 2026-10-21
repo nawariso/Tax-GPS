@@ -79,3 +79,17 @@ Task 2 consumes Task 1's unchanged IDs and HTML-only fragment actions; no confli
   ↳ preview ใหม่ http://127.0.0.1:64946/ PID35652; metadata tmp/ui01-play-session.json เป็นข้อมูลเฉพาะ session ต้องตรวจ server ก่อนใช้ในครั้งถัดไป
 - [ ] Visual acceptance: ภาพที่1440/390/360, Thai clipping/overflow, real keyboard focus/scroll และเทียบ reference ยัง UNVERIFIED เพราะ CUA apps/browsers=[]; อย่าอ้าง automatic tests ว่าตรวจสิ่งเหล่านี้แล้ว
 - ไม่ต้องทำ restyle/TDD/gates เดิมซ้ำหาก code ไม่เปลี่ยน; รับช่วงที่ visual review ของ preview และ feedback ผู้ใช้ ไม่เปลี่ยน C01/C02 tax scope หรือถือว่า ACCEPTED
+
+## Rendered review follow-up — 2026-10-20
+
+- [x] Chrome1440/390/360 screenshots, Thai/default/error copy, keyboard skip/CTA
+  focus/disclosure and internal table scroll checked; approximate reference compared.
+- [x] UI01-AC05 decorative-dot overflow fixed: rendered RED390=375/385,
+  360=345/355 → GREEN375/375,345/345; desktop1425/1425. Single CSS inset change,
+  no document overflow hiding, no new CI test; evidence is real rendered geometry.
+- [x] Full seven locked gates passed: Python695/11.61s,100%coverage2846/798,
+  frontend24/24, lint/format148/mypy102/build clean; fresh source review0findings.
+- [ ] **PARTIAL:** rendered reduced-motion mode NOT RUN; user visual acceptance pending.
+  Task2 follow-up report: [rendered review](../../implementation-reports/TGPS-UI01-visual-review-2026-10-20.md).
+  Earlier UNVERIFIED notes describe the original session. No milestone acceptance,
+  C01 F09 closure, C02 treatment, commit/push/merge is implied by this follow-up.
