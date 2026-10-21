@@ -123,3 +123,12 @@ Baseline สดรอบสรุปสถานะ: Python695 ผ่านใ�
 - หลักฐาน/ภาพ/ข้อจำกัดอยู่ใน [UI01 rendered report](TGPS-UI01-visual-review-2026-10-20.md).
   Preview ใหม่ http://127.0.0.1:57955/ (serverของsessionนี้); คืน viewport/default sampleแล้ว.
   ยังไม่มีcommit/push/merge; Stage4 draft คงเดิม
+
+## Checkpoint / CI — 2026-10-21
+
+- [x] UI02 reduced-motion runtime checked, media/default restored; see UI02 follow-up report.
+- [x] Code `805e2d9` and documentation `951732e` committed and pushed to the existing feature branch/draft PR4 under DEC-018; no merge.
+- [x] Remote run13 `39628740428` SUCCESS for head951732e / mergec404f7a, Ubuntu24.04.5/Python3.12.15/Node22.23.3: Python695, coverage100%, frontend37/37, all gates pass. Evidence: TGPS-UI02-remote-ci-2026-10-21.json. A later receipt commit needs its own CI result.
+- [x] C01 executor acceptance handoff review and C02 scope review brief prepared; no new legal certification or treatment.
+- [ ] User visual acceptance, independent C01 acceptance/F09 disposition, C02 detailed requirement approval then evidence/fixture gates. C02 implementation NOT_STARTED.
+- Unrelated untracked Stage4 draft preserved and excluded from commits.
