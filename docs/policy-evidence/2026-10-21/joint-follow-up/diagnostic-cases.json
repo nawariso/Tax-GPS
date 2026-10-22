@@ -1,0 +1,35 @@
+{
+  "status": "DIAGNOSTICS_NOT_LEGAL_GOLDEN_OR_ENGINE_TESTS",
+  "date": "2026-10-22",
+  "data": "synthetic; eligibility conditional; no election or readiness decision",
+  "cases": [
+    {
+      "id": "RMF-PVD-BASIS-BEFORE-EXEMPTION-HYPOTHESIS",
+      "disposition": "UNRESOLVED_ALTERNATIVE",
+      "salary": "990500", "pvd_exemption": "90000", "salary_expense": "100000",
+      "personal_allowance": "60000", "pvd_allowance": "10000", "sso": "10500",
+      "percentage_base": "990500", "claim": "297150", "taxable": "422850", "pit": "19785"
+    },
+    {
+      "id": "RMF-PVD-BASIS-AFTER-EXEMPTION-HYPOTHESIS",
+      "disposition": "UNRESOLVED_ALTERNATIVE",
+      "salary": "990500", "pvd_exemption": "90000", "salary_expense": "100000",
+      "personal_allowance": "60000", "pvd_allowance": "10000", "sso": "10500",
+      "percentage_base": "900500", "claim": "270150", "taxable": "449850", "pit": "22485"
+    },
+    {
+      "id": "ESG2026-CONDITIONAL-SHARED-POOL",
+      "disposition": "CONDITIONAL_ARITHMETIC_ONLY",
+      "salary": "1200000", "pvd_exemption": "0", "salary_expense": "100000",
+      "personal_allowance": "60000", "pvd_allowance": "0", "sso": "0",
+      "purchases": ["200000", "150000"], "claim": "300000", "taxable": "740000", "pit": "63500"
+    },
+    {
+      "id": "ESG2026-INCORRECT-EXTRA-POOL-COMPARATOR",
+      "disposition": "WRONG_POOL_COMPARATOR_NOT_ALLOWED_CLAIM",
+      "salary": "1200000", "pvd_exemption": "0", "salary_expense": "100000",
+      "personal_allowance": "60000", "pvd_allowance": "0", "sso": "0",
+      "purchases": ["200000", "150000"], "claim": "350000", "taxable": "690000", "pit": "56000"
+    }
+  ]
+}

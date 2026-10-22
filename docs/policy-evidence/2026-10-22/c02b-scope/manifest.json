@@ -1,0 +1,47 @@
+[
+  {
+    "file": "rd-mr126.html",
+    "url": "https://www.rd.go.th/2502.html",
+    "retrieved_at": "2026-10-22T13:51:25.504804+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 216006,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "15de91cdc56133bb4cf8f31190dedf349722e08d58353a8db3908daeaa1a1722"
+  },
+  {
+    "file": "rd-ministerial-index.html",
+    "url": "https://www.rd.go.th/6160.html",
+    "retrieved_at": "2026-10-22T13:51:25.773332+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 270059,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "adfccfb65da283307f9bcb11e49ed5ce4161458370a3b6edd068beca2de7cc18"
+  },
+  {
+    "file": "rd-dg401.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg401.pdf",
+    "retrieved_at": "2026-10-22T13:51:26.003616+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 204286,
+    "content_type": "application/pdf",
+    "sha256": "279b2870d7d1399eb29aace846c0aaac3d1275b1352152191f33142b45bc400f"
+  },
+  {
+    "file": "rd-dg414.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg414.pdf",
+    "retrieved_at": "2026-10-22T13:51:26.180321+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 61968,
+    "content_type": "application/pdf",
+    "sha256": "329bc2d8d061b30f5974be6d125e34316ed3cf93884e0775be832521d49396d1"
+  },
+  {
+    "file": "rd-income-dg-index.html",
+    "url": "https://www.rd.go.th/19956.html",
+    "retrieved_at": "2026-10-22T13:51:52.406638+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 387226,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "d54ed513625367c4e646ece6c95f0d073129dedcc813177cc154e070dd7e90b4"
+  }
+]

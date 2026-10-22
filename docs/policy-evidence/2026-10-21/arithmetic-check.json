@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-21",
+  "method": "Independent Decimal arithmetic, no tax_gps imports or pack reads",
+  "fixture_sha256": "545e7bba189f13c6632e0bda059931f50d846d845215631ef980d414210e27fb",
+  "passed": 9,
+  "cases": [
+    "PVD-LOW-WAGE",
+    "PVD-NORMAL",
+    "RMF-NORMAL",
+    "ESG-NORMAL",
+    "COMBINED",
+    "RMF-PERCENT-CAP",
+    "ESG-PERCENT-CAP",
+    "RETIREMENT-CAP",
+    "PVD-BELOW-SPLIT"
+  ],
+  "legal_gate": "OPEN",
+  "limitations": "Validates arithmetic under stated assumptions, not legal applicability or implementation"
+}

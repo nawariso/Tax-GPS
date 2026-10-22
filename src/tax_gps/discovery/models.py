@@ -31,6 +31,8 @@ class DiscoveryReasonCode(StrEnum):
     OUTSIDE_EFFECTIVE_PERIOD = "OUTSIDE_EFFECTIVE_PERIOD"
     RULE_NOT_READY = "RULE_NOT_READY"
     UNSUPPORTED_TAX_STATE = "UNSUPPORTED_TAX_STATE"
+    PVD_BASELINE_ONLY = "PVD_BASELINE_ONLY"
+    RMF_BASELINE_ONLY = "RMF_BASELINE_ONLY"
     ZERO_CURRENT_TAX_BENEFIT = "ZERO_CURRENT_TAX_BENEFIT"
     SHARED_LIMIT_APPLIED = "SHARED_LIMIT_APPLIED"
     ELIGIBILITY_CONDITION_FAILED = "ELIGIBILITY_CONDITION_FAILED"
@@ -146,10 +148,16 @@ class DiscoveryResult:
     catalog_version: str
     engine_version: str
     discovery_hash: str
+    baseline_status: str = "READY"
+    baseline_reason_codes: tuple[str, ...] = ()
+    missing_fact_ids: tuple[str, ...] = ()
 
     def material_dict(self) -> dict[str, object]:
         return {
             "status": self.status.value,
+            "baseline_status": self.baseline_status,
+            "baseline_reason_codes": list(self.baseline_reason_codes),
+            "missing_fact_ids": list(self.missing_fact_ids),
             "profile_hash": self.profile_hash,
             "tax_state_hash": self.tax_state_hash,
             "rule_pack_hash": self.rule_pack_hash,

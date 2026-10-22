@@ -1,0 +1,20 @@
+{
+  "scope": "DEC-028, first-ever ordinary own RMF purchase in2026, no PVD/other retirement rights, all eligibility facts conditional",
+  "status": "DRAFT_FOR_INDEPENDENT_REVIEW_NOT_LEGAL_CERTIFICATION",
+  "arithmetic_policy": "Exact Decimal, no filing-rounding claim; existing engine exact-derived Money convention",
+  "cases": [
+    {"id":"ZERO", "salary":"990500", "sso":"10500", "paid":"0", "percentage_cap":"297150", "claimed":"0", "excess":"0", "expense":"100000", "personal":"60000", "taxable":"820000", "pit":"79000"},
+    {"id":"NORMAL", "salary":"990500", "sso":"10500", "paid":"100000", "percentage_cap":"297150", "claimed":"100000", "excess":"0", "expense":"100000", "personal":"60000", "taxable":"720000", "pit":"60500"},
+    {"id":"PERCENT-BELOW", "salary":"990500", "sso":"10500", "paid":"297149.99", "percentage_cap":"297150", "claimed":"297149.99", "excess":"0", "expense":"100000", "personal":"60000", "taxable":"522850.01", "pit":"30927.5015"},
+    {"id":"PERCENT-AT", "salary":"990500", "sso":"10500", "paid":"297150", "percentage_cap":"297150", "claimed":"297150", "excess":"0", "expense":"100000", "personal":"60000", "taxable":"522850", "pit":"30927.50"},
+    {"id":"PERCENT-ABOVE", "salary":"990500", "sso":"10500", "paid":"297150.01", "percentage_cap":"297150", "claimed":"297150", "excess":"0.01", "expense":"100000", "personal":"60000", "taxable":"522850", "pit":"30927.50"},
+    {"id":"INDIVIDUAL-BELOW", "salary":"4000000", "sso":"0", "paid":"499999.99", "percentage_cap":"1200000", "claimed":"499999.99", "excess":"0", "expense":"100000", "personal":"60000", "taxable":"3340000.01", "pit":"767000.003"},
+    {"id":"INDIVIDUAL-AT", "salary":"4000000", "sso":"0", "paid":"500000", "percentage_cap":"1200000", "claimed":"500000", "excess":"0", "expense":"100000", "personal":"60000", "taxable":"3340000", "pit":"767000"},
+    {"id":"INDIVIDUAL-ABOVE", "salary":"4000000", "sso":"0", "paid":"500000.01", "percentage_cap":"1200000", "claimed":"500000", "excess":"0.01", "expense":"100000", "personal":"60000", "taxable":"3340000", "pit":"767000"},
+    {"id":"LOW-WAGE-ORDER", "salary":"180000", "sso":"0", "paid":"27000", "percentage_cap":"54000", "claimed":"27000", "excess":"0", "expense":"90000", "personal":"60000", "taxable":"3000", "pit":"0"},
+    {"id":"LOW-WAGE-FLOOR", "salary":"180000", "sso":"0", "paid":"54000", "percentage_cap":"54000", "claimed":"54000", "excess":"0", "expense":"90000", "personal":"60000", "taxable":"0", "pit":"0"},
+    {"id":"NO-PVD-SPLIT", "salary":"200000", "sso":"0", "paid":"10001", "percentage_cap":"60000", "claimed":"10001", "excess":"0", "expense":"100000", "personal":"60000", "taxable":"29999", "pit":"0"},
+    {"id":"EXACT-DERIVED", "salary":"990500.01", "sso":"10500", "paid":"297150.01", "percentage_cap":"297150.003", "claimed":"297150.003", "excess":"0.007", "expense":"100000", "personal":"60000", "taxable":"522850.007", "pit":"30927.50105"},
+    {"id":"NO-INCOME-CAP", "salary":"0", "sso":"0", "paid":"1", "percentage_cap":"0", "claimed":"0", "excess":"1", "expense":"0", "personal":"60000", "taxable":"0", "pit":"0"}
+  ]
+}

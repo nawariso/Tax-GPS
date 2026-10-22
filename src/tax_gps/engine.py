@@ -5,25 +5,26 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import cast
 
+from tax_gps.calculation.availability import PlanningAvailability
 from tax_gps.calculation.models import (
     AllowanceCalculation,
     CalculationStep,
     CalculationTrace,
-    DeductionCapacity,
     ExistingRight,
     ExpenseCalculation,
     IncomeCalculation,
     TaxState,
     TaxStatus,
 )
+from tax_gps.calculation.pvd import calculate_pvd
+from tax_gps.calculation.readiness import assess_baseline
+from tax_gps.calculation.rmf import build_rmf_conditions, calculate_rmf
 from tax_gps.calculation.rules import (
     allowance_for_children,
     allowance_for_parents,
-    calculate_deduction_capacity,
     calculate_progressive_pit,
     calculate_section_40_1_expense,
     deductible_mortgage_interest,
-    limit_group,
     personal_allowance,
 )
 from tax_gps.core.canonical import canonical_json, sha256_hex
@@ -33,7 +34,7 @@ from tax_gps.policy.activation import ActivatedRulePack
 from tax_gps.policy.models import RuleSource
 from tax_gps.profile.models import UserProfile
 
-ENGINE_VERSION = "tax-gps-core/0.1.1"
+ENGINE_VERSION = "tax-gps-core/0.4.0"
 
 
 def _step(
@@ -72,17 +73,20 @@ def _sources(rule_ids_used: tuple[str, ...], pack: ActivatedRulePack) -> tuple[R
 def calculate_tax(
     profile: UserProfile, pack: ActivatedRulePack, *, engine_version: str = ENGINE_VERSION
 ) -> TaxState:
+    if engine_version != ENGINE_VERSION:
+        raise ValueError("engine version is not implemented by this artifact")
     if profile.tax_year != pack.pack.tax_year:
         raise ValueError("profile tax year must match the activated rule pack")
     material_unsupported = tuple(
         item for item in profile.income.unsupported if item.amount.is_positive()
     )
-    if material_unsupported:
+    readiness = assess_baseline(profile, pack=pack)
+    if readiness.status is not TaxStatus.READY:
         reasons = tuple(
             f"material unsupported income: {item.category}" for item in material_unsupported
         )
         state = TaxState(
-            TaxStatus.ADVANCED_TAX_PATH_REQUIRED,
+            readiness.status,
             profile.tax_year,
             IncomeCalculation(profile.income.section_40_1),
             ExpenseCalculation(Money.zero()),
@@ -103,10 +107,16 @@ def calculate_tax(
             reasons,
             "",
             pack,
+            planning_availability=PlanningAvailability.BASELINE_NOT_READY,
+            reason_codes=readiness.reason_codes,
+            missing_fact_ids=readiness.missing_fact_ids,
         )
         return _with_hash(state)
 
-    income = profile.income.section_40_1
+    if profile.benefits.pvd is None or profile.benefits.pvd.employee_paid is None:
+        raise AssertionError("unreachable: readiness requires PVD paid")
+    pvd = calculate_pvd(profile.benefits.pvd.employee_paid, pack)
+    income = profile.income.section_40_1 - pvd.exemption
     expense_step = calculate_section_40_1_expense(income, pack)
     benefits = profile.benefits
     personal = personal_allowance(benefits.personal_eligible, pack)
@@ -116,37 +126,26 @@ def calculate_tax(
         benefits.mortgage_interest_paid, benefits.mortgage_eligible, pack
     )
     allowances = AllowanceCalculation(
-        personal, benefits.social_security_paid, parents, children, mortgage
+        personal, benefits.social_security_paid, parents, children, mortgage, pvd.allowance
     )
-    taxable_income = (income - expense_step.output_amount - allowances.total).floor_at_zero()
+    rmf = None
+    rmf_conditions = None
+    if benefits.other_rights is not None and benefits.other_rights.rmf is True:
+        if benefits.rmf is None or benefits.rmf.own_purchase_paid is None:
+            raise AssertionError("unreachable: readiness requires RMF facts")
+        rmf = calculate_rmf(benefits.rmf.own_purchase_paid, income, pack)
+        rmf_conditions = build_rmf_conditions(benefits.rmf, profile.tax_year, pack)
+    taxable_income = (
+        income
+        - expense_step.output_amount
+        - allowances.total
+        - (rmf.claimed if rmf is not None else Money.zero())
+    ).floor_at_zero()
     pit = calculate_progressive_pit(taxable_income, pack)
-    retirement_capacities: tuple[DeductionCapacity, ...] = ()
-    retirement_rule_ids: tuple[str, ...] = ()
-    retirement_trace: tuple[CalculationStep, ...] = ()
-    if benefits.retirement_contributions:
-        retirement_used = Money.sum(item.amount_used for item in benefits.retirement_contributions)
-        retirement_group = limit_group("RETIREMENT", pack)
-        retirement_capacity = calculate_deduction_capacity(
-            category="RETIREMENT_SHARED_GROUP",
-            standalone_limit=retirement_group.cap,
-            amount_used=retirement_used,
-            shared_group=retirement_group.group_id,
-            shared_amount_used=retirement_used,
-            pack=pack,
-        )
-        retirement_capacities = (retirement_capacity,)
-        retirement_rule_ids = (rule_ids.RETIREMENT_SHARED_LIMIT,)
-        retirement_trace = (
-            _step(
-                step_id="retirement-shared-capacity",
-                description="Remaining shared retirement deduction capacity",
-                rule_id=rule_ids.RETIREMENT_SHARED_LIMIT,
-                input_amount=retirement_used,
-                output_amount=retirement_capacity.usable_amount,
-                pack=pack,
-            ),
-        )
-    used = (
+    used: tuple[str, ...] = (
+        "PVD_ALLOWANCE",
+        "PVD_EXEMPTION",
+        "PVD_NORMAL_SCOPE",
         rule_ids.SECTION_40_1_EXPENSE,
         rule_ids.PERSONAL_ALLOWANCE,
         rule_ids.SOCIAL_SECURITY_SECTION_33,
@@ -154,9 +153,23 @@ def calculate_tax(
         rule_ids.CHILD_ALLOWANCE,
         rule_ids.MORTGAGE_INTEREST,
         rule_ids.PIT_RATE_SCHEDULE,
-        *retirement_rule_ids,
     )
+    if rmf is not None:
+        used += (
+            "RMF_DEDUCTION",
+            "RMF_FIRST_PURCHASE_SCOPE",
+            "RMF_CONTINUING_CONDITIONS",
+            "RMF_REPORTING",
+        )
     trace = (
+        _step(
+            step_id="pvd-exemption",
+            description="PVD exemption before employment expense",
+            rule_id="PVD_EXEMPTION",
+            input_amount=profile.income.section_40_1,
+            output_amount=pvd.exemption,
+            pack=pack,
+        ),
         _step(
             step_id="assessable-income",
             description="Assessable Section 40(1) employment income",
@@ -166,6 +179,14 @@ def calculate_tax(
             pack=pack,
         ),
         expense_step,
+        _step(
+            step_id="pvd-allowance",
+            description="Own employee PVD allowance after expense",
+            rule_id="PVD_ALLOWANCE",
+            input_amount=pvd.employee_paid,
+            output_amount=pvd.allowance,
+            pack=pack,
+        ),
         _step(
             step_id="personal-allowance",
             description="Personal allowance",
@@ -206,6 +227,20 @@ def calculate_tax(
             output_amount=mortgage,
             pack=pack,
         ),
+        *(
+            ()
+            if rmf is None
+            else (
+                _step(
+                    step_id="rmf-after-expense",
+                    description="Own RMF exemption after expenses and allowances",
+                    rule_id="RMF_DEDUCTION",
+                    input_amount=rmf.own_purchase_paid,
+                    output_amount=rmf.claimed,
+                    pack=pack,
+                ),
+            )
+        ),
         _step(
             step_id="net-taxable-income",
             description="Net taxable income",
@@ -214,7 +249,6 @@ def calculate_tax(
             output_amount=taxable_income,
             pack=pack,
         ),
-        *retirement_trace,
         *pit.steps,
     )
     rights: list[ExistingRight] = []
@@ -248,27 +282,17 @@ def calculate_tax(
                 rule_id=rule_ids.MORTGAGE_INTEREST,
             )
         )
-    rights.extend(
-        ExistingRight(
-            category=item.category,
-            eligible=True,
-            input_amount=item.amount_used,
-            deductible_amount=item.amount_used,
-            rule_id=rule_ids.RETIREMENT_SHARED_LIMIT,
-        )
-        for item in benefits.retirement_contributions
-    )
     state = TaxState(
         TaxStatus.READY,
         profile.tax_year,
-        IncomeCalculation(income),
+        IncomeCalculation(income, profile.income.section_40_1, pvd.exemption),
         ExpenseCalculation(expense_step.output_amount),
         allowances,
         taxable_income,
         pit.tax,
         pit.marginal_rate,
         tuple(rights),
-        retirement_capacities,
+        (),
         CalculationTrace(trace),
         used,
         _sources(used, pack),
@@ -278,6 +302,14 @@ def calculate_tax(
         (),
         "",
         pack,
+        pvd=pvd,
+        rmf=rmf,
+        rmf_conditions=rmf_conditions,
+        planning_availability=PlanningAvailability.PVD_BASELINE_ONLY
+        if pvd.employee_paid.is_positive()
+        else PlanningAvailability.RMF_BASELINE_ONLY
+        if rmf is not None
+        else PlanningAvailability.AVAILABLE,
     )
     return _with_hash(state)
 

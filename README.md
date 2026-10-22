@@ -1,8 +1,8 @@
-# Tax GPS — Deterministic Tax Core and Opportunity Discovery
+# Tax GPS — Deterministic Tax Core, Discovery, Guardrails & Candidate Outcomes
 
-Phase 1.0 and 1.1 implementation of `TGPS-P1-001` and `TGPS-P1-002`: a deterministic,
-auditable Thai individual income-tax core and tax-right/opportunity discovery engine for
-Gregorian tax year 2026 (B.E. 2569 is display metadata only).
+Phases 1.0–1.3 implement `TGPS-P1-001` through `TGPS-P1-004`: a deterministic,
+auditable Thai individual income-tax core, opportunity discovery, financial guardrails,
+and feasible candidate outcomes for Gregorian tax year 2026 (B.E. 2569 is display metadata only).
 
 The authoritative specification is
 [`docs/requirements/TGPS-P1-001-deterministic-tax-core.md`](docs/requirements/TGPS-P1-001-deterministic-tax-core.md).
@@ -10,6 +10,112 @@ The implementation report is
 [`docs/implementation-reports/TGPS-P1-001.md`](docs/implementation-reports/TGPS-P1-001.md).
 The discovery implementation report is
 [`docs/implementation-reports/TGPS-P1-002.md`](docs/implementation-reports/TGPS-P1-002.md).
+
+The candidate-allocation requirement is
+[`docs/requirements/TGPS-P1-004.md`](docs/requirements/TGPS-P1-004.md).
+The candidate implementation report is
+[`docs/implementation-reports/TGPS-P1-004.md`](docs/implementation-reports/TGPS-P1-004.md).
+
+## Product roadmap and requirements
+
+The agreed product direction is recorded in the [roadmap](docs/ROADMAP.md) and
+[decision log](docs/DECISIONS.md). The current milestone is
+[TGPS-C01: baseline integrity](docs/requirements/TGPS-C01-baseline-integrity.md).
+Its implementation is complete (Tasks 1–5, including fresh-review fixes); acceptance
+is conditional with F09 OPEN, not ACCEPTED. Final local checks: 694 Python tests, 100%
+statement/branch coverage, frontend 24/24 and build 0.2.0. See the
+[C01 report](docs/implementation-reports/TGPS-C01.md) and
+[C01 plan](docs/superpowers/plans/2026-10-15-c01-baseline-integrity.md) for per-task status. These records distinguish agreed direction, implementation evidence,
+and milestone acceptance.
+
+## Product and domain review
+
+The [15 October 2026 review](docs/reviews/2026-10-15-product-domain-review.md)
+records baseline deduction gaps, source-evidence issues, local verification results,
+and proposed requirements for annual tax estimates and investment comparisons.
+Its proposals do not change the accepted milestone contracts or legal policy versions.
+Reproduce the synthetic retirement, unknown-parent and prior-purchase cases with:
+
+```console
+uv run python -m docs.reviews.reproduce_tax_gaps
+```
+
+## Interactive local demo
+
+The Thai browser demo is a separately authorized presentation adapter, not part of the
+P1-004 domain scope or independent acceptance. It calls the existing activation,
+tax, discovery, guardrail and candidate engines without changing or duplicating rules.
+
+From the repository root:
+
+```console
+uv sync --locked
+uv run python -m examples.web_demo
+```
+
+Open `http://127.0.0.1:8765/` in your browser. Stop with Ctrl+C. Use `--port 8766`
+if the default port is busy. The screen includes editable input, seven example scenarios,
+baseline versus feasible outcomes, a user-selected comparison table, rights/conditions,
+and JSON download. Choose the checkbox below a cash candidate to compare it with the
+pinned NO_ACTION row; this is neither ranking nor an investment instruction.
+
+The employee example calculates PIT 79,000 THB before and 60,500 THB after a 100,000 THB
+allocation: tax saving 18,500 THB, cash outflow 100,000 THB, remaining spendable surplus
+250,000 THB. These are executed engine outcomes, not estimated screen placeholders.
+
+Important boundaries:
+
+- Employee Section 40(1), bundled tax year 2026; the default example explicitly asserts
+  personal allowance eligibility. Extended profiles can declare a different known status.
+- Stage 2 accepts explicit parents/children, mortgage interest, debts, committed payments,
+  and known/unknown life coverage. Eligibility is a caller assertion, not legal verification.
+- Positive or unknown other income and retirement contributions block the demo: the current
+  core does not deduct retirement contributions from PIT taxable income. No incomplete tax
+  result is published for these profiles. See [input coverage](docs/demo/input-coverage.md).
+- C01 gates the baseline in the domain: positive retirement or prior Thai ESG/ESGX usage
+  is UNSUPPORTED; unknown shared usage is REQUIRES_INPUT. Neither publishes PIT, savings,
+  candidates or stale exports. Explicit known zero/complete empty usage preserves the
+  supported salary path. Actual treatment of existing purchases is deferred to C02.
+- No ranking, recommendation, product choice, return forecast, tax withholding reconciliation,
+  filing, authentication or persistence. Downloaded JSON contains submitted financial facts.
+- Loopback-only HTTP server and explicit asset allowlist; no repository-wide file server,
+  external services, fonts, analytics, browser storage or submitted-data logging.
+- Existing bundled legal policy is used as-is; this demo does not reverify current law.
+  P1-004 independent acceptance remains pending. This is not production approval.
+
+See [the demo guide](docs/demo/local-web-demo.md) for scope and test commands,
+and the [Stage 1 checkpoint handoff](docs/demo/checkpoint-review.md) plus
+[Stage 2 handoff](docs/demo/stage2-review.md) and
+[Stage 3 handoff](docs/demo/stage3-review.md) for review boundaries and remaining gates.
+
+## Candidate allocations (P1-004)
+
+`tax_gps.candidate.engine.build_candidates(tax, discovery, financial, guardrails, policy)`
+produces feasible, bounded allocation compositions and deterministic outcomes only. It does
+not rank, select, or recommend a candidate. `NO_ACTION` is present for READY tax baselines, and tax savings
+come from the existing progressive PIT core, not a marginal-rate approximation. The caller
+must pass an `ActivatedAllocationPolicy` bound by `activate_allocation_policy(raw_policy,
+profile, tax, discovery, catalog)`. Build the raw production policy with
+`bundled_allocation_policy(profile, tax, discovery, catalog)`, using the accepted
+`UserProfile` and activated opportunity catalog. Activation binds the profile hash to
+discovery, replays P1-002 from accepted profile/tax/catalog/planning-date evidence, and
+independently verifies governed capacity with P1-002's capacity function and the profile's
+shared-usage facts. A self-consistent discovery hash is integrity metadata, not authority
+for remaining capacity. Unknown shared usage cannot become new-cash allocation. Activation
+also verifies the EFFECTIVE bundled catalog and policy ID/version/year, P1-002 tax-saving
+semantics and rule/source provenance. Only `FULL_ALLOCATION_DEDUCTION` is supported;
+non-1:1 allocation-to-deduction is deferred pending separately governed upstream
+policy/catalog support. Arbitrary caller treatments, unknown groups, and self-attested
+content hashes cannot grant production authority. The candidate maximum remains 1–256,
+with no more than eight allocatable opportunities. Raw profile facts are not serialized
+into candidate audit records; state and policy hashes, exact allocations, tax, and
+financial outcomes are retained.
+
+See `tests/acceptance/test_candidates.py::_inputs` for a fully exercised construction
+of TaxState, DiscoveryResult, FinancialState, GuardrailResult, and production policy
+activation. Run `uv run pytest tests/acceptance/test_candidates.py tests/acceptance/test_candidate_policy_binding.py tests/acceptance/test_candidate_capacity_authority.py -q` to verify the integration.
+Synthetic multi-opportunity cases test construction mechanics only and are never
+activated as production policy.
 
 ## Scope
 
@@ -24,8 +130,8 @@ In scope:
 - generic standalone and shared deduction capacity;
 - explicit unsupported-income states instead of approximation;
 - material calculation trace, rule/source provenance, and deterministic SHA-256 audit replay.
-- existing-right-first discovery for personal, parent, child, social-security, mortgage, and
-  retirement-shared-capacity rights;
+- existing-right-first discovery for supported personal, parent, child, social-security and
+  mortgage rights; standalone retirement capacity math does not authorize baseline deduction;
 - a versioned opportunity catalog for Thai ESG, artwork, and Solar Rooftop;
 - explicit intent, missing-input, effective-period, policy-readiness, and shared-pool decisions;
 - immutable discovery snapshots and deterministic replay.
@@ -57,7 +163,7 @@ from tax_gps.core.tax_year import TaxYear
 from tax_gps.engine import calculate_tax
 from tax_gps.policy.activation import activate_rule_pack
 from tax_gps.policy.loader import BUNDLED_PACK_ID_2026, load_bundled_rule_pack
-from tax_gps.profile.models import ExistingTaxBenefits, IncomeProfile, UserProfile
+from tax_gps.profile.models import ExistingTaxBenefits, IncomeProfile, OpportunityFacts, UserProfile
 
 pack = activate_rule_pack(load_bundled_rule_pack(BUNDLED_PACK_ID_2026))
 
@@ -67,6 +173,7 @@ profile = UserProfile(
     tax_year=TaxYear(2026),
     income=IncomeProfile(section_40_1=Money.of(990_500)),
     benefits=ExistingTaxBenefits(social_security_paid=Money.of(10_500)),
+    opportunity_facts=OpportunityFacts(shared_limit_usage=()),  # confirmed no prior usage
 )
 
 state = calculate_tax(profile, pack)
@@ -128,7 +235,10 @@ are isolated so they map cleanly to the corresponding DMN decisions; no workflow
 ## Policy packs
 
 Tax constants live only in versioned policy packs, never in calculation code. The bundled
-production pack is `src/tax_gps/policy/packs/TH-PIT-2026-001.json`.
+production pack is `src/tax_gps/policy/packs/TH-PIT-2026-001@1.0.1.json`; the catalog
+current version is also 1.0.1. Unsuffixed 1.0.0 resources remain historical and unchanged.
+Load them explicitly with `version="1.0.0"` and optionally `expected_hash`; loading an old
+catalog does not grant current allocation authority. See [C01 migration and replay](docs/implementation-reports/TGPS-C01.md).
 
 Every material activated rule carries `rule_id`, `version`, `tax_year`, `effective_from`,
 `effective_to`, `status`, `source_id`, and `verified_at`. Rule status follows
@@ -157,13 +267,88 @@ uv run pytest -m boundary -q      # PIT bracket boundaries
 uv run pytest -m golden -q        # personas G01-G03 and fixtures
 uv run pytest -m negative -q      # invalid input, unsupported income, inactive policy
 uv run pytest -m replay -q        # deterministic hash and replay
+uv run python -m examples.check_web_demo  # real-engine frontend lifecycle tests; Node.js 22+
 uv build
 ```
 
 Coverage is gated at 100% statements and branches.
 
-Engine and package version `0.1.1` expands calculation provenance to include every applied
+Historical engine and package version `0.1.1` expands calculation provenance to include every applied
 rule's primary source followed by supplementary sources in Rule Pack order, deduplicated at
 first reference. Because sources are part of canonical material output, hashes differ from
 `0.1.0`; new `0.1.1` calculations and replay remain deterministic. Historical snapshots require
 the matching `0.1.0` engine artifact.
+
+
+Current C01 package/core is 0.2.0; discovery/candidates are 0.3.0. Incomplete baselines
+carry machine reasons/missing IDs instead of usable PIT/savings/candidates. Parser errors
+identify code-owned scalar paths or record indices; arbitrary parent identity is never
+reflected in error metadata. This changes output hashes intentionally. Historical replay
+must use the retained pre-C01 engine artifact described in the C01 report.
+
+
+The approved [UI01 restyle](docs/implementation-reports/TGPS-UI01.md) gives the local
+demo a cream/forest frame, centered Thai hero, native links into the real calculator,
+and matching dashboard panels using only local HTML/CSS/SVG. Existing calculation JS
+and domain rules are unchanged. Automatic/source verification passed (695 Python tests,
+100% core coverage, frontend24); rendered desktop/mobile acceptance remains pending.
+
+Handoff checks also passed in isolated local Windows Python3.12.14: 695 tests,
+100% core coverage, frontend24 and all quality gates. Ubuntu/Node22 remote CI has
+not run. See [verification](docs/implementation-reports/TGPS-handoff-verification.json).
+The [C02 requirement](docs/requirements/TGPS-C02-existing-rights.md) is drafted for
+review; no C02 treatment is implemented. Its [ledger](docs/implementation-reports/TGPS-C02-progress.md)
+records the legal evidence and approval gates still pending.
+
+Remote follow-up: [draft PR #4](https://github.com/nawariso/Tax-GPS/pull/4) now has
+[successful CI run 10](https://github.com/nawariso/Tax-GPS/actions/runs/38765573860)
+for head c4527c9 (merge ref b9015a3): Ubuntu24.04.5, Python3.12.15, Node22.23.3,
+695 tests, 100% core coverage, frontend24/24 and all gates pass. See
+[exact SHA/runtime evidence](docs/implementation-reports/TGPS-remote-ci.json).
+This does not close F09 or rendered visual acceptance; the PR remains draft.
+
+## UI02 — กรอกง่ายและคำนวณต่อเนื่อง
+
+หน้า local demo แบ่งข้อมูลเป็น3หมวด พร้อมตัวอย่างและคำนวณอัตโนมัติหลังหยุดพิมพ์450ms. พื้นที่ผลลัพธ์คงอยู่ขณะตรวจข้อมูล; แสดงเฉพาะยอดล่าสุดจาก engine พร้อม motion เบา ๆ. รายละเอียด/ผลตรวจ/ข้อค้าง reduced-motion runtime และ user acceptance: [UI02 report](docs/implementation-reports/TGPS-UI02.md).
+
+Follow-up 2026-10-21: reduced-motion runtime ตรวจแล้ว; ยังรอ user visual acceptance.
+UI code checkpoint `805e2d9`, local Python695/coverage100%/frontend37 ผ่าน.
+C01/F09 review และ [C02 scope review brief](docs/requirements/TGPS-C02-review-brief.md)
+พร้อมอ่านต่อ; ยังไม่เริ่ม C02 treatment. ดู DEC-018 สำหรับ checkpoint/CI authorization
+
+C02 follow-up2026-10-21: scope/behavior approvedตามDEC-019; อยู่ legal evidence
+review, implementation NOT_STARTED. [Evidence matrix](docs/policy-evidence/2026-10-21/README.md)
+มี12 original artifactsพร้อมhashและ9 provisional arithmetic fixtures; applicability
+และ independent-review gapsยังOPEN จึงยังไม่เพิ่มtreatment
+
+C02 follow-up2026-10-22: [cross-rule review](docs/policy-evidence/2026-10-21/joint-follow-up/README.md)
+เพิ่ม amendment lineage และ ESGX2026 common-pool corroboration; custody19 originals
+(รวมแหล่งที่คัดออก) และ4 diagnostic arithmetic casesแยกจาก9 fixturesเดิม.
+PVD aggregation/exception, RMF basis และ legal-review gatesยังOPEN; implementation NOT_STARTED
+
+UX draft2026-10-22: [C02 หน้าจอสิทธิเดิมที่อ่านง่าย](docs/requirements/TGPS-C02-guided-rights-ux.md)
+เสนอแสดงภาพรวมก่อน แล้วเปิดสิทธิ/วิธีคิดตามต้องการ พร้อมบอกจุดที่ต้องแก้.
+เป็นแบบสำหรับรีวิวตามDEC-020 ยังไม่ใช่หน้าจอที่ implementแล้ว
+
+UX follow-up DEC-021: แบบได้รับอนุมัติแล้ว มี
+[ต้นแบบลองกด](docs/demo/c02-guided-rights-preview.html) ให้ทดลอง3สถานการณ์จากข้อมูลสมมุติ.
+เป็นdesign artifactแยกจากdemoจริง ไม่มีการคำนวณภาษีหรือstorage; C02legal gatesยังOPEN
+
+C02A [scope](docs/requirements/TGPS-C02A-pvd-first-slice.md) ได้รับอนุมัติตามDEC-023:
+เริ่มภาพรวมภาษีจากPVDกรณีพื้นฐานก่อน ไม่เปิดการทดลองเงินเพิ่มสำหรับpositivePVD
+ในขั้นนี้. Bounded evidence เพียงพอสำหรับวางแผน; [แผน4tasks](docs/superpowers/plans/2026-10-22-c02a-normal-pvd.md)
+รอรีวิว/เลือกวิธีทำงานก่อนลงcode. ไม่เปลี่ยนสถานะIMPLEMENTED/ACCEPTEDของparent
+
+## C02A current checkpoint — 2026-10-22
+
+Normal single-employer/single-fund PVD is integrated with the Thai demo. Core/package0.3.0, discovery/candidates0.4.0; positive PVD supports baseline/breakdown only. Explicit zero preserves supported planning when facts are complete. Local752 Python tests/100% core coverage/frontend45 and all seven gates pass. Remaining delivery checks and acceptance: [C02A progress](docs/implementation-reports/TGPS-C02A-progress.md). Earlier NOT_STARTED descriptions are historical; parent C02 legal gates and C01/F09 remain open.
+
+C02A delivery follow-up: checkpoint `fd5513a` pushed and [remote CI run15](https://github.com/nawariso/Tax-GPS/actions/runs/39778189799) passed Python752/coverage100%/frontend45 on Ubuntu/Python3.12. Tasks1–3 done; fresh reduced-motion runtime and explicit user acceptance remain open. Full parent C02 and C03 are not complete. See the current plan/ledger rather than earlier preparation summaries.
+
+C02 next-slice review: [RMF facts/time evidence](docs/policy-evidence/2026-10-22/rmf-facts-review/README.md) and [C02B proposal](docs/requirements/TGPS-C02B-rmf-first-slice.md) distinguish current purchase/declaration from future obligations and AMC reporting. C02B is REQUIREMENT_REVIEW, scope not approved, no plan/code. Combined RMF/PVD base remains unresolved; existing product gates754/coverage100%/frontend45 pass.
+
+C02B scope approved underDEC-028. [Scoped evidence](docs/policy-evidence/2026-10-22/c02b-scope/README.md) and13 independent arithmetic cases are adequate for planning only; [4task draft plan](docs/superpowers/plans/2026-10-22-c02b-first-rmf.md) includes explicit dated facts, future obligations and report-snapshot binding. Plan/contract review pending, no RMF runtime yet; C02A/parent legal/user acceptance gates unchanged.
+
+C02B current checkpoint (supersedes earlier draft summaries): DEC-030 approved the detailed contract and four-task Native plan. First-purchase RMF-only core, consumers, Thai HTTP/UI and conditional baseline export implemented; final verification/delivery in progress. PositiveRMF disables new-cash planning; combinedPVD remains unsupported. Parent legal gates, reduced-motion verification and user acceptance remain open.
+
+C02B verified technical checkpoint / DEC-031: package/core0.4.0, pack/catalog1.2.0 and discovery/candidates0.5.0. All seven gates pass: Python814, core statements/branches100%, frontend52; independent review findings fixed and normal-mode responsive/keyboard checks recorded. [Current ledger](docs/implementation-reports/TGPS-C02B-progress.md) and [verification receipt](docs/implementation-reports/c02b-verification-complete-2026-10-22.json). IMPLEMENTED is not ACCEPTED: reduced-motion runtime, user acceptance and parent legal gates remain open.

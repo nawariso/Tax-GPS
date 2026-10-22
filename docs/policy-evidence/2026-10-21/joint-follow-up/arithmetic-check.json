@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-22",
+  "passed": 4,
+  "fixture_sha256": "f80f8791d06d1d7181c28d1d70861c5ebcb50adbf2105e7357385afd6a82c113",
+  "method": "Independent Decimal arithmetic; no tax_gps imports or pack reads",
+  "status": "DIAGNOSTICS_ONLY_NO_LEGAL_CHOICE_OR_ACCEPTANCE",
+  "cases": [
+    "RMF-PVD-BASIS-BEFORE-EXEMPTION-HYPOTHESIS",
+    "RMF-PVD-BASIS-AFTER-EXEMPTION-HYPOTHESIS",
+    "ESG2026-CONDITIONAL-SHARED-POOL",
+    "ESG2026-INCORRECT-EXTRA-POOL-COMPARATOR"
+  ]
+}

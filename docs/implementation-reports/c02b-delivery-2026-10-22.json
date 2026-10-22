@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-22",
+  "source_commit": "e3babbb3ed48cec308cf0745474307ebdcb1c7f7",
+  "pushed_head": "acbe3932ede477131ebf287131119547df58bd76",
+  "remote_ref_verified": "refs/heads/feature/tgps-c01-baseline-integrity",
+  "pull_request": "https://github.com/nawariso/Tax-GPS/pull/4",
+  "draft": true,
+  "merge_ref_at_observation": "cd8d32adae2d5e16a358afeaf6621d82bd62ec39",
+  "ci": {
+    "run_id": 39800026973,
+    "run_number": 22,
+    "url": "https://github.com/nawariso/Tax-GPS/actions/runs/39800026973",
+    "head_sha": "acbe3932ede477131ebf287131119547df58bd76",
+    "status": "queued",
+    "conclusion": null,
+    "job_id": 119897761523,
+    "job_status": "queued",
+    "remote_pass_claimed": false
+  },
+  "local_gates": "ALL_SEVEN_PASS",
+  "verification_receipt": "c02b-verification-complete-2026-10-22.json",
+  "python_tests_passed": 814,
+  "core_statement_and_branch_coverage_percent": 100,
+  "frontend_passed": 52,
+  "acceptance": "NOT_CLAIMED",
+  "open_gates": ["remote CI result", "actual reduced-motion runtime", "explicit user acceptance", "parent C02 legal G1-G6", "C01 F09"],
+  "receipt_follow_up_changes": "Documentation only; later head CI is separate and not inferred from this observation"
+}

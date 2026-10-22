@@ -54,6 +54,7 @@ from tax_gps.profile.models import (
 from tests.acceptance.test_discovery import SOLAR_FULLY_ASSERTED
 from tests.support.catalog import production_catalog, solar_ready_catalog
 from tests.support.policy import production_pack
+from tests.support.profiles import complete_benefits
 
 PLANNING_DATE = date(2026, 6, 1)
 
@@ -73,7 +74,7 @@ def _tax_profile(
         version="1",
         tax_year=TaxYear(2026),
         income=IncomeProfile(section_40_1=Money.of(salary)),
-        benefits=benefits or ExistingTaxBenefits(social_security_paid=Money.of(10500)),
+        benefits=benefits or complete_benefits(social_security_paid=Money.of(10500)),
         opportunity_facts=facts if facts is not None else OpportunityFacts(shared_limit_usage=()),
     )
 
@@ -146,7 +147,7 @@ HIGH_APR_DEBT = Debt(
 @pytest.mark.mandatory
 def test_gr_01_existing_right_passthrough_even_with_critical_debt_and_low_emergency_fund() -> None:
     discovery = _discovery(
-        _tax_profile(benefits=ExistingTaxBenefits(parents=(Parent("father", True),)))
+        _tax_profile(benefits=complete_benefits(parents=(Parent("father", True),)))
     )
     financial_profile = _financial_profile(
         liquid_assets=5000, expenses=5000, debts=(HIGH_APR_DEBT,)
@@ -226,7 +227,9 @@ def test_gr_06_commitment_reduces_feasibility_to_cap() -> None:
 @pytest.mark.mandatory
 def test_gr_07_critical_debt_plus_intrinsic_purpose_requires_review() -> None:
     discovery = _discovery(
-        _tax_profile(facts=OpportunityFacts(solar_rooftop=SOLAR_FULLY_ASSERTED)),
+        _tax_profile(
+            facts=OpportunityFacts(shared_limit_usage=(), solar_rooftop=SOLAR_FULLY_ASSERTED)
+        ),
         catalog=solar_ready_catalog(),
     )
     financial_profile = _financial_profile(
@@ -241,7 +244,9 @@ def test_gr_07_critical_debt_plus_intrinsic_purpose_requires_review() -> None:
 @pytest.mark.mandatory
 def test_gr_08_emergency_shortfall_plus_intrinsic_purpose_requires_review() -> None:
     discovery = _discovery(
-        _tax_profile(facts=OpportunityFacts(solar_rooftop=SOLAR_FULLY_ASSERTED)),
+        _tax_profile(
+            facts=OpportunityFacts(shared_limit_usage=(), solar_rooftop=SOLAR_FULLY_ASSERTED)
+        ),
         catalog=solar_ready_catalog(),
     )
     financial_profile = _financial_profile(liquid_assets=100000, expenses=50000)
@@ -378,7 +383,7 @@ def test_gr_16_no_recommendation_leakage() -> None:
 def test_gr_17_unknown_liquid_assets_existing_right_still_allows() -> None:
     """R1-01: unknown liquid assets + existing rights -> ALLOW."""
     discovery = _discovery(
-        _tax_profile(benefits=ExistingTaxBenefits(parents=(Parent("father", True),)))
+        _tax_profile(benefits=complete_benefits(parents=(Parent("father", True),)))
     )
     financial_profile = _financial_profile(liquid_assets=None, expenses=50000)
     result = _guardrails(discovery, financial_profile, budget=0)

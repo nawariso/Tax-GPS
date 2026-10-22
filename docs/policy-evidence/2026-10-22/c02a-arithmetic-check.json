@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-22",
+  "method": "Independent Decimal arithmetic, no tax_gps imports/assets",
+  "passed": 9,
+  "fixture_sha256": "515405968b26ed5b366410416096b9c5443d92aeb461d72770022f7c7b11c14c",
+  "scope_status": "NOT_APPROVED",
+  "legal_acceptance": false,
+  "cases": [
+    "ZERO",
+    "SPLIT-9999",
+    "SPLIT-10000",
+    "SPLIT-10001",
+    "CAP-499999",
+    "CAP-500000",
+    "CAP-500001",
+    "ORDINARY-PAID-600000",
+    "LOW-WAGE-EMPLOYER-EXCLUDED"
+  ]
+}

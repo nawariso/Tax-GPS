@@ -1,0 +1,56 @@
+[
+  {
+    "file": "mr357.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/mr357.pdf",
+    "retrieved_at": "2026-10-21T17:02:08.136927+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "content_type": "application/pdf",
+    "bytes": 104559,
+    "sha256": "aa130583063938b25aa9b75f9a924afacfe103a504be035689fa6f7938a3c214"
+  },
+  {
+    "file": "mr266.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/266.pdf",
+    "retrieved_at": "2026-10-21T17:02:08.137854+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "content_type": "application/pdf",
+    "bytes": 88846,
+    "sha256": "be9f4f1c1c07cd00825ec66b1d1f8003eb764ed9820152d6ac8b5537db2b6394"
+  },
+  {
+    "file": "mr401A.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/mr401A.pdf",
+    "retrieved_at": "2026-10-21T17:02:08.138275+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "content_type": "application/pdf",
+    "bytes": 108689,
+    "sha256": "a81817c7b4c039247132a5647c560c161f9f812f9a7fe99e6512893fd48930b8"
+  },
+  {
+    "file": "sec-esgx-qa-20250401.pdf",
+    "url": "https://www.sec.or.th/TH/Documents/Thai%20ESGX/QA-LTF-to-Thai%20ESGX-010468.pdf",
+    "retrieved_at": "2026-10-21T17:02:08.412987+00:00",
+    "status": "FAILED",
+    "sha256": null,
+    "error_type": "HTTPError",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "file": "rd-rmf-basis-faq.html",
+    "url": "https://www.rd.go.th/60059.html",
+    "retrieved_at": "2026-10-21T17:02:08.447207+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 62391,
+    "sha256": "875bba9abd30fdb69729f4a5651d40576f8077e9cbdd21ef3f6e2a9e2416332e"
+  },
+  {
+    "file": "rd-pvd-rmf-clearcut.html",
+    "url": "https://www.rd.go.th/62777.html",
+    "retrieved_at": "2026-10-21T17:02:08.501972+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 183996,
+    "sha256": "e3534961e74458a46ffef6ce86788149d8b24d61acfc06745643f26cd098b44a"
+  }
+]

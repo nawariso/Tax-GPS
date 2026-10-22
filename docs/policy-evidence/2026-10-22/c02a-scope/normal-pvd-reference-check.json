@@ -1,0 +1,7 @@
+{
+  "date": "2026-10-22",
+  "passed": 9,
+  "fixture_sha256": "54ce3705c8ddf28442a7e8029e56cfcfd2d2094781edde323205d2509fa360b5",
+  "method": "Independent Decimal calculation; both normal-rate ratios checked; no tax_gps imports",
+  "acceptance": "NOT_CLAIMED"
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "file": "set-rmf-example.html",
+    "url": "https://www.setinvestnow.com/th/knowledge/article/348-how-to-invest-in-rmf-for-retirement-and-tax-planning",
+    "retrieved_at": "2026-10-21T17:39:56.710608+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 217110,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "fbe4a4e3afc8a482bdd372a5a4f1955bc357b4ca0aa827de4c408b18e81596eb"
+  },
+  {
+    "file": "set-rmf-example-1.png",
+    "url": "https://media.setinvestnow.com/setinvestnow/Images/2021/Nov/TSI_Article_274_Inv_%E0%B9%80%E0%B8%97%E0%B8%84%E0%B8%99%E0%B8%B4%E0%B8%84%E0%B8%A5%E0%B8%87%E0%B8%97%E0%B8%B8%E0%B8%99%E0%B9%83%E0%B8%99-RMF-%E0%B9%83%E0%B8%AB%E0%B9%89%E0%B9%84%E0%B8%94%E0%B9%89%E0%B8%97%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B9%80%E0%B8%81%E0%B8%A9%E0%B8%B5%E0%B8%A2%E0%B8%93%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A0%E0%B8%B2%E0%B8%A9%E0%B8%B5_01.png",
+    "retrieved_at": "2026-10-21T17:39:56.711319+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 14528,
+    "content_type": "image/png",
+    "sha256": "970e1646153522d9079e3537c74377c6c0bfd906380a23983ff597fea22b7d53"
+  },
+  {
+    "file": "set-rmf-example-2.png",
+    "url": "https://media.setinvestnow.com/setinvestnow/Images/2021/Nov/TSI_Article_274_Inv_%E0%B9%80%E0%B8%97%E0%B8%84%E0%B8%99%E0%B8%B4%E0%B8%84%E0%B8%A5%E0%B8%87%E0%B8%97%E0%B8%B8%E0%B8%99%E0%B9%83%E0%B8%99-RMF-%E0%B9%83%E0%B8%AB%E0%B9%89%E0%B9%84%E0%B8%94%E0%B9%89%E0%B8%97%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B9%80%E0%B8%81%E0%B8%A9%E0%B8%B5%E0%B8%A2%E0%B8%93%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A0%E0%B8%B2%E0%B8%A9%E0%B8%B5_02.png",
+    "retrieved_at": "2026-10-21T17:39:56.711759+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 16948,
+    "content_type": "image/png",
+    "sha256": "55659ef84fd9ab380176bae82b183e6cf25e66c83e9d51178ab626b26f92e9d2"
+  }
+]

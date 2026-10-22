@@ -1,0 +1,128 @@
+[
+  {
+    "file": "rd-mr126.html",
+    "url": "https://www.rd.go.th/2502.html",
+    "final_url": "https://www.rd.go.th/2502.html",
+    "retrieved_date": "2026-10-21",
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 216006,
+    "sha256": "15de91cdc56133bb4cf8f31190dedf349722e08d58353a8db3908daeaa1a1722",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "rd-code-38-64.html",
+    "url": "https://www.rd.go.th/5937.html",
+    "final_url": "https://www.rd.go.th/5937.html",
+    "retrieved_date": "2026-10-21",
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 241403,
+    "sha256": "8e7968587d5aaa020f54896c0dd15199ccbd2472c5a7b077e4333e745d79984d",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "mr395.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/mr395.pdf",
+    "final_url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/mr395.pdf",
+    "retrieved_date": "2026-10-21",
+    "content_type": "application/pdf",
+    "bytes": 96424,
+    "sha256": "37f03b89ae1ccb94c052e52d0bfde0383aeb57f14da5fc1f3694187ff8446895",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "mr398.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/mr398.pdf",
+    "final_url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/mr398.pdf",
+    "retrieved_date": "2026-10-21",
+    "content_type": "application/pdf",
+    "bytes": 107624,
+    "sha256": "ba5910599f078aee4f367124390861560ea9445c33eb731e9540779ce7caa06c",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "dg401.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg401.pdf",
+    "final_url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg401.pdf",
+    "retrieved_date": "2026-10-21",
+    "content_type": "application/pdf",
+    "bytes": 204286,
+    "sha256": "279b2870d7d1399eb29aace846c0aaac3d1275b1352152191f33142b45bc400f",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "dg414.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg414.pdf",
+    "final_url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg414.pdf",
+    "retrieved_date": "2026-10-21",
+    "content_type": "application/pdf",
+    "bytes": 61968,
+    "sha256": "329bc2d8d061b30f5974be6d125e34316ed3cf93884e0775be832521d49396d1",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "dg458A.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg458A.pdf",
+    "retrieved_date": "2026-10-21",
+    "content_type": "application/pdf",
+    "bytes": 125447,
+    "sha256": "e991c33b357abaf54b3244cc2eeeaee3dbff4a73df41e858494c4b497336b704",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "rd-brackets.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/borkor/tax121260.pdf",
+    "retrieved_date": "2026-10-21",
+    "content_type": "application/pdf",
+    "bytes": 142556,
+    "sha256": "91008f6474a28e9a30a5aeaefc8dad5a885d07a48fc68e1204ecbb1b46706e5d",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "rd-decree470.html",
+    "url": "https://www.rd.go.th/33893.html",
+    "retrieved_date": "2026-10-21",
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 34647,
+    "sha256": "d1455e273b32cc0c0db8f117daadf6a5377aa6f1fd588d22ed8ea51d795bd679",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "rd-rates.html",
+    "url": "https://www.rd.go.th/5938.html",
+    "retrieved_date": "2026-10-21",
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 42200,
+    "sha256": "5ec38d0dbbb7ee5d226ad1a7422aa14ff603dcf29dfc566e47e48bd04bc0a3b4",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "rd-ins91-2568.pdf",
+    "url": "https://www.rd.go.th/fileadmin/tax_pdf/pit/2568/Ins91_241268.pdf",
+    "retrieved_date": "2026-10-21",
+    "content_type": "application/pdf",
+    "bytes": 809127,
+    "sha256": "9ae4936ef71c6f33806e07911c5620ec9c0cfb3346e3fe514c8aa185f3f02529",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  },
+  {
+    "file": "rd-taxdeduct69.pdf",
+    "url": "https://rd.go.th/fileadmin/user_upload/callcenter/Q_A___Easy_Tax/Taxdeduct69.pdf",
+    "retrieved_date": "2026-10-21",
+    "content_type": "application/pdf",
+    "bytes": 441238,
+    "sha256": "a0122d57eb6d1cacf7e15b690e14eb2338231c024729b10ae56a8e47ae877010",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "legal_gate": "PENDING_RULE_REVIEW"
+  }
+]

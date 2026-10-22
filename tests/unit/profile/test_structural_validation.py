@@ -8,7 +8,6 @@ from tax_gps.core.tax_year import TaxYear
 from tax_gps.profile.models import (
     ArtworkIntent,
     Child,
-    ExistingTaxBenefits,
     IncomeProfile,
     OpportunityFacts,
     Parent,
@@ -16,6 +15,7 @@ from tax_gps.profile.models import (
     SolarRooftopIntent,
     UserProfile,
 )
+from tests.support.profiles import complete_benefits
 
 
 def child(child_id: str, order: int, *, legally_eligible: bool = True) -> Child:
@@ -26,11 +26,11 @@ def child(child_id: str, order: int, *, legally_eligible: bool = True) -> Child:
 @pytest.mark.negative
 def test_disc_14_duplicate_parent_identity_is_rejected() -> None:
     with pytest.raises(InvalidValueError, match="duplicate parent"):
-        ExistingTaxBenefits(parents=(Parent("father", True), Parent("father", True)))
+        complete_benefits(parents=(Parent("father", True), Parent("father", True)))
 
 
 def test_distinct_parent_roles_are_accepted() -> None:
-    benefits = ExistingTaxBenefits(parents=(Parent("father", True), Parent("mother", True)))
+    benefits = complete_benefits(parents=(Parent("father", True), Parent("mother", True)))
     assert len(benefits.parents) == 2
 
 
@@ -48,20 +48,18 @@ def test_parent_eligibility_may_be_unknown() -> None:
 @pytest.mark.negative
 def test_disc_15_duplicate_child_identity_is_rejected() -> None:
     with pytest.raises(InvalidValueError, match="duplicate child id"):
-        ExistingTaxBenefits(children=(child("c1", 1), child("c1", 2)))
+        complete_benefits(children=(child("c1", 1), child("c1", 2)))
 
 
 @pytest.mark.mandatory
 @pytest.mark.negative
 def test_disc_15_duplicate_legal_child_order_is_rejected() -> None:
     with pytest.raises(InvalidValueError, match="duplicate legal child order"):
-        ExistingTaxBenefits(children=(child("c1", 1), child("c2", 1)))
+        complete_benefits(children=(child("c1", 1), child("c2", 1)))
 
 
 def test_order_may_repeat_for_children_that_are_not_legally_eligible() -> None:
-    benefits = ExistingTaxBenefits(
-        children=(child("c1", 1), child("c2", 1, legally_eligible=False))
-    )
+    benefits = complete_benefits(children=(child("c1", 1), child("c2", 1, legally_eligible=False)))
     assert len(benefits.children) == 2
 
 
@@ -97,12 +95,12 @@ def test_child_constructor_rejects_invalid_identity_and_required_fields(
 @pytest.mark.parametrize("field", ["personal_eligible", "mortgage_eligible"])
 def test_existing_benefit_flags_must_be_boolean(field: str) -> None:
     with pytest.raises(InvalidValueError, match="must be a boolean"):
-        ExistingTaxBenefits(**{field: "yes"})  # type: ignore[arg-type]
+        complete_benefits(**{field: "yes"})
 
 
 def test_profile_collections_are_copied_to_immutable_tuples() -> None:
     parents = [Parent("father", True)]
-    benefits = ExistingTaxBenefits(parents=parents)  # type: ignore[arg-type]
+    benefits = complete_benefits(parents=parents)
     parents.append(Parent("father", True))
     assert benefits.parents == (Parent("father", True),)
 
@@ -158,13 +156,14 @@ def test_profile_dict_and_hash_cover_opportunity_facts() -> None:
         version="1",
         tax_year=TaxYear(2026),
         income=IncomeProfile(section_40_1=Money.of(1000)),
+        benefits=complete_benefits(),
     )
     with_facts = UserProfile(
         profile_id="p",
         version="1",
         tax_year=TaxYear(2026),
         income=IncomeProfile(section_40_1=Money.of(1000)),
-        benefits=ExistingTaxBenefits(parents=(Parent("father", None),), children=(child("c1", 1),)),
+        benefits=complete_benefits(parents=(Parent("father", None),), children=(child("c1", 1),)),
         opportunity_facts=OpportunityFacts(
             artwork=ArtworkIntent(intends_to_purchase=True),
             solar_rooftop=SolarRooftopIntent(intends_to_install=False),
