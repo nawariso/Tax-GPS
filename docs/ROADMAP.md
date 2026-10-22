@@ -208,3 +208,7 @@ Delivery follow-up2026-10-22 / DEC-026: checkpointfd5513a pushed; remote CI run1
 RMF evidence follow-up2026-10-22: [fact/time review packet](policy-evidence/2026-10-22/rmf-facts-review/README.md) separates observable purchase/history/declaration from future holding and AMC reporting.3 new originals/1 failed capture; total29 original hashes match. Combined-PVD RMF base, shared authority and current applicability remainOPEN. No new slice approval, plan, treatment, status or acceptance change.
 
 DEC-027 AUTHORING_DETAIL: [C02B draft](requirements/TGPS-C02B-rmf-first-slice.md) proposes first-ever ordinary RMF purchases without PVD/other rights, baseline-only; no scope approval/plan/implementation. C02A positivePVD/RMFzero remains as implemented. Parent/acceptance states unchanged.
+
+2026-10-22 / DEC-028: C02B first-purchase RMF-only staged scope and baseline-only approved by user. REQUIREMENT_REVIEW now concerns scoped evidence/contract/fixtures, not renewed scope approval. PlanNONE/implementationNOT_STARTED; parent/C02A/C01F09 unchanged.
+
+2026-10-22 / DEC-029: C02B scoped evidence/independent reference13/13 ADEQUATE_FOR_PLANNING_ONLY. [Draft4task plan](superpowers/plans/2026-10-22-c02b-first-rmf.md) and detailed fact/time/reporting snapshot contract ready for review; implementationNOT_STARTED. Parent/C02A/C01F09/acceptance unchanged.

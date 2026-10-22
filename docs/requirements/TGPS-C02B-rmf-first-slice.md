@@ -1,8 +1,8 @@
 # TGPS-C02B — RMF ซื้อครั้งแรก โดยไม่มีสิทธิเกษียณอื่นร่วม
 
-Version: `0.1-draft` · Date: `2026-10-22` (Asia/Bangkok)
-Status: **REQUIREMENT_REVIEW / PROPOSED — ยังไม่อนุมัติ staged scope นี้**
-Implementation: **NOT_STARTED** · Implementation plan: **NONE**
+Version: `0.1` · Date: `2026-10-22` (Asia/Bangkok)
+Status: **REQUIREMENT_REVIEW — staged scope APPROVED (DEC-028); scoped evidence/contract review OPEN**
+Implementation: **NOT_STARTED** · Implementation plan: **DRAFT_FOR_REVIEW** ([4 tasks](../superpowers/plans/2026-10-22-c02b-first-rmf.md))
 Parent: [C02 v0.1](TGPS-C02-existing-rights.md)
 Evidence: [RMF facts/time packet](../policy-evidence/2026-10-22/rmf-facts-review/README.md)
 
@@ -94,7 +94,7 @@ zero ทั้งสองยังรักษาพฤติกรรมเด
 
 ## Gate ก่อนเขียน implementation plan
 
-- [ ] ผู้ใช้อนุมัติ staged scope นี้และ baseline-only availability โดย DEC ใหม่
+- [x] ผู้ใช้อนุมัติ staged scope นี้และ baseline-only availability โดย DEC-028
 - [ ] Scoped amendment/current-applicability review ของ MR126/MR357/DG401/DG414
 - [ ] ยืนยัน ordinary RMF legal classification/own purchase และ first-ever facts
 - [ ] ตกลง fact/time/readiness contract โดยเฉพาะ reporting pending และ future obligations
@@ -117,3 +117,55 @@ applicability, fact/time/readiness และ independent-fixture gates ข้า
 | Date | Version | Change |
 | --- | --- | --- |
 | 2026-10-22 | 0.1-draft | เสนอ first-purchase RMF-only staged scope และ review gates; ยังไม่อนุมัติ ไม่มี plan/product edits |
+
+## Scope approval follow-up
+
+ผู้ใช้อนุมัติ staged scope ตาม DEC-028 แล้วตั้งแต่คำตอบล่าสุด ข้อความเสนอ/ยังไม่มี
+คำตอบข้างบนเป็นประวัติขณะจัดร่าง ไม่ใช่การขอ scope approval ซ้ำ
+Scoped evidence/contract/fixtures และ implementation plan ยังไม่อนุมัติ
+
+| Date | Version | Change |
+| --- | --- | --- |
+| 2026-10-22 | 0.1 | ผู้ใช้อนุมัติ first-purchase RMF-only scope และ baseline-only; DEC-028. ยังต้อง scoped evidence/contract review ก่อน plan |
+
+## Detailed contract สำหรับรีวิวแผน
+
+เป็นรายละเอียดทางวิศวกรรมจาก scoped evidence review ไม่อ้างว่า DG414 กำหนด
+enum หรือ READY ของซอฟต์แวร์ และยังไม่อนุมัติให้เปิด treatment ใน runtime
+
+- `other_rights.rmf=false` ที่ผู้ใช้ยืนยันคือไม่มีซื้อ RMF ในปีนี้ จึงไม่ต้องถาม
+  รายละเอียด RMF เพิ่มเมื่อไม่เกี่ยวข้อง; inventory/history เดิมที่จำเป็นยังต้องครบ
+  ไม่มีการสร้างคำตอบ eligibility/history อัตโนมัติ `None` ยังคง missing
+- ถ้า presence=true ต้องมี own paid >0 และรายละเอียดครบ; falseพร้อมยอดบวก
+  หรือ trueพร้อมยอด0เป็นข้อมูลขัดกัน มี private field error ไม่เลือกคำตอบแทน
+- ต้องมีวันซื้อครั้งแรกและวันที่ประเมินที่ผู้ใช้ส่งจริงในปี2569 และวันซื้อ≤วันประเมิน
+  ยอดซื้อสะสมยืนยันว่าเป็นยอดจ่ายจริงถึงวันประเมิน ไม่ใช้ clock หรือเงินตั้งใจซื้อ
+- ยืนยันจากหลักฐานว่าเป็น ordinary own RMF purchase, หนึ่งกองทุน/หนึ่ง บลจ.,
+  ซื้อเป็นครั้งแรกในปีนี้ ไม่มีโอน/ขาย/รับประโยชน์/กู้หรือเบิก และไม่มีสิทธิอื่นที่กระทบ
+- ต้องแจ้งใช้สิทธิแล้ว: unknownเป็นmissing; ยังไม่ได้แจ้งเป็นnamedunsupported
+  ของ route ปัจจุบัน ไม่ใช่คำตัดสินว่าหมดสิทธิทางกฎหมายถาวร
+- `reporting_status` เป็น explicit NOT_YET_DUE / CONFIRMED_SUBMITTED /
+  DISCREPANCY_OR_CORRECTION หรือNone(unknown). NOT_YET_DUE ต้องก่อนกำหนดปกติ
+  จากpackและมีคำตอบยืนยันว่าไม่มีปัญหารายงานที่ทราบอยู่; ไม่อนุมานสถานะนี้จากช่องว่าง
+- CONFIRMED_SUBMITTED ต้องมี snapshot ชื่อกองทุน/บลจ./ปี/ยอดซื้อสะสม/วันที่ยืนยัน
+  ตรงfactsปัจจุบัน; วันซื้อ≤วันยืนยัน≤วันประเมิน. แก้ยอด/กองทุน/บลจ.ต้องล้าง
+  confirmationบนUI และdomainปฏิเสธsnapshotไม่ตรงโดยอิสระ. ไม่ตรวจระบบ บลจ.ออนไลน์
+- กรณีมีปัญหารายงาน/ต้องแก้ไขยังunsupportedพร้อมระบุกรณี ไม่ตัดสินภาษีย้อนหลัง;
+  filingปี2570และข้อยกเว้นกำหนดเวลายังอยู่นอกsliceการประเมินในปี2569นี้
+- การรับทราบภาระในอนาคตจำเป็นต่อ conditional-estimate route; unknownขอinput,
+  ไม่รับทราบยังunsupportedในrouteนี้ ไม่ใช่หลักฐานว่าซื้อผิดกฎหมาย. แสดงภาระ
+  การซื้อต่อเนื่อง ถือครอง/ขายคืน ไม่รับเงินระหว่างลงทุน และไม่กู้/เบิก ตามpack
+- positiveRMF READY ต้องเห็นคำว่า **ประมาณการภายใต้เงื่อนไข RMF ที่ต้องปฏิบัติต่อเนื่อง**
+  ทั้งsummary/detail/export; conditionsและreporting noticeเป็นmaterial/hash
+  ไม่แสดงว่าอนาคตผ่านแล้ว ไม่เปิดnew-cash/capacity/candidates/tax_impact/saving
+- Ordinary RMF cap/order สำหรับsingle-typeนี้มี13referencecasesตรวจสองวิธีตรงกัน;
+  exact-derivedprecisionคงตามcoreเดิม ไม่อ้างเป็นfilingrounding. ยังไม่ใช้สูตร
+  RMFร่วมPVDหรือร่วมสิทธิเกษียณอื่น และไม่เรียกparent C02ว่าจบ
+
+Scoped evidence disposition: **ADEQUATE_FOR_PLANNING_ONLY** ตาม independent
+reviewและrulingsใน[bounded packet](../policy-evidence/2026-10-22/c02b-scope/README.md).
+รายละเอียดนี้ต้องอยู่ในแผนที่ส่งรีวิวก่อนimplementation ไม่ถามscopeDEC-028ซ้ำ
+
+| Date | Version | Change |
+| --- | --- | --- |
+| 2026-10-22 | 0.1 planning detail | Scoped evidence/independent arithmetic13/13 adequate for planning only; add explicit proposed fact/time/reporting snapshot contract and draft4task plan, pending user plan/contract review |

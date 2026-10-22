@@ -279,3 +279,21 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Proposal: [C02B v0.1-draft](requirements/TGPS-C02B-rmf-first-slice.md) เริ่ม own first-ever normal RMF purchases in2026, one fund/AMC, explicit noPVD/other rights/history; baseline-only สำหรับ positiveRMF. C02A positivePVD/RMFzero คงเดิม; combinedpositiveยังปิดผล
 - Reason: [fact/time packet](policy-evidence/2026-10-22/rmf-facts-review/README.md) ทำ present facts/future obligations/AMC reporting ให้รีวิวแยกกันได้ ขณะที่ combined-PVD RMF base ยังไม่มี direct authority ที่เพียงพอ
 - Boundary: ไม่แทน parent C02 approved scope หรืออนุมัติข้อจำกัดใหม่นี้แทนผู้ใช้; ไม่ปิด legal gates, ไม่กำหนด reporting-pending readiness, ไม่มี implementation plan/runtime changes. ต้องผ่าน scope/evidence/contract review ก่อน plan. C02A reduced-motion/user acceptance และ C01/F09 ไม่เปลี่ยน
+
+## DEC-028 — อนุมัติ C02B first-purchase RMF-only staged scope
+
+- Date: `2026-10-22`
+- Status: `AGREED` — scope approved; scoped evidence/contract review remains open
+- Evidence: ผู้ใช้ตอบ “โอเครครับ ลุย!” ต่อคำถามขออนุมัติ C02B กรณีไม่มี PVD/สิทธิเกษียณอื่นร่วม และ baseline-only availability
+- Decision: อนุมัติ staged scope ใน C02B v0.1-draft เป็น v0.1 สำหรับ scope; เดิน scoped evidence/fact-time/independent numeric review ก่อนเขียนแผน ไม่ถาม scope เดิมซ้ำ
+- Reason: เดิน RMF ส่วนที่ตรวจแยกได้ โดยไม่เลือกสูตร combined-PVD ที่ยังไม่มีข้อยุติ
+- Boundary: ไม่ถือเป็น legal certification หรืออนุมัติ readiness details/implementation plan ที่ยังไม่มี; parent C02 gates, C02A reduced-motion/user acceptance และ C01/F09 ไม่เปลี่ยน. ไม่มี merge/release
+
+## DEC-029 — C02B scoped evidence เพียงพอสำหรับเขียนแผน
+
+- Date: `2026-10-22`
+- Status: `AUTHORING_DETAIL / REQUIREMENT_REVIEW` — ยังไม่อนุมัติ implementation plan/READY contract
+- Evidence: [bounded C02B packet](policy-evidence/2026-10-22/c02b-scope/README.md); independent reviewer c02b_scoped_builder_review recomputed13/13 using separate PowerShell Decimal and judged ADEQUATE_FOR_PLANNING_ONLY with explicit rulings
+- Decision: บันทึก scoped current-chain/fact-time/first-purchase evidence และ arithmetic ว่าเพียงพอสำหรับ authoring [แผน4tasks](superpowers/plans/2026-10-22-c02b-first-rmf.md). Detailed contract ใน requirement/plan รวม material assessment date, explicit presence, future obligations และ reporting snapshot ผูกยอด/identity/year/date เป็นข้อเสนอให้รีวิวก่อน code
+- Reason: ผู้วางแผนไม่ต้องเดา combined-PVD base หรือถือว่าการส่งข้อมูลเก่าใช้แทนยอดซื้อใหม่ได้; false/unknown/not-yet-due ไม่ถูกสลับความหมาย
+- Boundary: ไม่ปิด parent C02 G1–G6 รวม, ไม่รับรองกฎหมายทั้งหมดหรือ filing rounding, ไม่ activate artifacts/treatment, ไม่ถือว่าผู้ใช้อนุมัติรายละเอียดหรือ Native execution สำหรับแผนนี้แล้ว. C02A reduced-motion/user acceptance/C01F09 ไม่เปลี่ยน
