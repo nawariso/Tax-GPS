@@ -297,3 +297,19 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Decision: บันทึก scoped current-chain/fact-time/first-purchase evidence และ arithmetic ว่าเพียงพอสำหรับ authoring [แผน4tasks](superpowers/plans/2026-10-22-c02b-first-rmf.md). Detailed contract ใน requirement/plan รวม material assessment date, explicit presence, future obligations และ reporting snapshot ผูกยอด/identity/year/date เป็นข้อเสนอให้รีวิวก่อน code
 - Reason: ผู้วางแผนไม่ต้องเดา combined-PVD base หรือถือว่าการส่งข้อมูลเก่าใช้แทนยอดซื้อใหม่ได้; false/unknown/not-yet-due ไม่ถูกสลับความหมาย
 - Boundary: ไม่ปิด parent C02 G1–G6 รวม, ไม่รับรองกฎหมายทั้งหมดหรือ filing rounding, ไม่ activate artifacts/treatment, ไม่ถือว่าผู้ใช้อนุมัติรายละเอียดหรือ Native execution สำหรับแผนนี้แล้ว. C02A reduced-motion/user acceptance/C01F09 ไม่เปลี่ยน
+
+## DEC-030 — อนุมัติแผน C02B และเริ่ม Native implementation
+
+- Date: `2026-10-22`
+- Status: `AGREED`
+- Evidence: ผู้ใช้ตอบ “โอเครครับ ลุย!” หลังได้รับแผน C02B สี่ tasks และ detailed contract เพื่อรีวิว
+- Decision: อนุมัติแผน 2026-10-22-c02b-first-rmf และ detailed contract; เริ่ม IN_PROGRESS ด้วย Native ตามวิธีเดิม โดยทำ RED→GREEN และ final independent review
+- Boundary: เฉพาะ first-ever ordinary RMF 2026 ไม่มี PVD ร่วม; baseline-only เมื่อ positive. ไม่ใช่ legal/user acceptance, ไม่ merge/release และไม่ปิด parent C02 gates หรือ C01/F09. ใช้สิทธิ commit/push เดิมตามคำสั่งผู้ใช้
+
+## DEC-031 — C02B technical implementation verified; acceptance remains open
+
+- Date: `2026-10-22`
+- Status: `IMPLEMENTED` (technical checkpoint only)
+- Evidence: final independent review TGPS-C02B-final-review.md; one material fix pass RED3/50→GREEN50/50; all7 local gates PASS, Python814, statements/branches100%, frontend52; rendered1440/390/360/320 and keyboard checks
+- Decision: Record first-ever own ordinary2026 RMF-only baseline as IMPLEMENTED; package/core0.4.0, pack/catalog1.2.0, discovery/candidates0.5.0. Commit/push existing feature branch under prior user authorization
+- Boundary: No automatic ACCEPTED, no merge/release. Reduced-motion runtime UNVERIFIED; explicit user acceptance and parent legal G1–G6 remain OPEN. C01/F09 and combinedPVD/RMF interpretation unchanged. Released artifacts preserved

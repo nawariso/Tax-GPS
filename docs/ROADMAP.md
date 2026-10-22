@@ -3,7 +3,7 @@
 Version: `0.1`  
 Updated: `2026-10-15` (Asia/Bangkok)  
 Direction: **AGREED**  
-Current work: **C02A IN_PROGRESS — core/consumers/HTTP/UI implemented; request-size follow-up verified; reduced-motion runtime/user acceptance pending. C01 IMPLEMENTED / F09 OPEN; parent C02 legal review OPEN.**
+Current work: **C02B IMPLEMENTED — first-purchase RMF-only verified814/100%/frontend52, delivery in progress; reduced-motion/user acceptance OPEN; C02A IN_PROGRESS — core/consumers/HTTP/UI implemented; request-size follow-up verified; reduced-motion runtime/user acceptance pending. C01 IMPLEMENTED / F09 OPEN; parent C02 legal review OPEN.**
 
 Presentation work: **TGPS-UI01 IMPLEMENTED / VISUAL_REVIEW_PENDING** — restyle และ automatic/source verification เสร็จแล้ว;
 ดู [ข้อเสนอ UI01](requirements/TGPS-UI01-fintech-restyle.md) / [DEC-012](DECISIONS.md#dec-012--ทิศทางปรับหน้าตาตาม-fintech-template).
@@ -212,3 +212,5 @@ DEC-027 AUTHORING_DETAIL: [C02B draft](requirements/TGPS-C02B-rmf-first-slice.md
 2026-10-22 / DEC-028: C02B first-purchase RMF-only staged scope and baseline-only approved by user. REQUIREMENT_REVIEW now concerns scoped evidence/contract/fixtures, not renewed scope approval. PlanNONE/implementationNOT_STARTED; parent/C02A/C01F09 unchanged.
 
 2026-10-22 / DEC-029: C02B scoped evidence/independent reference13/13 ADEQUATE_FOR_PLANNING_ONLY. [Draft4task plan](superpowers/plans/2026-10-22-c02b-first-rmf.md) and detailed fact/time/reporting snapshot contract ready for review; implementationNOT_STARTED. Parent/C02A/C01F09/acceptance unchanged.
+
+2026-10-22 / DEC-030–031: C02B approved detailed contract/plan executed with Native; first-purchase RMF-only technical IMPLEMENTED, all7gates814/coverage100%/frontend52. Independent review3findings fixed RED→GREEN; normal-mode rendered/keyboard verified. Task4 PARTIAL for reduced-motion/user acceptance. Source commit e3babbb; delivery receipt follows. Parent C02 G1–G6 and C01/F09 unchanged.

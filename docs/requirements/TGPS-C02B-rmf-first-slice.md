@@ -1,8 +1,8 @@
 # TGPS-C02B — RMF ซื้อครั้งแรก โดยไม่มีสิทธิเกษียณอื่นร่วม
 
 Version: `0.1` · Date: `2026-10-22` (Asia/Bangkok)
-Status: **REQUIREMENT_REVIEW — staged scope APPROVED (DEC-028); scoped evidence/contract review OPEN**
-Implementation: **NOT_STARTED** · Implementation plan: **DRAFT_FOR_REVIEW** ([4 tasks](../superpowers/plans/2026-10-22-c02b-first-rmf.md))
+Status: **IMPLEMENTED — technical review/fix pass verified; reduced-motion and user/legal acceptance OPEN (DEC-031)**
+Implementation: **IMPLEMENTED** · Implementation plan: **APPROVED / Tasks1–3 DONE, Task4 delivery/acceptance PARTIAL** ([4 tasks](../superpowers/plans/2026-10-22-c02b-first-rmf.md))
 Parent: [C02 v0.1](TGPS-C02-existing-rights.md)
 Evidence: [RMF facts/time packet](../policy-evidence/2026-10-22/rmf-facts-review/README.md)
 
@@ -169,3 +169,7 @@ reviewและrulingsใน[bounded packet](../policy-evidence/2026-10-22/c02b-
 | Date | Version | Change |
 | --- | --- | --- |
 | 2026-10-22 | 0.1 planning detail | Scoped evidence/independent arithmetic13/13 adequate for planning only; add explicit proposed fact/time/reporting snapshot contract and draft4task plan, pending user plan/contract review |
+
+### Change log — 2026-10-22 execution
+
+DEC-030: user approved detailed contract/plan, Native execution started. DEC-031: technical IMPLEMENTED after independent review and one verified fix pass; all7gates814/100%/frontend52. Earlier unapproved-proposal language records preparation, superseded by these approval records. Reduced-motion/user/legal acceptance remains OPEN.
