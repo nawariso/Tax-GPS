@@ -93,3 +93,9 @@ First all-gate receipt retained with failures: wrong historical hash helper and 
 ### Scoped source commit
 
 `e3babbb3ed48cec308cf0745474307ebdcb1c7f7` — feat(rmf): add dated first-purchase conditional baseline. Tasks1–3 delivered together as integrated source commit because core/readiness/versioned artifacts/consumers/UI share the same contract; per-task RED/GREEN checkpoints retained above. Final staged diff-check found one extra blank EOF in newpack1.2.0; removed whitespace only before commit, parsed content/hash unchanged. Released files untouched; custody34 originals match working tree and index. Documentation/review/screenshots commit follows separately.
+
+### Push and remote receipt
+
+Source `e3babbb3ed48cec308cf0745474307ebdcb1c7f7` and documentation `acbe3932ede477131ebf287131119547df58bd76` pushed to origin/feature/tgps-c01-baseline-integrity. `git ls-remote` independently confirms acbe393; sandbox network attempt failed, explicit escalation succeeded. DraftPR4 updated, remains draft/unmerged. CIrun22 /39800026973 for exact headacbe393, observed mergerefcd8d32adae2d5e16a358afeaf6621d82bd62ec39 and job119897761523 are **QUEUED**, conclusionnull at latest check. No remotePASS inferred. Local7gatesPASS remains separate Windows3.14 evidence; CI3.12 pending.
+
+Task4 delivery committed/pushed; still PARTIAL for remoteCI/reduced-motion/user acceptance. Only unrelated Stage4 draft remains untracked. This receipt-only follow-up changes no runtime/tests or source custody. Later head CI is separate. Parent legalG1–G6 and C01/F09 remain OPEN. No merge/release or acceptance performed.
