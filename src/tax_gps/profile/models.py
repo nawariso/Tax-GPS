@@ -9,6 +9,7 @@ from tax_gps.core.errors import InvalidValueError
 from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.profile.pvd import FundHistoryFacts, OtherRightsFacts, PvdFacts, facts_to_dict
+from tax_gps.profile.rmf import RmfFacts
 
 
 def _non_negative(amount: Money, field: str) -> None:
@@ -122,6 +123,7 @@ class ExistingTaxBenefits:
     pvd: PvdFacts | None = None
     other_rights: OtherRightsFacts | None = None
     fund_history: FundHistoryFacts | None = None
+    rmf: RmfFacts | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "parents", tuple(self.parents))
@@ -237,6 +239,7 @@ class UserProfile:
                 ],
             },
             "benefits": {
+                "rmf": self.benefits.rmf.to_dict() if self.benefits.rmf is not None else None,
                 "pvd": facts_to_dict(self.benefits.pvd),
                 "other_rights": facts_to_dict(self.benefits.other_rights),
                 "fund_history": facts_to_dict(self.benefits.fund_history),

@@ -270,8 +270,9 @@ def test_c01_ready_copy_is_scoped_and_names_unsupported_items() -> None:
     assert "สิทธิที่มีอยู่ถูกนำมาคำนวณแล้ว" not in page
     assert "รวมรายการที่รองรับและกรอกยืนยันแล้ว" in page
     assert "40(1) ปี 2569" in page
-    exclusions = page.split("รองรับ PVD กรณีปกติ", 1)[1].split("</p>", 1)[0]
-    for item in ("นายจ้างเดียว", "RMF", "สิทธิอื่น", "ประวัติ", "ปิดผล"):
+    # C02B AC02/03: RMF has a bounded conditional route, not blanket exclusion.
+    exclusions = page.split("รองรับ PVD ปกติ หรือ RMF ซื้อเองครั้งแรก", 1)[1].split("</p>", 1)[0]
+    for item in ("ไม่มี PVD ร่วม", "เงื่อนไขต่อเนื่อง", "สิทธิอื่น", "ประวัติ", "ปิดผล"):
         assert item in exclusions, item
 
 

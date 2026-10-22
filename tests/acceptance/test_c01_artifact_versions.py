@@ -27,7 +27,7 @@ from tests.support.catalog import production_catalog
 def test_current_evidence_rotates_without_overwriting_historical_bundles() -> None:
     old = load_bundled_rule_pack(version="1.0.0")
     current = load_bundled_rule_pack()
-    assert current.version == "1.1.0"
+    assert current.version == "1.2.0"
     assert old.version == "1.0.0"
     assert (
         rule_pack_content_hash(old)
@@ -46,7 +46,7 @@ def test_current_evidence_rotates_without_overwriting_historical_bundles() -> No
 def test_current_catalog_evidence_covers_the_2026_pool_and_old_catalog_stays_historical() -> None:
     current = load_bundled_catalog()
     old = load_bundled_catalog(version="1.0.0")
-    assert current.version == "1.1.0"
+    assert current.version == "1.2.0"
     assert old.version == "1.0.0"
     source = current.find_source("SEC-THAI-ESG-2026")
     assert source is not None

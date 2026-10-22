@@ -5,6 +5,7 @@ from contextlib import contextmanager
 
 FIELD_LABELS = {
     "salary": "เงินเดือน",
+    "rmf": "ข้อมูล RMF",
     "pvd": "ข้อมูลเงินสะสม PVD",
     "other_rights": "สิทธิอื่นในปีนี้",
     "fund_history": "ประวัติกองทุน",

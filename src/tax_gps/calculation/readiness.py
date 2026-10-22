@@ -4,6 +4,7 @@ from dataclasses import dataclass, fields
 
 from tax_gps.calculation.models import TaxStatus
 from tax_gps.calculation.pvd import pvd_parameter
+from tax_gps.calculation.rmf import assess_rmf
 from tax_gps.core.errors import InvalidValueError
 from tax_gps.core.money import Money
 from tax_gps.core.percentage import Percentage
@@ -59,7 +60,7 @@ def assess_baseline(profile: UserProfile, *, pack: ActivatedRulePack) -> Baselin
                 value = getattr(facts, item.name)
                 if value is None:
                     missing.append(f"{group}.{item.name}")
-                elif value:
+                elif value and not (group == "other_rights" and item.name == "rmf"):
                     reasons.append(f"{group.upper()}_{item.name.upper()}_UNSUPPORTED")
                     c02_unsupported = True
     pvd = profile.benefits.pvd
@@ -83,6 +84,25 @@ def assess_baseline(profile: UserProfile, *, pack: ActivatedRulePack) -> Baselin
             if not pvd.wage_basis * minimum <= pvd.employee_paid <= pvd.wage_basis * maximum:
                 reasons.append("PVD_RATE_OUTSIDE_NORMAL_SCOPE")
                 c02_unsupported = True
+    presence = (
+        profile.benefits.other_rights.rmf if profile.benefits.other_rights is not None else None
+    )
+    combined = (
+        presence is True
+        and pvd is not None
+        and pvd.employee_paid is not None
+        and pvd.employee_paid.is_positive()
+    )
+    if combined:
+        reasons.append("PVD_RMF_COMBINED_UNSUPPORTED")
+        c02_unsupported = True
+    else:
+        rmf_reasons, rmf_missing = assess_rmf(
+            presence, profile.benefits.rmf, profile.tax_year, pack
+        )
+        reasons.extend(rmf_reasons)
+        missing.extend(rmf_missing)
+        c02_unsupported = c02_unsupported or bool(rmf_reasons)
     if len(missing) > c02_missing_start:
         reasons.append("C02A_FACTS_REQUIRED")
     if unsupported_income:

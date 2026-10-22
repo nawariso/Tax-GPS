@@ -76,4 +76,4 @@ def test_prov_04_sources_unrelated_to_applied_rules_are_excluded() -> None:
 
 
 def test_engine_version_identifies_material_provenance_contract() -> None:
-    assert ENGINE_VERSION == "tax-gps-core/0.3.0"
+    assert ENGINE_VERSION == "tax-gps-core/0.4.0"

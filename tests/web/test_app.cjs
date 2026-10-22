@@ -7,7 +7,7 @@ const test = require('node:test');
 const vm = require('node:vm');
 const base = process.env.TAX_GPS_DEMO_URL || 'http://127.0.0.1:8765';
 assert.match(base, /^http:\/\/127\.0\.0\.1:\d+$/);
-const source = fs.readFileSync(path.join(__dirname, '../../examples/web/pvd.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/profile.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/app.js'), 'utf8');
+const source = fs.readFileSync(path.join(__dirname, '../../examples/web/rmf.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/pvd.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/profile.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/app.js'), 'utf8');
 
 class Element {
   constructor() {
@@ -89,6 +89,57 @@ function harness() {
   };
 }
 const settle = () => new Promise(resolve => setTimeout(resolve, 30));
+
+function setRmf(app) {
+  app.get('other_rights_rmf').value='true';
+  Object.entries({own_purchase_paid:'100000',fund_name:'กองทุนทดสอบ',amc_name:'บลจ.ทดสอบ',first_purchase_date:'2026-01-02',reporting_status:'NOT_YET_DUE',ordinary_own_purchase_confirmed:'true',single_fund:'true',single_amc:'true',first_ever_purchase_in_tax_year:'true',paid_through_assessment_date:'true',declaration_completed:'true',no_distributions_or_borrowing:'true',no_known_reporting_problem:'true',future_obligations_acknowledged:'true'}).forEach(([k,v])=>{app.get('rmf_'+k).value=v;});
+}
+test('C02B conditional baseline shows every continuing obligation',async()=>{
+  const app=harness();setRmf(app);app.recalculate();await app.resolve(app.calls.length-1);
+  assert.equal(app.latest().planning_availability,'RMF_BASELINE_ONLY');
+  assert.match(app.get('rmfEstimate').textContent,/ประมาณการภายใต้เงื่อนไข RMF/);
+  assert.match(app.get('rmfConditions').textContent,/55/);
+  assert.match(app.get('rmfConditions').textContent,/กู้ยืม/);
+  assert.equal(app.get('comparisonTab').disabled,true);
+  assert.equal(app.export().comparison_view.kind,'BASELINE_ONLY');
+  assert.match(app.get('profileBreakdown').textContent,/RMF หลังค่าใช้จ่าย.*100,000/);
+  assert.match(app.get('profileBreakdown').textContent,/รวมค่าลดหย่อน \(ไม่รวมส่วนยกเว้น RMF\).*70,500/);
+});
+
+test('C02B exact continuing terms are visible before acknowledgement',async()=>{
+  const html=await (await fetch(base+'/')).text();
+  assert.match(html,/id="rmfTerms"[^>]*>[^<]*5 ปี[^<]*55 ปี[^<]*1 ปี/);
+  assert.ok(html.indexOf('id="rmfTerms"')<html.indexOf('id="rmf_future_obligations_acknowledged"'));
+});
+test('C02B coverage describes the supported conditional RMF route',async()=>{
+  const html=await (await fetch(base+'/')).text();
+  assert.doesNotMatch(html,/RMF \/ สิทธิอื่นและประวัติที่อยู่นอกขอบเขตยังปิดผล/);
+  assert.match(html,/PVD ปกติ หรือ RMF ซื้อเองครั้งแรก/);
+});
+test('C02B no purchase preserves C02A and history',async()=>{
+  const app=harness();app.get('fund_history_prior_conditional_rights').value='true';
+  app.get('other_rightsNone').click();
+  assert.equal(app.get('fund_history_prior_conditional_rights').value,'true');
+  app.get('other_rights_rmf').value='';app.get('other_rightsNone').click();
+  assert.equal(app.get('other_rights_rmf').value,'');
+});
+test('C02B edits invalidate stale reporting and export',async()=>{
+  const app=harness();setRmf(app);app.recalculate();await app.resolve(app.calls.length-1);
+  app.get('rmf_reporting_status').value='CONFIRMED_SUBMITTED';
+  app.get('rmf_own_purchase_paid').value='110000';app.get('rmf_own_purchase_paid').listeners.input();
+  assert.equal(app.get('rmf_reporting_status').value,'');assert.equal(app.export(),null);
+});
+test('C02B late response cannot publish old conditions',async()=>{
+  const app=harness();setRmf(app);app.recalculate();const old=app.calls.length-1;
+  app.get('rmf_declaration_completed').value='';app.recalculate();
+  await app.resolve(app.calls.length-1,400);await app.resolve(old);
+  assert.equal(app.latest(),null);assert.equal(app.export(),null);
+});
+test('C02B report fields focus actual required control',async()=>{
+  const app=harness();setRmf(app);app.get('rmf_reporting_status').value='CONFIRMED_SUBMITTED';
+  app.recalculate();await app.resolve(app.calls.length-1,400);
+  assert.equal(app.get('rmf_report_fund_name').getAttribute('aria-invalid'),'true');
+});
 
 test('C02A unknown input hides every result',async()=>{
   const app=harness(); app.get('pvd_presence').value='';

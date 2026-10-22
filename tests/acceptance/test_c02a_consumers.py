@@ -55,7 +55,7 @@ def test_c02a_replay_material_and_hash() -> None:
 
 
 def test_c02a_historical_bytes_and_current_rejection() -> None:
-    assert load_bundled_rule_pack().version == "1.1.0"
+    assert load_bundled_rule_pack().version == "1.2.0"
     assert load_bundled_rule_pack(version="1.0.1").version == "1.0.1"
 
 

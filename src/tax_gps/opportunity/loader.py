@@ -25,7 +25,7 @@ from tax_gps.policy.loader import PolicyValidationError
 from tax_gps.policy.models import RuleSource, RuleStatus, SourceAuthority
 
 BUNDLED_CATALOG_ID_2026 = "TH-OPPORTUNITY-2026-001"
-BUNDLED_CATALOG_VERSION_2026 = "1.1.0"
+BUNDLED_CATALOG_VERSION_2026 = "1.2.0"
 _TOP_KEYS = {
     "schema_version",
     "catalog_id",
@@ -310,7 +310,7 @@ def load_bundled_catalog(
     if catalog_id != BUNDLED_CATALOG_ID_2026:
         raise PolicyValidationError(f"unknown bundled catalog: {catalog_id}")
     selected = BUNDLED_CATALOG_VERSION_2026 if version is None else version
-    if selected not in {"1.0.0", "1.0.1", BUNDLED_CATALOG_VERSION_2026}:
+    if selected not in {"1.0.0", "1.0.1", "1.1.0", BUNDLED_CATALOG_VERSION_2026}:
         raise PolicyValidationError("unknown bundled catalog version")
     suffix = "" if selected == "1.0.0" else f"@{selected}"
     resource = files("tax_gps.opportunity.catalogs").joinpath(f"{catalog_id}{suffix}.json")

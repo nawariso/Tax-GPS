@@ -25,6 +25,14 @@ import pytest
             "src/tax_gps/opportunity/catalogs/TH-OPPORTUNITY-2026-001@1.0.1.json",
             "5831327f5cb67d1dd7682a66011211944f9b9abbc35fd516a7be7f8a82440f55",
         ),
+        (
+            "src/tax_gps/policy/packs/TH-PIT-2026-001@1.1.0.json",
+            "cb61b0e3fe53f7960de942f4d44a09cc144063125cc204fac7068704f73dded1",
+        ),
+        (
+            "src/tax_gps/opportunity/catalogs/TH-OPPORTUNITY-2026-001@1.1.0.json",
+            "b30009a713326e8147b9fcb5ad01dcfebaed743cf1c6240159982eb1b63cc2c5",
+        ),
     ],
 )
 def test_c02a_released_artifact_bytes_remain_unchanged(path: str, digest: str) -> None:

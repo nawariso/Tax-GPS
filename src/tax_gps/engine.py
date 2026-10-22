@@ -18,6 +18,7 @@ from tax_gps.calculation.models import (
 )
 from tax_gps.calculation.pvd import calculate_pvd
 from tax_gps.calculation.readiness import assess_baseline
+from tax_gps.calculation.rmf import build_rmf_conditions, calculate_rmf
 from tax_gps.calculation.rules import (
     allowance_for_children,
     allowance_for_parents,
@@ -33,7 +34,7 @@ from tax_gps.policy.activation import ActivatedRulePack
 from tax_gps.policy.models import RuleSource
 from tax_gps.profile.models import UserProfile
 
-ENGINE_VERSION = "tax-gps-core/0.3.0"
+ENGINE_VERSION = "tax-gps-core/0.4.0"
 
 
 def _step(
@@ -127,9 +128,21 @@ def calculate_tax(
     allowances = AllowanceCalculation(
         personal, benefits.social_security_paid, parents, children, mortgage, pvd.allowance
     )
-    taxable_income = (income - expense_step.output_amount - allowances.total).floor_at_zero()
+    rmf = None
+    rmf_conditions = None
+    if benefits.other_rights is not None and benefits.other_rights.rmf is True:
+        if benefits.rmf is None or benefits.rmf.own_purchase_paid is None:
+            raise AssertionError("unreachable: readiness requires RMF facts")
+        rmf = calculate_rmf(benefits.rmf.own_purchase_paid, income, pack)
+        rmf_conditions = build_rmf_conditions(benefits.rmf, profile.tax_year, pack)
+    taxable_income = (
+        income
+        - expense_step.output_amount
+        - allowances.total
+        - (rmf.claimed if rmf is not None else Money.zero())
+    ).floor_at_zero()
     pit = calculate_progressive_pit(taxable_income, pack)
-    used = (
+    used: tuple[str, ...] = (
         "PVD_ALLOWANCE",
         "PVD_EXEMPTION",
         "PVD_NORMAL_SCOPE",
@@ -141,6 +154,13 @@ def calculate_tax(
         rule_ids.MORTGAGE_INTEREST,
         rule_ids.PIT_RATE_SCHEDULE,
     )
+    if rmf is not None:
+        used += (
+            "RMF_DEDUCTION",
+            "RMF_FIRST_PURCHASE_SCOPE",
+            "RMF_CONTINUING_CONDITIONS",
+            "RMF_REPORTING",
+        )
     trace = (
         _step(
             step_id="pvd-exemption",
@@ -207,6 +227,20 @@ def calculate_tax(
             output_amount=mortgage,
             pack=pack,
         ),
+        *(
+            ()
+            if rmf is None
+            else (
+                _step(
+                    step_id="rmf-after-expense",
+                    description="Own RMF exemption after expenses and allowances",
+                    rule_id="RMF_DEDUCTION",
+                    input_amount=rmf.own_purchase_paid,
+                    output_amount=rmf.claimed,
+                    pack=pack,
+                ),
+            )
+        ),
         _step(
             step_id="net-taxable-income",
             description="Net taxable income",
@@ -269,8 +303,12 @@ def calculate_tax(
         "",
         pack,
         pvd=pvd,
+        rmf=rmf,
+        rmf_conditions=rmf_conditions,
         planning_availability=PlanningAvailability.PVD_BASELINE_ONLY
         if pvd.employee_paid.is_positive()
+        else PlanningAvailability.RMF_BASELINE_ONLY
+        if rmf is not None
         else PlanningAvailability.AVAILABLE,
     )
     return _with_hash(state)

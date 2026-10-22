@@ -15,7 +15,7 @@ from tax_gps.core.tax_year import TaxYear
 from tax_gps.policy.models import RulePack, RuleSource, RuleStatus, SourceAuthority, TaxRule
 
 BUNDLED_PACK_ID_2026 = "TH-PIT-2026-001"
-BUNDLED_PACK_VERSION_2026 = "1.1.0"
+BUNDLED_PACK_VERSION_2026 = "1.2.0"
 _SCHEMA_VERSION = "1"
 _TOP_KEYS = {
     "schema_version",
@@ -267,7 +267,7 @@ def load_bundled_rule_pack(
     if rule_pack_id != BUNDLED_PACK_ID_2026:
         raise PolicyValidationError(f"unknown bundled rule pack: {rule_pack_id}")
     selected = BUNDLED_PACK_VERSION_2026 if version is None else version
-    if selected not in {"1.0.0", "1.0.1", BUNDLED_PACK_VERSION_2026}:
+    if selected not in {"1.0.0", "1.0.1", "1.1.0", BUNDLED_PACK_VERSION_2026}:
         raise PolicyValidationError("unknown bundled rule pack version")
     suffix = "" if selected == "1.0.0" else f"@{selected}"
     resource = files("tax_gps.policy.packs").joinpath(f"{rule_pack_id}{suffix}.json")

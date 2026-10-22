@@ -35,7 +35,7 @@ from tax_gps.policy.activation import ActivatedRulePack
 from tax_gps.policy.models import RuleSource
 from tax_gps.profile.models import UserProfile
 
-DISCOVERY_ENGINE_VERSION = "tax-gps-discovery/0.4.0"
+DISCOVERY_ENGINE_VERSION = "tax-gps-discovery/0.5.0"
 T = TypeVar("T")
 
 
@@ -74,6 +74,7 @@ def _existing_rights(
 ) -> tuple[DiscoveredRight, ...]:
     benefits = profile.benefits
     amount_by_id = {
+        opportunity_ids.RMF_OWN_2026: state.rmf.claimed if state.rmf is not None else Money.zero(),
         opportunity_ids.PERSONAL_ALLOWANCE: state.allowances.personal,
         opportunity_ids.PARENT_ALLOWANCE: state.allowances.parents,
         opportunity_ids.CHILD_ALLOWANCE: state.allowances.children,
@@ -81,6 +82,8 @@ def _existing_rights(
         opportunity_ids.MORTGAGE_INTEREST: state.allowances.mortgage_interest,
     }
     present = {
+        opportunity_ids.RMF_OWN_2026: state.rmf is not None
+        and state.rmf.own_purchase_paid.is_positive(),
         opportunity_ids.PERSONAL_ALLOWANCE: state.allowances.personal.is_positive(),
         opportunity_ids.PARENT_ALLOWANCE: bool(benefits.parents)
         and any(parent.eligible is not False for parent in benefits.parents),
@@ -336,7 +339,13 @@ def discover_opportunities(
         or expected_state.material_dict() != state.material_dict()
     ):
         raise ValueError("tax state does not match profile and activated policy")
-    baseline_only = state.pvd is not None and state.pvd.employee_paid.is_positive()
+    rmf_only = state.rmf is not None and state.rmf.own_purchase_paid.is_positive()
+    if rmf_only and (
+        state.rmf_conditions is None
+        or context.planning_date != state.rmf_conditions.assessment_date
+    ):
+        raise ValueError("RMF assessment date must match discovery planning date")
+    baseline_only = rmf_only or (state.pvd is not None and state.pvd.employee_paid.is_positive())
     if state.status is not TaxStatus.READY or baseline_only:
         result = DiscoveryResult(
             status=DiscoveryStatus.UNSUPPORTED,
@@ -351,7 +360,9 @@ def discover_opportunities(
             else (),
             opportunities=(),
             reason_codes=(
-                DiscoveryReasonCode.PVD_BASELINE_ONLY
+                DiscoveryReasonCode.RMF_BASELINE_ONLY
+                if rmf_only
+                else DiscoveryReasonCode.PVD_BASELINE_ONLY
                 if baseline_only
                 else DiscoveryReasonCode.UNSUPPORTED_TAX_STATE,
             ),

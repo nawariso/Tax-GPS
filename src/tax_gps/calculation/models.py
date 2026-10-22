@@ -7,6 +7,7 @@ from enum import StrEnum
 
 from tax_gps.calculation.availability import PlanningAvailability
 from tax_gps.calculation.pvd import PvdCalculation
+from tax_gps.calculation.rmf import RmfCalculation, RmfConditions
 from tax_gps.core.money import Money
 from tax_gps.core.percentage import Percentage
 from tax_gps.core.tax_year import TaxYear
@@ -152,6 +153,8 @@ class TaxState:
     _activated_pack: ActivatedRulePack = field(repr=False, compare=False)
     planning_availability: PlanningAvailability = PlanningAvailability.AVAILABLE
     pvd: PvdCalculation | None = None
+    rmf: RmfCalculation | None = None
+    rmf_conditions: RmfConditions | None = None
     reason_codes: tuple[str, ...] = ()
     missing_fact_ids: tuple[str, ...] = ()
     calculation_scope: str = "EMPLOYEE_40_1_SUPPORTED_RIGHTS_2026"
@@ -161,6 +164,7 @@ class TaxState:
             self.status is not TaxStatus.READY
             or self.taxable_income is None
             or self.planning_availability is not PlanningAvailability.AVAILABLE
+            or (self.rmf is not None and self.rmf.own_purchase_paid.is_positive())
             or (self.pvd is not None and self.pvd.employee_paid.is_positive())
         ):
             raise ValueError("tax impact is unavailable for unsupported tax state")
@@ -176,6 +180,10 @@ class TaxState:
             "missing_fact_ids": list(self.missing_fact_ids),
             "calculation_scope": self.calculation_scope,
             "tax_year": self.tax_year.gregorian,
+            "rmf": self.rmf.to_dict() if self.rmf is not None else None,
+            "rmf_conditions": self.rmf_conditions.to_dict()
+            if self.rmf_conditions is not None
+            else None,
             "pvd": self.pvd.to_dict() if self.pvd is not None else None,
             "income": {
                 "assessable_income": self.income.assessable_income.canonical(),

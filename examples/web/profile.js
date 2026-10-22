@@ -38,9 +38,10 @@ function collectProfile() {
   Object.entries(profileRecords).forEach(([group,records])=>{
     profile[group]=records.map(entry=>Object.fromEntries(Object.entries(entry.fields).map(([key,input])=>[key,input.value])));
   });
-  return {...profile,...collectPvdProfile()};
+  return {...profile,...collectPvdProfile(),rmf:collectRmfProfile()};
 }
 function resetProfile() {
+  renderRmfProfile(null);
   renderPvdProfile({pvd:{employee_paid:'0'},
     other_rights:Object.fromEntries(pvdGroups.other_rights.map(key=>[key,'false'])),
     fund_history:Object.fromEntries(pvdGroups.fund_history.map(key=>[key,'false']))});
@@ -60,7 +61,7 @@ function updateGroupSummaries() {
 function renderProfile(data) {
   const dl=$('profileBreakdown');dl.replaceChildren();
   const financial=data.financial;
-  if(!financial){Object.entries(data.tax_state.allowances).forEach(([key,value])=>dl.append(row(({personal:"ส่วนตัว",social_security:"ประกันสังคม",parents:"บิดา / มารดา",children:"บุตร",mortgage_interest:"ดอกเบี้ยบ้าน",pvd:"PVD ส่วนลดหย่อน",total:"รวมสิทธิเดิม"})[key]||key,baht(value))));$("financialReasons").textContent="ยังไม่เปิดการทดลองเงินเพิ่มสำหรับกรณีที่มี PVD";return;}
+  if(!financial){Object.entries(data.tax_state.allowances).forEach(([key,value])=>dl.append(row(({personal:"ส่วนตัว",social_security:"ประกันสังคม",parents:"บิดา / มารดา",children:"บุตร",mortgage_interest:"ดอกเบี้ยบ้าน",pvd:"PVD ส่วนลดหย่อน",total:data.rmf?"รวมค่าลดหย่อน (ไม่รวมส่วนยกเว้น RMF)":"รวมสิทธิเดิม"})[key]||key,baht(value))));if(data.rmf)dl.append(row("RMF หลังค่าใช้จ่าย · ส่วนยกเว้นแยกต่างหาก",baht(data.rmf.claimed)));$("financialReasons").textContent="ยังไม่เปิดการทดลองเงินเพิ่มสำหรับกรณีที่มี PVD / RMF";return;}
   [['เงินสำรองฉุกเฉินขั้นต่ำ',financial.emergency_reserve_floor],['ภาระจ่ายจำเป็นในช่วงใกล้',financial.near_term_committed_cash],['ยอดหนี้ดอกเบี้ยสูง',financial.critical_debt_balance],['ช่องว่างความคุ้มครองชีวิต',financial.protection_gap]].forEach(([label,value])=>dl.append(row(label,baht(value))));
   const names={personal:'ส่วนตัว',social_security:'ประกันสังคม',parents:'บิดา / มารดา',children:'บุตร',mortgage_interest:'ดอกเบี้ยบ้าน',total:'รวมสิทธิเดิม'};
   Object.entries(data.tax_state.allowances).forEach(([key,value])=>dl.append(row(names[key]||key,baht(value))));

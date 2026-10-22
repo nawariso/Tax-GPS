@@ -72,21 +72,23 @@ function selectComparison(id, checked, resultHash) {
   renderComparison(latest);return true;
 }
 function comparisonExport() {
-  if(latest?.planning_availability==='PVD_BASELINE_ONLY')return {...latest,comparison_view:{version:'1',kind:'BASELINE_ONLY',result_hash:latest.tax_state.output_hash}};
+  if(['PVD_BASELINE_ONLY','RMF_BASELINE_ONLY'].includes(latest?.planning_availability))return {...latest,comparison_view:{version:'1',kind:'BASELINE_ONLY',result_hash:latest.tax_state.output_hash}};
   if (!latest || !latest.outcomes || latest.outcomes.result_hash !== comparisonResultHash) return null;
   return {...latest,comparison_view:{version:'1',kind:'USER_SELECTED_COMPARISON',result_hash:latest.outcomes.result_hash,selected_candidate_ids:comparisonRows(latest).filter(c => c.allocations.length > 0).map(c => c.candidate_id)}};
 }
 function render(data) {
   resetComparison();
-  const baselineOnly=data.planning_availability==='PVD_BASELINE_ONLY';
+  const baselineOnly=['PVD_BASELINE_ONLY','RMF_BASELINE_ONLY'].includes(data.planning_availability);
+  renderRmfResult(data);
   $('comparisonTab').disabled=baselineOnly;
-  $('pvdPlanningNote').hidden=!baselineOnly;$('pvdResult').hidden=!baselineOnly;
+  $('pvdPlanningNote').hidden=!baselineOnly;$('pvdResult').hidden=data.planning_availability!=='PVD_BASELINE_ONLY';
   $('tax').textContent=money(data.tax_before);$('taxable').textContent=money(data.taxable_income);
   if(baselineOnly){
-    showTab(true);renderProfile(data);$('ready').textContent='ภาพรวมภาษีพร้อม · PVD กรณีพื้นฐาน';
+    showTab(true);renderProfile(data);$('ready').textContent=data.rmf?'ภาพรวมภาษีพร้อม · RMF มีเงื่อนไขต่อเนื่อง':'ภาพรวมภาษีพร้อม · PVD กรณีพื้นฐาน';
+    $('pvdPlanningNote').textContent='ภาพรวมภาษีพร้อมแล้ว · ยังไม่เปิดการทดลองเงินเพิ่มสำหรับกรณีที่มี PVD / RMF';
     $('surplus').textContent='ยังไม่เปิด';$('reserve').textContent='ส่วนทดลองเงินเพิ่มรอขั้นถัดไป';
     $('pvdBreakdown').replaceChildren();
-    [['เงินสะสมลูกจ้างที่จ่ายแล้ว',data.pvd.employee_paid],['ส่วนยกเว้นก่อนค่าใช้จ่าย',data.pvd.exemption],['ค่าใช้จ่ายจากรายได้หลังยกเว้น',data.tax_state.expenses.section_40_1],['ส่วนลดหย่อนหลังค่าใช้จ่าย',data.pvd.allowance],['เงินสะสมส่วนเกินสิทธิ',data.pvd.excess]].forEach(([label,value])=>$('pvdBreakdown').append(row(label,baht(value))));
+    if(!data.rmf) [['เงินสะสมลูกจ้างที่จ่ายแล้ว',data.pvd.employee_paid],['ส่วนยกเว้นก่อนค่าใช้จ่าย',data.pvd.exemption],['ค่าใช้จ่ายจากรายได้หลังยกเว้น',data.tax_state.expenses.section_40_1],['ส่วนลดหย่อนหลังค่าใช้จ่าย',data.pvd.allowance],['เงินสะสมส่วนเกินสิทธิ',data.pvd.excess]].forEach(([label,value])=>$('pvdBreakdown').append(row(label,baht(value))));
     $('candidates').replaceChildren();$('comparisonTableBody').replaceChildren();$('rights').replaceChildren();
     data.discovery.existing_rights.forEach(item=>{const card=el('article',undefined,'right');card.append(el('h3',labels[item.opportunity_id]||item.name),el('p',`รวมในฐานภาษีแล้ว ${baht(item.eligible_amount)} · ไม่ใช้เงินเพิ่ม`));$('rights').append(card);});
     $('hashes').replaceChildren();Object.entries({output_hash:data.tax_state.output_hash,engine_version:data.tax_state.engine_version,rule_pack_version:data.tax_state.rule_pack_version}).forEach(([key,value])=>$('hashes').append(el('dt',key),el('dd',value)));return;
@@ -188,6 +190,7 @@ form.addEventListener('change', invalidateResults);
 
 const fieldNames = {salary:'รายได้จากเงินเดือนทั้งปี',social_security:'ประกันสังคมที่จ่ายแล้ว',assets:'สินทรัพย์สภาพคล่อง',expenses:'ค่าใช้จ่ายจำเป็นต่อเดือน',budget:'งบทดลอง',shared_usage:'ยอด Thai ESG / ESGX ที่ใช้ไปแล้ว',planning_date:'วันที่วางแผน',personal_eligible:'สิทธิส่วนตัว',mortgage_interest:'ดอกเบี้ยบ้าน',mortgage_eligible:'เงื่อนไขสิทธิดอกเบี้ยบ้าน',required_coverage:'ความคุ้มครองที่ต้องการ',existing_coverage:'ความคุ้มครองที่มีอยู่',other_income:'รายได้อื่น',retirement_usage:'เงินออมเกษียณ'};
 function fieldForFact(fact) {
+  const rmfInput=rmfFieldForFact(fact);if(rmfInput)return rmfInput;
   const pvdInput=pvdFieldForFact(fact);if(pvdInput)return pvdInput;
   if (fact === 'opportunity_facts.shared_limit_usage') return $('shared_usage');
   const parent = fact.match(/^parent\.(father|mother)\.eligible$/);
@@ -255,7 +258,7 @@ async function calculate(manual = false) {
     const envelope = error.envelope;
     const scoped = envelope && ['BASELINE_NOT_READY','INPUT_REQUIRED','INVALID_INPUT'].includes(envelope.code);
     $('error').textContent = scoped
-      ? `ยังไม่แสดงผลคำนวณ: ${error.message.replace(/\s*\((?:pvd|other_rights|fund_history)\.[a-z_]+\)/g,'')}`
+      ? `ยังไม่แสดงผลคำนวณ: ${error.message.replace(/\s*\((?:pvd|rmf|other_rights|fund_history)\.[a-z_]+\)/g,'')}`
       : `ยังไม่แสดงผลคำนวณ: โปรดตรวจจำนวนเงิน (ไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง) งบต้องไม่เกินสินทรัพย์ที่ทราบ และวันที่ต้องอยู่ในปี 2026 ตรวจสิทธิที่ยังไม่ทราบและรายการนอกขอบเขตด้วย — ${error.message}`;
     $('error').hidden = false;
     const c02Errors=new Map();
@@ -311,4 +314,5 @@ $('download').addEventListener('click', () => {
 });
 initProfile();
 initPvdProfile(invalidateResults);
+initRmfProfile(invalidateResults);
 calculate();

@@ -73,7 +73,9 @@ def test_c02a_unknown_and_positive_inventory_precedence(group: str, value: bool 
         )
         state = calculate_tax(changed, production_pack())
         assert state.status is (
-            TaxStatus.REQUIRES_INPUT if value is None else TaxStatus.UNSUPPORTED
+            TaxStatus.REQUIRES_INPUT
+            if value is None or (group == "other_rights" and item.name == "rmf")
+            else TaxStatus.UNSUPPORTED
         )
         assert state.pit is None
         assert state.taxable_income is None

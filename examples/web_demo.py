@@ -14,6 +14,7 @@ from pathlib import Path
 from examples.demo_errors import DemoInputError, input_scope, invalid_input
 from examples.demo_profile import amount, parse_profile
 from examples.pvd_adapter import c02_reason
+from examples.rmf_adapter import render_rmf_terms
 from tax_gps.candidate.activation import activate_allocation_policy, bundled_allocation_policy
 from tax_gps.candidate.engine import build_candidates
 from tax_gps.core.money import Money
@@ -38,6 +39,7 @@ from tax_gps.profile.models import (
     UserProfile,
 )
 from tax_gps.profile.pvd import PvdWageBasisError
+from tax_gps.profile.rmf import RmfFactConflictError
 
 ASSETS = Path(__file__).with_name("web")
 FIELDS = frozenset(
@@ -47,6 +49,7 @@ MAX_BODY = 4096
 STATIC = {
     "/": ("index.html", "text/html; charset=utf-8"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/rmf.js": ("rmf.js", "text/javascript; charset=utf-8"),
     "/pvd.js": ("pvd.js", "text/javascript; charset=utf-8"),
     "/profile.js": ("profile.js", "text/javascript; charset=utf-8"),
     "/profile.css": ("profile.css", "text/css; charset=utf-8"),
@@ -80,10 +83,11 @@ def _calculate(data: object) -> dict[str, object]:
             assets=financial_profile.liquid_assets,
             expenses=financial_profile.monthly_essential_expenses,
             social=_money(data, "social_security"),
+            assessment_date=planning_date,
         )
     profile = UserProfile(
         profile_id="local-demo",
-        version="2",
+        version="3",
         tax_year=year,
         income=IncomeProfile(section_40_1=_money(data, "salary")),
         benefits=benefits,
@@ -116,19 +120,28 @@ def _calculate(data: object) -> dict[str, object]:
     discovery = discover_opportunities(
         profile, tax, pack, catalog, DiscoveryContext(year, planning_date)
     )
-    if tax.planning_availability.value == "PVD_BASELINE_ONLY":
+    if tax.planning_availability.value in {"PVD_BASELINE_ONLY", "RMF_BASELINE_ONLY"}:
         return {
             "taxable_income": tax.taxable_income.canonical(),
             "tax_before": tax.pit.canonical(),
             "planning_availability": tax.planning_availability.value,
             "pvd": tax.pvd.to_dict() if tax.pvd is not None else None,
+            "rmf": tax.rmf.to_dict() if tax.rmf is not None else None,
+            "rmf_conditions": tax.rmf_conditions.to_dict()
+            if tax.rmf_conditions is not None
+            else None,
+            "estimate_label": "ประมาณการภายใต้เงื่อนไข RMF ที่ต้องปฏิบัติต่อเนื่อง"
+            if tax.rmf is not None
+            else None,
             "financial": None,
             "guardrails": None,
             "outcomes": None,
             "discovery": discovery.to_dict(),
             "tax_state": tax.to_dict(),
             "submitted_profile": {"tax": profile.to_dict()},
-            "demo_scope": "C02A_OWN_PVD_BASELINE_ONLY",
+            "demo_scope": "C02B_OWN_RMF_BASELINE_ONLY"
+            if tax.rmf is not None
+            else "C02A_OWN_PVD_BASELINE_ONLY",
         }
     financial_profile = FinancialProfile(
         liquid_assets=_money(data, "assets") if data["assets"] != "" else None,
@@ -140,6 +153,7 @@ def _calculate(data: object) -> dict[str, object]:
             assets=financial_profile.liquid_assets,
             expenses=financial_profile.monthly_essential_expenses,
             social=_money(data, "social_security"),
+            assessment_date=planning_date,
         )
     context = FinancialPlanningContext(planning_date, _money(data, "budget"))
     financial_policy = activate_financial_policy(bundled_financial_policy(year))
@@ -179,6 +193,8 @@ def calculate(data: object) -> dict[str, object]:
     with input_scope("profile"):
         try:
             return _calculate(data)
+        except RmfFactConflictError as exc:
+            raise invalid_input(exc.fact_id) from exc
         except PvdWageBasisError as exc:
             raise invalid_input("pvd.wage_basis") from exc
 
@@ -240,7 +256,11 @@ class DemoHandler(BaseHTTPRequestHandler):
             self._json(403, {"error": "Local browser requests only"})
         elif self.path in STATIC:
             name, content_type = STATIC[self.path]
-            self._reply(200, (ASSETS / name).read_bytes(), content_type)
+            body = (ASSETS / name).read_bytes()
+            if name == "index.html":
+                pack = activate_rule_pack(load_bundled_rule_pack())
+                body = body.replace(b"{{RMF_TERMS}}", render_rmf_terms(pack).encode("utf-8"))
+            self._reply(200, body, content_type)
         else:
             self._json(404, {"error": "Not found"})
 

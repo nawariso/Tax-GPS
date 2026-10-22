@@ -4,6 +4,7 @@ from dataclasses import fields
 from typing import Any
 
 from examples.demo_errors import input_scope, invalid_input
+from examples.rmf_adapter import rmf_reason
 from tax_gps.core.money import Money
 from tax_gps.profile.pvd import FundHistoryFacts, OtherRightsFacts, PvdFacts
 
@@ -32,7 +33,7 @@ OTHER_LABELS = {
 }
 HISTORY_LABELS = {
     "prior_conditional_rights": (
-        "ประวัติใช้สิทธิ RMF / SSF / ESG / LTF ที่ยังมีเงื่อนไขต่อเนื่อง (นอกเหนือ PVD ปกติ)"
+        "ประวัติก่อนปีภาษีนี้ที่ใช้สิทธิ RMF / SSF / ESG / LTF ที่ยังมีเงื่อนไขต่อเนื่อง (นอกเหนือ PVD ปกติ)"
     ),
     "disposal_withdrawal_transfer": "ประวัติขาย ถอน หรือโอนกองทุนในปีนี้",
     "retirement_or_recapture": "ประวัติเกษียณหรือคืนสิทธิภาษีในปีนี้",
@@ -86,8 +87,11 @@ def parse_pvd_profile(
 
 
 def c02_reason(reason: str) -> str:
+
+    if (message := rmf_reason(reason)) is not None:
+        return message
     if reason == "C02A_FACTS_REQUIRED":
-        return "ยังไม่ทราบข้อมูล PVD สิทธิอื่น หรือประวัติกองทุน โปรดตรวจรายการที่ต้องกรอก"
+        return "ยังไม่ทราบข้อมูล PVD / RMF สิทธิอื่น หรือประวัติกองทุน โปรดตรวจรายการที่ต้องกรอก"
     if reason == "PVD_RATE_OUTSIDE_NORMAL_SCOPE":
         return "อัตราเงินสะสม PVD อยู่นอกกรณีปกติที่รองรับ"
     failure_labels = {

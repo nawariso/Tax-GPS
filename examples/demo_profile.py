@@ -9,6 +9,7 @@ from typing import cast
 
 from examples.demo_errors import DemoInputError, field_label, input_scope, invalid_input
 from examples.pvd_adapter import parse_pvd_profile
+from examples.rmf_adapter import parse_rmf_profile
 from tax_gps.core.decimal_context import EXACT
 from tax_gps.core.money import Money
 from tax_gps.financial.profile import (
@@ -162,9 +163,14 @@ def _commitments(items: list[object]) -> tuple[CommittedCashNeed, ...]:
 
 
 def _parse_profile(
-    value: object, *, assets: Money | None, expenses: Money | None, social: Money
+    value: object,
+    *,
+    assets: Money | None,
+    expenses: Money | None,
+    social: Money,
+    assessment_date: date,
 ) -> tuple[ExistingTaxBenefits, FinancialProfile]:
-    groups = {"pvd", "other_rights", "fund_history"}
+    groups = {"pvd", "other_rights", "fund_history", "rmf"}
     if not isinstance(value, dict) or set(value) - groups != SCALARS | LISTS:
         raise invalid_input("profile")
     scalars = _strings({key: value[key] for key in SCALARS}, SCALARS, "profile")
@@ -194,6 +200,7 @@ def _parse_profile(
     pvd, other_rights, history = parse_pvd_profile(value)
     benefits = ExistingTaxBenefits(
         pvd=pvd,
+        rmf=parse_rmf_profile(value.get("rmf"), assessment_date=assessment_date),
         other_rights=other_rights,
         fund_history=history,
         personal_eligible=_boolean(scalars["personal_eligible"], "personal_eligible"),
@@ -224,7 +231,14 @@ def _parse_profile(
 
 
 def parse_profile(
-    value: object, *, assets: Money | None, expenses: Money | None, social: Money
+    value: object,
+    *,
+    assets: Money | None,
+    expenses: Money | None,
+    social: Money,
+    assessment_date: date,
 ) -> tuple[ExistingTaxBenefits, FinancialProfile]:
     with input_scope("profile"):
-        return _parse_profile(value, assets=assets, expenses=expenses, social=social)
+        return _parse_profile(
+            value, assets=assets, expenses=expenses, social=social, assessment_date=assessment_date
+        )

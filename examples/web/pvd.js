@@ -16,7 +16,7 @@ function collectPvdProfile() {
 function updatePvdVisibility() {
   const positive=document.getElementById('pvd_presence').value==='true';
   document.getElementById('pvdDetails').hidden=!positive;
-  document.getElementById('budget').required=!positive;
+  document.getElementById('budget').required=!(positive||document.getElementById('other_rights_rmf').value==='true');
 }
 function renderPvdProfile(data) {
   const pvd=data.pvd;
@@ -30,7 +30,7 @@ function initPvdProfile(onChange) {
   document.getElementById('pvd_presence').addEventListener('change',updatePvdVisibility);
   ['other_rights','fund_history'].forEach(group=>{
     document.getElementById(group+'None').addEventListener('click',()=>{
-      pvdGroups[group].forEach(name=>{document.getElementById(group+'_'+name).value='false';});
+      pvdGroups[group].filter(name=>!(group==='other_rights'&&name==='rmf')).forEach(name=>{document.getElementById(group+'_'+name).value='false';});
       onChange();
     });
   });
