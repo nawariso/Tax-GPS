@@ -59,3 +59,7 @@ Do not repeat earlier C02A tasks or promote combined-PVD hypotheses into rules.
 - Final gates all exit0: sync16,ruffclean,format184,mypy114,Python754/12.35s,2994statements/852branches100%; fresh-serverfrontend45/45,fail0/skip0/4907.1283ms; build0.3.0. WindowsPython3.14.3. [Plan verification](TGPS-C02B-plan-verification.json). Productpaths/src/examples/tests/pyproject/lock have no diff.
 - Self-review corrected one trailing table space and clarified Thai no-known-reporting-problem wording. Exact proposed obligationcodes and typed date/report fields added to plan after checking consumers; these are documentation only. Native preference fromDEC-025 is preserved; earlier notes about unselectedmethod are superseded, newplan/contract approval still required.
 - User asked asynchronously to review the concrete plan/detailed contract before implementation per writing-plans. This is not a repeated DEC-028 scope question; no approval received as of this record, no product code started.
+
+- Scope/evidence/plan checkpoint `dcd3839aaab6c93c3a888fce76bc33c494e1b9de`
+  committed and pushed successfully to the existing feature branch. This records
+  actual delivery only; no new plan approval, implementation or acceptance.
