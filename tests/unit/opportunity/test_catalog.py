@@ -59,7 +59,7 @@ def test_catalog_declares_every_required_existing_right_in_stable_order() -> Non
         for definition in catalog.definitions
         if definition.opportunity_type is OpportunityType.EXISTING_RIGHT
     ]
-    assert rights == list(opportunity_ids.EXISTING_RIGHT_IDS)
+    assert rights == [*opportunity_ids.EXISTING_RIGHT_IDS, "TH-RIGHT-PVD"]
     assert all(
         catalog.definition(right).category is OpportunityCategory.CLAIM_EXISTING_RIGHT
         for right in rights

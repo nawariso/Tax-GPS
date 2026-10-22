@@ -17,8 +17,9 @@ UI01 follow-up2026-10-20: ตรวจ rendered1440/390/360 และ keyboard �
 Handoff: Windows Python3.14.3 และ isolated3.12.14 ผ่าน 695 tests, coverage100%,
 frontend24/24 และทุก quality gate; remote Ubuntu/Node22 CI ยังไม่ได้รัน
 ([หลักฐาน](implementation-reports/TGPS-handoff-verification.json)).
-C02 มี [requirement v0.1-draft](requirements/TGPS-C02-existing-rights.md)
-เป็น **REQUIREMENT_REVIEW / implementation NOT_STARTED** ตาม DEC-015
+C02 มี [requirement v0.1](requirements/TGPS-C02-existing-rights.md)
+เป็น **REQUIREMENT_REVIEW / implementation NOT_STARTED**: scope/behavior approved
+ตาม DEC-019; legal evidence gate ยัง OPEN
 
 Remote follow-up: [draft PR#4](https://github.com/nawariso/Tax-GPS/pull/4),
 [CI run10](https://github.com/nawariso/Tax-GPS/actions/runs/38765573860) SUCCESS
@@ -133,6 +134,9 @@ acceptance cases, dependencies และ change log
 | 2026-10-15 | 0.1 | C01 เป็น IN_PROGRESS ตามหลักฐานใน ledger; ไม่เปลี่ยนลำดับหรือขอบเขต | [DEC-009](DECISIONS.md#dec-009--เริ่ม-implementation-c01-และการติดตามความคืบหน้า) |
 | 2026-10-15 | 0.1 | C01 IMPLEMENTED ตาม local gates/fresh-review fix-pass; F09 OPEN และ acceptance conditional, C02 ยัง PLANNED | [DEC-011](DECISIONS.md#dec-011--c01-implemented-และจุดรับช่วงที่ไม่ทำงานเดิมซ้ำ) |
 | 2026-10-15 | 0.1 | เพิ่ม local Python3.12 evidence และ C02 REQUIREMENT_REVIEW; ไม่เพิ่ม treatment หรือปิด acceptance | DEC-015 / handoff verification |
+| 2026-10-22 | 0.1 | เพิ่มแบบ UX C02 สำหรับรีวิวตามคำขอความเข้าใจง่าย; ไม่เปลี่ยนสถานะ milestone | DEC-020 |
+| 2026-10-22 | 0.1 | อนุมัติแบบ UX C02และทำprototypeสำหรับลอง; parent legal/treatment statusไม่เปลี่ยน | DEC-021 |
+| 2026-10-22 | 0.1 | เสนอ C02A ordinaryPVD baselineเป็นขั้นแรก; ยังไม่อนุมัติ/เริ่ม implementation | DEC-022 AUTHORING_DETAIL |
 
 ## UI02 presentation follow-up — 2026-10-20
 
@@ -154,3 +158,47 @@ Remote checkpoint result: head `951732e` / merge `c404f7a`,
 [CI run13](https://github.com/nawariso/Tax-GPS/actions/runs/39628740428) SUCCESS:
 Ubuntu24.04.5/Python3.12.15/Node22.23.3, Python695/coverage100%/frontend37
 และทุก gate ผ่าน. เป็นผลของ SHA นี้เท่านั้น; ไม่ปิด F09/acceptance/C02 gates
+
+## C02 evidence follow-up — 2026-10-21 (DEC-019)
+
+ผู้ใช้อนุมัติ scope/behavior ของ requirement v0.1 แล้ว; สถานะยัง
+REQUIREMENT_REVIEW (legal evidence review) / implementation NOT_STARTED.
+จัด [primary-source matrix](policy-evidence/2026-10-21/README.md),12 original
+artifactsพร้อมhash และ9 provisional numeric fixtures/independent arithmetic9/9แล้ว.
+G1–G6ยังOPEN จึงยังไม่เขียนimplementation planหรือเพิ่มtreatment.
+C01 acceptance/F09/UI visual acceptanceไม่เปลี่ยน
+
+Follow-up2026-10-22: [cross-rule review](policy-evidence/2026-10-21/joint-follow-up/README.md)
+ตรวจ MR266→MR357 และเทียบ SEC QA/MR398/DG458 สำหรับ ESGX2026 common pool;
+custody19 originals (รวม unrelated sourceที่คัดออก),4 diagnostic casesเพิ่มแยกจาก9เดิม.
+RMF basisสองสมมติฐานให้ PITต่าง2700บาท จึงยังไม่เลือกสูตร;
+PVD aggregation/exception และ independent/current-applicability gatesยังOPEN.
+ไม่มีการเปลี่ยน milestone หรือ implementation status
+
+UX follow-up2026-10-22 (DEC-020): ตามคำขอให้อ่านง่าย จัด
+[C02 guided-rights UX draft](requirements/TGPS-C02-guided-rights-ux.md)
+เป็น REQUIREMENT_REVIEW: ภาพรวม→สิทธิ→วิธีคิด, unknown/zeroชัด, errorพาไปฟิลด์;
+เป็นข้อเสนอหน้าจอ ไม่ใช่ implementation plan และไม่ปิด legal gates.
+
+UX follow-up (DEC-021): ผู้ใช้อนุมัติแบบแล้ว; มี
+[clickable prototype](demo/c02-guided-rights-preview.html) และfield/copy inventory.
+ตรวจChrome390/320pxและinteractionหลักแล้ว; ไม่เชื่อมtax engine/เพิ่มAPI,
+ไม่อ้างว่าC02IMPLEMENTED และยังไม่ผ่านuser usability acceptance
+
+Evidence follow-up: [SETworkedexamples](policy-evidence/2026-10-22/README.md)
+เพิ่มcorroborationของgrossRMFbase แต่ไม่ปิดG1/G3; custody22originalsรวม
+supplementary/excluded sources. [C02Aproposal](requirements/TGPS-C02A-pvd-first-slice.md)
+พร้อมscope review ไม่ใช่การเปลี่ยนparentcoverageหรือimplementationplan
+
+2026-10-22 / DEC-023: ผู้ใช้อนุมัติ C02A v0.1 แล้ว — PVD นายจ้างเดียว/
+กองทุนเดียว/อัตราปกติเป็นขั้นแรก; positive PVD แสดง baseline ก่อนและยังไม่เปิด
+ทดลองเงินใหม่. Scoped evidence review OPEN / implementation NOT_STARTED;
+parent C02 และ acceptance เดิมไม่เปลี่ยน
+
+2026-10-22 / DEC-024: Scoped chain/currency และ normal-PVD reference9/9
+เพียงพอสำหรับ planning เท่านั้น; [แผน C02A 4tasks](superpowers/plans/2026-10-22-c02a-normal-pvd.md)
+เป็น DRAFT_FOR_REVIEW / implementation NOT_STARTED. Parent legal gates ไม่ถูกปิดรวม
+
+## Current checkpoint — 2026-10-22 / DEC-025–026
+
+C02A implementation **IN_PROGRESS**: core/consumer Tasks1–2 complete; integrated Thai UI implemented and reviewed, Tasks3–4 retain request-size and reduced-motion verification/documentation work. Python752/coverage100%/frontend45 pass all seven local gates. User authorized commit/push and continuation. Parent C02 remains legal REQUIREMENT_REVIEW, C01/F09 and user acceptance remain open. Earlier NOT_STARTED/plan-review summaries are historical and superseded for C02A only.

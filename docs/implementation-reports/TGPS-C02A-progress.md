@@ -1,0 +1,42 @@
+# TGPS-C02A progress ledger
+
+Date:2026-10-22, Asia/Bangkok. Scope approved DEC-023; evidence
+ADEQUATE_FOR_PLANNING_ONLY (DEC-024). Plan DRAFT_FOR_REVIEW;
+implementation NOT_STARTED, acceptance NOT_CLAIMED.
+
+## Scope and pre-implementation evidence
+
+- [x] อ่าน AGENTS/roadmap/decisions/requirement และ skills; git status/log ตรวจงานค้างโดยไม่ทับ unrelated Stage4 draft. Session baseline sync16, pytest695/11.04s; fresh-server frontend37/37 fail0/skip0 (4809.5112ms)
+- [x] บันทึก user “โอเครครับ ลุย!” เป็น scope approval DEC-023 ไม่ขอ scope ซ้ำ
+- [x] Independent read-only reviewer `c02a_evidence_review` คำนวณ PowerShell Decimal9/9 ตรง; initially important gaps: scoped currency และ qualifying-fund chain. ปิดผ่าน bounded review/actual-credit+normal-remittance contract; follow-up ADEQUATE_FOR_PLANNING_ONLY ไม่ใช่ certification
+- [x] เก็บ RD originals เพิ่ม4 พร้อมhash, SECraw403สองรายการบันทึกFAILED/hashnullและอ่านผ่านweb. รวม custody26originals/failed4; ทุกhashตรง, four arithmetic receiptsตรงและJSONparseผ่าน
+- [x] สร้าง ordinary-employer reference ใหม่9/9จากsynthetic assumptions; employeeexpectedoutputsเท่าเดิม, ไม่แก้draftเก่า. fixtureSHA256 `54ce3705c8ddf28442a7e8029e56cfcfd2d2094781edde323205d2509fa360b5`; employer99999เดิมเป็นdiagnosticไม่ใช่normallegalgolden
+- [x] **CORRECTION:** ข่าวSEC13302เป็นpublished guidelines2026-09-07 ไม่ใช่draftตามคำบรรยายทำงานก่อนหน้า; ไม่ใช่PITamendment. บันทึกไว้ในevidenceโดยไม่ใช้เป็นหลักฐานหลายงาน/หลายกองทุน
+- [x] [แผน](../superpowers/plans/2026-10-22-c02a-normal-pvd.md)4tasksและself-review: AC01–09/fivefailuremodesมีtask/test; ตรวจsignatureจริง `tax_impact(additional_deduction: Money)->TaxImpact` และแก้ก่อนส่งรีวิว. Patchสองครั้งจับcontextไม่ตรงจึงไม่แก้ไฟล์; ใช้contextจริงแก้สำเร็จ ไม่มีruntimeผลกระทบ
+- Task preparation: DONE; Task1–4: pending plan review/execution choice. ไม่มีproduct edits, RED/GREEN, commit/push หรือ user acceptance ในช่วงนี้
+- [x] [Final verification](TGPS-C02A-plan-verification.json): seven gates exit0 — sync16, ruffclean/format165, mypy102, pytest695/11.36s, coverage2846statements/798branches100%; fresh-serverfrontend37/37 fail0/skip0 (4483.5213ms), build0.2.0สำเร็จ. WindowsCPython3.14.3; ไม่ใช่ CI Python3.12 runใหม่
+- [x] `git diff --check` exit0 พร้อม warningCRLFเดิมใน parent requirement; diffในsrc/examples/tests/pyproject.toml/uv.lockว่าง. ยังไม่รัน rendered product QA เพราะไม่มี integrated implementation ใหม่; ไม่อ้าง prototype QA แทน
+- [x] Final plan self-review เพิ่ม pack argument ใน proposed assess_baseline เพื่ออ่าน normal-rate bounds จาก versioned pack; rgยืนยันปัจจุบันมี runtime caller เดียวในengine.py. แก้เฉพาะแผน/ledgerหลังgates ไม่ใช่productioncode
+
+## Native execution / DEC-025
+
+- [x] Plan approved by user “โอเครครับ ลุย!”, Native recommended method accepted. Baseline695/11.07s; frontend37/37 fail0/skip0/4691.471ms.
+- Ruling: work in existing feature checkout preserving prior docs/unrelated Stage4; use native Windows plan-scoped ledger in place of Bash helpers. No main/parallel product writes.
+- Task1 IN_PROGRESS: AC01–05 tests written before production edits.
+
+- [x] Task1 RED27fail → GREEN27pass/0.15s. First GREEN attempt hit sandbox pytest-cache failure; uv escalated rerun revealed SEC authority mismatch, fixed new (unreleased) source classification to OFFICIAL_PROVIDER, without changing activation guardrail. One inline Python quoting error made no edits.
+- [x] Full-suite checkpoint696pass/26fail: expected HTTP adapter integration and version/provenance assertions, plus overbroad C02 missing reason (fixed to append only for C02 missing facts). No baseline failures hidden.
+- Ruling: start Task2/3 integration before Task1 full-suite green because current HTTP must submit new facts to preserve existing tests; core remains27green. Cost if wrong: larger integration checkpoint, final full-suite gate unchanged.
+- [x] Task2 RED2fail/2pass (replay/version already characterization); category assertion corrected to existing CLAIM_EXISTING_RIGHT/right ID because there is no RETIREMENT category in catalog.
+- [x] Task2 targeted GREEN31/31 including core; Task3 RED2/2fail (strict group schema unsupported before adapter). C02A reason labels remain code-owned Thai names, never submitted values.
+- [x] Task3 Python integration726pass/2catalog-order assertions failed then fixed; later739pass with core2990statements/852branches100%; mypy113clean, frontend42/42 before UX follow-up. Initial lint68 and typing12 findings fixed in touched files only; scratch migration argument order/import-path/quote/context errors recorded, no hidden successful claims.
+- [x] Actual browser inspection found raw15fact paths and obsolete aggregate retirement field confusing current PVD entry. UX regression RED42pass/1fail; grouped Thai error links replace raw paths, gross salary precedes PVD, prior conditional history explicitly excludes ordinary PVD membership.
+- Ruling: hide legacy retirement aggregate input (existing0 compatibility placeholder) in current UI; explicit typed inventory still requires every real answer and legacy positive API inputs remain unsupported. Cost if wrong: legacy aggregate must be exposed again for a future supported route; no new readiness defaults in domain.
+
+## 2026-10-22 checkpoint / DEC-026
+
+- User authorized commit/push and continuation. Existing feature branch `feature/tgps-c01-baseline-integrity`; unrelated Stage4 draft excluded.
+- Fresh baseline: Python752 passed/11.32s; frontend45/45, fail0/skip0.
+- Fresh pre-commit seven gates all exit0: Python752/12.48s,2994statements/852branches100%; frontend45/45, fail0/skip0; ruff clean, format179, mypy114, build0.3.0. Windows Python3.14.3. Receipt: [checkpoint verification](TGPS-C02A-checkpoint-verification.json).
+- Task1 DONE; Task2 DONE; Task3 PARTIAL (representative Thai request size); Task4 PARTIAL (fresh reduced-motion runtime, documentation and delivery). Existing independent review and fixes retained; no new review or ACCEPTED claim.
+- CORRECTION: the opening NOT_STARTED/DRAFT statements and unchecked plan boxes describe preparation history; runtime now exists and passes the above checks. Current task status here supersedes those stale summaries.

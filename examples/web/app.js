@@ -38,7 +38,7 @@ function resetComparison() {
   $('comparisonSelectionStatus').textContent = 'ยังไม่มีผลคำนวณสำหรับเปรียบเทียบ';
 }
 function comparisonRows(data) {
-  if (!data || data.outcomes.result_hash !== comparisonResultHash) return [];
+  if (!data || !data.outcomes || data.outcomes.result_hash !== comparisonResultHash) return [];
   return data.outcomes.candidates.filter(candidate => candidate.allocations.length === 0 || comparisonSelection.has(candidate.candidate_id));
 }
 function comparisonOpportunityDetail(id, data) {
@@ -65,18 +65,33 @@ function renderComparison(data) {
   $('comparisonSelectionStatus').textContent = data.outcomes.candidates.every(c => c.allocations.length === 0) ? 'ไม่มีรายการใช้เงินที่ engine เปิดให้ทดลอง — แสดง NO_ACTION และเหตุผลจริง' : `เลือกมาเทียบ ${rows.filter(c => c.allocations.length > 0).length} รายการ · NO_ACTION แสดงเสมอ · เรียงตาม engine ไม่ใช่อันดับ`;
 }
 function selectComparison(id, checked, resultHash) {
-  if (!latest || typeof checked !== 'boolean' || resultHash !== comparisonResultHash || resultHash !== latest.outcomes.result_hash) return false;
+  if (!latest || !latest.outcomes || typeof checked !== 'boolean' || resultHash !== comparisonResultHash || resultHash !== latest.outcomes.result_hash) return false;
   const candidate = latest.outcomes.candidates.find(c => c.candidate_id === id && c.allocations.length > 0);
   if (!candidate) return false;
   if (checked) comparisonSelection.add(id); else comparisonSelection.delete(id);
   renderComparison(latest);return true;
 }
 function comparisonExport() {
-  if (!latest || latest.outcomes.result_hash !== comparisonResultHash) return null;
+  if(latest?.planning_availability==='PVD_BASELINE_ONLY')return {...latest,comparison_view:{version:'1',kind:'BASELINE_ONLY',result_hash:latest.tax_state.output_hash}};
+  if (!latest || !latest.outcomes || latest.outcomes.result_hash !== comparisonResultHash) return null;
   return {...latest,comparison_view:{version:'1',kind:'USER_SELECTED_COMPARISON',result_hash:latest.outcomes.result_hash,selected_candidate_ids:comparisonRows(latest).filter(c => c.allocations.length > 0).map(c => c.candidate_id)}};
 }
 function render(data) {
-  resetComparison();comparisonResultHash = data.outcomes.result_hash;
+  resetComparison();
+  const baselineOnly=data.planning_availability==='PVD_BASELINE_ONLY';
+  $('comparisonTab').disabled=baselineOnly;
+  $('pvdPlanningNote').hidden=!baselineOnly;$('pvdResult').hidden=!baselineOnly;
+  $('tax').textContent=money(data.tax_before);$('taxable').textContent=money(data.taxable_income);
+  if(baselineOnly){
+    showTab(true);renderProfile(data);$('ready').textContent='ภาพรวมภาษีพร้อม · PVD กรณีพื้นฐาน';
+    $('surplus').textContent='ยังไม่เปิด';$('reserve').textContent='ส่วนทดลองเงินเพิ่มรอขั้นถัดไป';
+    $('pvdBreakdown').replaceChildren();
+    [['เงินสะสมลูกจ้างที่จ่ายแล้ว',data.pvd.employee_paid],['ส่วนยกเว้นก่อนค่าใช้จ่าย',data.pvd.exemption],['ค่าใช้จ่ายจากรายได้หลังยกเว้น',data.tax_state.expenses.section_40_1],['ส่วนลดหย่อนหลังค่าใช้จ่าย',data.pvd.allowance],['เงินสะสมส่วนเกินสิทธิ',data.pvd.excess]].forEach(([label,value])=>$('pvdBreakdown').append(row(label,baht(value))));
+    $('candidates').replaceChildren();$('comparisonTableBody').replaceChildren();$('rights').replaceChildren();
+    data.discovery.existing_rights.forEach(item=>{const card=el('article',undefined,'right');card.append(el('h3',labels[item.opportunity_id]||item.name),el('p',`รวมในฐานภาษีแล้ว ${baht(item.eligible_amount)} · ไม่ใช้เงินเพิ่ม`));$('rights').append(card);});
+    $('hashes').replaceChildren();Object.entries({output_hash:data.tax_state.output_hash,engine_version:data.tax_state.engine_version,rule_pack_version:data.tax_state.rule_pack_version}).forEach(([key,value])=>$('hashes').append(el('dt',key),el('dd',value)));return;
+  }
+  comparisonResultHash = data.outcomes.result_hash;
   renderComparison(data);
   renderProfile(data);
   $('tax').textContent = money(data.tax_before);
@@ -173,6 +188,7 @@ form.addEventListener('change', invalidateResults);
 
 const fieldNames = {salary:'รายได้จากเงินเดือนทั้งปี',social_security:'ประกันสังคมที่จ่ายแล้ว',assets:'สินทรัพย์สภาพคล่อง',expenses:'ค่าใช้จ่ายจำเป็นต่อเดือน',budget:'งบทดลอง',shared_usage:'ยอด Thai ESG / ESGX ที่ใช้ไปแล้ว',planning_date:'วันที่วางแผน',personal_eligible:'สิทธิส่วนตัว',mortgage_interest:'ดอกเบี้ยบ้าน',mortgage_eligible:'เงื่อนไขสิทธิดอกเบี้ยบ้าน',required_coverage:'ความคุ้มครองที่ต้องการ',existing_coverage:'ความคุ้มครองที่มีอยู่',other_income:'รายได้อื่น',retirement_usage:'เงินออมเกษียณ'};
 function fieldForFact(fact) {
+  const pvdInput=pvdFieldForFact(fact);if(pvdInput)return pvdInput;
   if (fact === 'opportunity_facts.shared_limit_usage') return $('shared_usage');
   const parent = fact.match(/^parent\.(father|mother)\.eligible$/);
   if (parent) return profileRecords.parents.find(entry=>entry.fields.relationship.value === parent[1])?.fields.eligible;
@@ -191,14 +207,14 @@ function revealField(input) {
   input.focus?.();
   input.scrollIntoView?.({block:'center'});
 }
-function addErrorLink(input, label) {
+function addErrorLink(input, label, target = $('error')) {
   if (!input) return;
   if (!errorFields.has(input)) errorFields.set(input,input.getAttribute('aria-describedby'));
   input.setAttribute('aria-invalid','true');
   input.setAttribute('aria-describedby',[errorFields.get(input),'error'].filter(Boolean).join(' '));
   const link = el('a',label,'error-link');link.href = `#${input.id}`;
   link.addEventListener('click',event=>{event.preventDefault();revealField(input);});
-  $('error').append(link);
+  target.append(link);
 }
 async function calculate(manual = false) {
   clearPublishedResults();
@@ -239,12 +255,23 @@ async function calculate(manual = false) {
     const envelope = error.envelope;
     const scoped = envelope && ['BASELINE_NOT_READY','INPUT_REQUIRED','INVALID_INPUT'].includes(envelope.code);
     $('error').textContent = scoped
-      ? `ยังไม่แสดงผลคำนวณ: ${error.message}${envelope.missing_fact_ids?.length ? ` · ข้อมูลที่ยังขาด: ${envelope.missing_fact_ids.join(', ')}` : ''}`
+      ? `ยังไม่แสดงผลคำนวณ: ${error.message.replace(/\s*\((?:pvd|other_rights|fund_history)\.[a-z_]+\)/g,'')}`
       : `ยังไม่แสดงผลคำนวณ: โปรดตรวจจำนวนเงิน (ไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง) งบต้องไม่เกินสินทรัพย์ที่ทราบ และวันที่ต้องอยู่ในปี 2026 ตรวจสิทธิที่ยังไม่ทราบและรายการนอกขอบเขตด้วย — ${error.message}`;
     $('error').hidden = false;
+    const c02Errors=new Map();
     (envelope?.missing_fact_ids || []).forEach(fact=>{
+      const group=Object.keys(pvdGroups).find(key=>fact===key||fact.startsWith(key+'.'));
+      let target=$('error');
+      if(group){
+        if(!c02Errors.has(group)){
+          const details=el('details',undefined,'error-group');
+          details.append(el('summary',({pvd:'ข้อมูล PVD',other_rights:'สิทธิอื่นในปีนี้',fund_history:'ประวัติกองทุน'})[group]+' · เปิดดูรายการที่ต้องตรวจ'));
+          $('error').append(details);c02Errors.set(group,details);
+        }
+        target=c02Errors.get(group);
+      }
       const input=fieldForFact(fact);
-      addErrorLink(input,input ? fieldNames[input.id] || input.labels?.[0]?.textContent || 'ตรวจรายการนี้' : '');
+      addErrorLink(input,input ? fieldNames[input.id] || input.labels?.[0]?.textContent || 'ตรวจรายการนี้' : '',target);
     });
     updateStatus('ยังแสดงผลไม่ได้ · ตรวจข้อมูลที่ระบุด้านล่าง');
   } finally {
@@ -283,4 +310,5 @@ $('download').addEventListener('click', () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 initProfile();
+initPvdProfile(invalidateResults);
 calculate();

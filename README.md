@@ -315,3 +315,30 @@ Follow-up 2026-10-21: reduced-motion runtime ตรวจแล้ว; ยัง
 UI code checkpoint `805e2d9`, local Python695/coverage100%/frontend37 ผ่าน.
 C01/F09 review และ [C02 scope review brief](docs/requirements/TGPS-C02-review-brief.md)
 พร้อมอ่านต่อ; ยังไม่เริ่ม C02 treatment. ดู DEC-018 สำหรับ checkpoint/CI authorization
+
+C02 follow-up2026-10-21: scope/behavior approvedตามDEC-019; อยู่ legal evidence
+review, implementation NOT_STARTED. [Evidence matrix](docs/policy-evidence/2026-10-21/README.md)
+มี12 original artifactsพร้อมhashและ9 provisional arithmetic fixtures; applicability
+และ independent-review gapsยังOPEN จึงยังไม่เพิ่มtreatment
+
+C02 follow-up2026-10-22: [cross-rule review](docs/policy-evidence/2026-10-21/joint-follow-up/README.md)
+เพิ่ม amendment lineage และ ESGX2026 common-pool corroboration; custody19 originals
+(รวมแหล่งที่คัดออก) และ4 diagnostic arithmetic casesแยกจาก9 fixturesเดิม.
+PVD aggregation/exception, RMF basis และ legal-review gatesยังOPEN; implementation NOT_STARTED
+
+UX draft2026-10-22: [C02 หน้าจอสิทธิเดิมที่อ่านง่าย](docs/requirements/TGPS-C02-guided-rights-ux.md)
+เสนอแสดงภาพรวมก่อน แล้วเปิดสิทธิ/วิธีคิดตามต้องการ พร้อมบอกจุดที่ต้องแก้.
+เป็นแบบสำหรับรีวิวตามDEC-020 ยังไม่ใช่หน้าจอที่ implementแล้ว
+
+UX follow-up DEC-021: แบบได้รับอนุมัติแล้ว มี
+[ต้นแบบลองกด](docs/demo/c02-guided-rights-preview.html) ให้ทดลอง3สถานการณ์จากข้อมูลสมมุติ.
+เป็นdesign artifactแยกจากdemoจริง ไม่มีการคำนวณภาษีหรือstorage; C02legal gatesยังOPEN
+
+C02A [scope](docs/requirements/TGPS-C02A-pvd-first-slice.md) ได้รับอนุมัติตามDEC-023:
+เริ่มภาพรวมภาษีจากPVDกรณีพื้นฐานก่อน ไม่เปิดการทดลองเงินเพิ่มสำหรับpositivePVD
+ในขั้นนี้. Bounded evidence เพียงพอสำหรับวางแผน; [แผน4tasks](docs/superpowers/plans/2026-10-22-c02a-normal-pvd.md)
+รอรีวิว/เลือกวิธีทำงานก่อนลงcode. ไม่เปลี่ยนสถานะIMPLEMENTED/ACCEPTEDของparent
+
+## C02A current checkpoint — 2026-10-22
+
+Normal single-employer/single-fund PVD is integrated with the Thai demo. Core/package0.3.0, discovery/candidates0.4.0; positive PVD supports baseline/breakdown only. Explicit zero preserves supported planning when facts are complete. Local752 Python tests/100% core coverage/frontend45 and all seven gates pass. Remaining delivery checks and acceptance: [C02A progress](docs/implementation-reports/TGPS-C02A-progress.md). Earlier NOT_STARTED descriptions are historical; parent C02 legal gates and C01/F09 remain open.

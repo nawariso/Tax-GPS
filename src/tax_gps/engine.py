@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import cast
 
+from tax_gps.calculation.availability import PlanningAvailability
 from tax_gps.calculation.models import (
     AllowanceCalculation,
     CalculationStep,
@@ -15,6 +16,7 @@ from tax_gps.calculation.models import (
     TaxState,
     TaxStatus,
 )
+from tax_gps.calculation.pvd import calculate_pvd
 from tax_gps.calculation.readiness import assess_baseline
 from tax_gps.calculation.rules import (
     allowance_for_children,
@@ -31,7 +33,7 @@ from tax_gps.policy.activation import ActivatedRulePack
 from tax_gps.policy.models import RuleSource
 from tax_gps.profile.models import UserProfile
 
-ENGINE_VERSION = "tax-gps-core/0.2.0"
+ENGINE_VERSION = "tax-gps-core/0.3.0"
 
 
 def _step(
@@ -77,7 +79,7 @@ def calculate_tax(
     material_unsupported = tuple(
         item for item in profile.income.unsupported if item.amount.is_positive()
     )
-    readiness = assess_baseline(profile)
+    readiness = assess_baseline(profile, pack=pack)
     if readiness.status is not TaxStatus.READY:
         reasons = tuple(
             f"material unsupported income: {item.category}" for item in material_unsupported
@@ -104,12 +106,16 @@ def calculate_tax(
             reasons,
             "",
             pack,
+            planning_availability=PlanningAvailability.BASELINE_NOT_READY,
             reason_codes=readiness.reason_codes,
             missing_fact_ids=readiness.missing_fact_ids,
         )
         return _with_hash(state)
 
-    income = profile.income.section_40_1
+    if profile.benefits.pvd is None or profile.benefits.pvd.employee_paid is None:
+        raise AssertionError("unreachable: readiness requires PVD paid")
+    pvd = calculate_pvd(profile.benefits.pvd.employee_paid, pack)
+    income = profile.income.section_40_1 - pvd.exemption
     expense_step = calculate_section_40_1_expense(income, pack)
     benefits = profile.benefits
     personal = personal_allowance(benefits.personal_eligible, pack)
@@ -119,11 +125,14 @@ def calculate_tax(
         benefits.mortgage_interest_paid, benefits.mortgage_eligible, pack
     )
     allowances = AllowanceCalculation(
-        personal, benefits.social_security_paid, parents, children, mortgage
+        personal, benefits.social_security_paid, parents, children, mortgage, pvd.allowance
     )
     taxable_income = (income - expense_step.output_amount - allowances.total).floor_at_zero()
     pit = calculate_progressive_pit(taxable_income, pack)
     used = (
+        "PVD_ALLOWANCE",
+        "PVD_EXEMPTION",
+        "PVD_NORMAL_SCOPE",
         rule_ids.SECTION_40_1_EXPENSE,
         rule_ids.PERSONAL_ALLOWANCE,
         rule_ids.SOCIAL_SECURITY_SECTION_33,
@@ -134,6 +143,14 @@ def calculate_tax(
     )
     trace = (
         _step(
+            step_id="pvd-exemption",
+            description="PVD exemption before employment expense",
+            rule_id="PVD_EXEMPTION",
+            input_amount=profile.income.section_40_1,
+            output_amount=pvd.exemption,
+            pack=pack,
+        ),
+        _step(
             step_id="assessable-income",
             description="Assessable Section 40(1) employment income",
             rule_id=rule_ids.SECTION_40_1_EXPENSE,
@@ -142,6 +159,14 @@ def calculate_tax(
             pack=pack,
         ),
         expense_step,
+        _step(
+            step_id="pvd-allowance",
+            description="Own employee PVD allowance after expense",
+            rule_id="PVD_ALLOWANCE",
+            input_amount=pvd.employee_paid,
+            output_amount=pvd.allowance,
+            pack=pack,
+        ),
         _step(
             step_id="personal-allowance",
             description="Personal allowance",
@@ -226,7 +251,7 @@ def calculate_tax(
     state = TaxState(
         TaxStatus.READY,
         profile.tax_year,
-        IncomeCalculation(income),
+        IncomeCalculation(income, profile.income.section_40_1, pvd.exemption),
         ExpenseCalculation(expense_step.output_amount),
         allowances,
         taxable_income,
@@ -243,6 +268,10 @@ def calculate_tax(
         (),
         "",
         pack,
+        pvd=pvd,
+        planning_availability=PlanningAvailability.PVD_BASELINE_ONLY
+        if pvd.employee_paid.is_positive()
+        else PlanningAvailability.AVAILABLE,
     )
     return _with_hash(state)
 

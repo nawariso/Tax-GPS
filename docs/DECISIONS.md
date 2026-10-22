@@ -199,3 +199,74 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Decision: commit งาน UI01 follow-up/UI02 และเอกสารที่ตรวจแล้วบน feature branch เดิม; push เข้า draft PR เดิมเพื่อตรวจ CI ของ SHA ใหม่ แยก code/documentation commits และเว้น unrelated Stage4 draft
 - Reason: เก็บงานที่ผ่าน local verification/reduced-motion runtime แล้ว ก่อนเดินต่อ requirement/evidence gates
 - Boundary: supersedes ข้อ no commit/push ของ DEC-017 เฉพาะ checkpoint นี้; ไม่ merge, ไม่เปลี่ยน draft status, ไม่ถือว่าผู้ใช้รับงาน UI/C01 และไม่อนุมัติ C02 treatment/readiness หรือปิด F09
+
+## DEC-019 — อนุมัติขอบเขต C02 และเริ่ม evidence/fixtures
+
+- Date: `2026-10-21`
+- Status: `AGREED` สำหรับ scope/behavior และการตรวจหลักฐาน; กฎตัวเลข/coverage รายละเอียดอยู่ evidence review
+- Evidence: ผู้ใช้ตอบ “โอเครครับ ลุย!” หลังได้รับลิงก์ C02 review brief และแจ้งว่าขั้นต่อไปคืออนุมัติรายละเอียดแล้วตรวจหลักฐานกฎหมาย/ตัวอย่างคำนวณก่อนลงโค้ด
+- Decision: ใช้ requirement C02 v0.1 ตาม brief: PVD เงินสะสมลูกจ้าง → RMF → Thai ESG; baseline/capacity authority เดียว, ไม่หักซ้ำ, unknown/readiness/version boundaries เดิม; เริ่มเก็บ primary sources และ independent arithmetic fixtures
+- Reason: ต้องพิสูจน์ deduction treatment/เพดาน/เงื่อนไขก่อนเขียน implementation plan
+- Boundary: C02 ยัง REQUIREMENT_REVIEW / implementation NOT_STARTED จน evidence gate ผ่าน; ไม่ certify กฎหมายจากการอนุมัติของผู้ใช้, ไม่ข้าม C01 acceptance/F09, ไม่แก้ released assets, ไม่ merge และไม่อนุมัติ scope ใหม่ที่ไม่อยู่ v0.1
+
+## DEC-020 — ออกแบบ C02 ให้ข้อมูลมากแต่เข้าใจง่าย
+
+- Date: `2026-10-22`
+- Status: `AGREED` สำหรับเป้าหมายความเข้าใจง่ายและการจัดทำแบบ; layout/interaction รายละเอียดเป็น `AUTHORING_DETAIL / REQUIREMENT_REVIEW`
+- Evidence: ผู้ใช้กล่าว “โอเครครับ ลุย! อย่าลืมนะ เราเน้นให้ดูเข้าใจง่าย ถ้ามีข้อมูลเยอะๆ ช่วยออกแบบหน่อยว่าจะทำเป็นรูปแบบยังไงให้ user ใช้งานแล้วไม่งง”
+- Decision: ทำ evidence C02 ต่อพร้อมจัดแบบ UX ที่ลดภาระการอ่านและช่วยหาข้อมูลที่ต้องกรอก; บันทึกแบบให้รีวิวก่อนลง product code
+- Author proposal: หน้าเดียวแบ่งหมวดเดิม, ถามมี/ไม่มี/ยังไม่ทราบ, เปิดรายละเอียดเมื่อเกี่ยวข้อง, ภาพรวม→สิทธิแต่ละรายการ→วิธีคิด; ดู [UX draft](requirements/TGPS-C02-guided-rights-ux.md)
+- Boundary: ผู้ใช้ยังไม่ได้อนุมัติ layout/interaction ที่เพิ่งร่าง; ไม่เปลี่ยน tax/readiness/coverage contracts, ไม่ปิด legal gatesหรือ acceptance, ไม่เริ่ม implementation planหรือเปลี่ยน C02 เป็น IN_PROGRESS
+
+## DEC-021 — อนุมัติแบบ UX C02 และทำต้นแบบให้ลอง
+
+- Date: `2026-10-22`
+- Status: `AGREED` สำหรับ UX design v0.1 และดำเนินงานต่อ; parent legal evidence reviewยังOPEN
+- Evidence: ผู้ใช้ตอบ “โอเครครับ ลุย!” หลังรับลิงก์ UX draftที่ reviewerตรวจแล้วและสรุปภาพรวม→สิทธิ→วิธีคิด, มี/ไม่มี/ยังไม่ทราบ และแยกกองทุนเดิม
+- Decision: ใช้ [C02 UX design](requirements/TGPS-C02-guided-rights-ux.md) เป็นแบบหลัก; ทำต้นแบบสำหรับทดลองความเข้าใจจากข้อมูลสมมุติ และจัดfield/copy inventoryให้พร้อมรีวิวการเชื่อมต่อ
+- Method: [standalone HTML preview](demo/c02-guided-rights-preview.html) เป็นdesign artifactในdocs ไม่เพิ่มrouteหรือเชื่อมHTTP calculationของdemo; local loopback previewเปิดเฉพาะไฟล์นี้
+- Boundary: อนุมัติแบบไม่ใช่การรับงานหน้าจอที่สร้างใหม่หรือการรับรองกฎหมาย; C02 treatment implementationยังNOT_STARTED. ไม่สร้างC02 implementation planก่อนevidenceผ่าน, ไม่เปลี่ยน readiness/pack/catalog/API, ไม่mergeหรือpush. รูปแบบ prototypeไม่ใช่APIหรือvalidation contract
+
+## DEC-022 — เสนอ C02A PVD กรณีพื้นฐานเป็นขั้นแรก
+
+- Date: `2026-10-22`
+- Status: `AUTHORING_DETAIL / REQUIREMENT_REVIEW` — ยังไม่ได้รับอนุมัติstagedscopeนี้
+- Evidence: ผู้ใช้สั่ง“โอเครครับ ลุย!”หลังรายการปิดกฎหมาย→เชื่อมC02; การตอบนี้อนุมัติให้ทำงานต่อในscopeเดิม ไม่ใช่อนุมัติการจำกัดREADYcoverageที่เพิ่งเสนอ
+- Proposal: [C02A](requirements/TGPS-C02A-pvd-first-slice.md) เปิดbaselinePVDเฉพาะsingleemployer/singlefund/normalrate; positiveRMF/ESGและกรณีค้างยังปิดผล. PositivePVDแสดงภาษี/breakdownก่อน โดยส่วนทดลองเงินเพิ่มรอขั้นต่อไป; explicitPVDzeroคงsupportedbehaviorเดิมเมื่อfactsครบ
+- Reason: บันทึกทางเดินที่รีวิวได้แทนค้นผลทั่วไปซ้ำแล้วเลื่อนgateโดยไม่มีหลักฐาน; [SETworkedexamples](policy-evidence/2026-10-22/README.md) เพิ่มcorroborationแต่ไม่ใช่RDlegalclosure
+- Boundary: ไม่แทนที่DEC-019/parentrequirementจนuserอนุมัติ; ไม่มีproductcode/implementationplanหรือlegalacceptance. แม้อนุมัติscopeยังต้องreviewevidence/fixturesเฉพาะsliceก่อนimplement. คงUXที่อนุมัติและC01/F09/acceptanceเดิม
+
+## DEC-023 — อนุมัติ C02A PVD กรณีพื้นฐานเป็นขั้นแรก
+
+- Date: `2026-10-22`
+- Status: `AGREED` สำหรับ staged scope; scoped evidence review ยัง OPEN
+- Evidence: ผู้ใช้ตอบ “โอเครครับ ลุย!” หลังข้อเสนอให้เริ่ม PVD นายจ้างเดียวอัตราปกติ ปิดผลกรณีอื่นที่ยังไม่รองรับ และยังไม่เปิดทดลองเงินเพิ่มสำหรับ positive PVD
+- Decision: อนุมัติ [C02A v0.1](requirements/TGPS-C02A-pvd-first-slice.md) ตามข้อเสนอ DEC-022; positive PVD เปิด baseline/breakdown เมื่อ facts และหลักฐานครบ ส่วน new-cash ปิดด้วย domain availability; explicit zero คง supported behavior เดิมเมื่อ facts ครบ
+- Reason: เชื่อมงานจริงเป็นลำดับที่ตรวจได้ ขณะประเด็นหลายสิทธิ/ฐาน RMF ของ parent ยังต้องตรวจต่อ
+- Boundary: เปลี่ยนสถานะข้อเสนอของ DEC-022 เป็น scope approved ตั้งแต่คำตอบนี้ ไม่แก้ประวัติเดิม; ไม่ถือเป็น legal certification, plan approval หรือ acceptance ของ implementation. ต้องปิด scoped evidence ก่อนสร้าง implementation plan; C02 parent, C01/F09, user visual acceptance ไม่เปลี่ยน ไม่มีสิทธิ push/merge เพิ่ม
+
+## DEC-024 — Scoped C02A evidence เพียงพอสำหรับเขียนแผน
+
+- Date: `2026-10-22`
+- Status: `AUTHORING_DETAIL / REQUIREMENT_REVIEW` — technical evidence disposition, ไม่ใช่ผู้ใช้อนุมัติแผน
+- Evidence: [bounded review](policy-evidence/2026-10-22/c02a-scope/README.md), primary RD/SEC locators; independent reviewer ยืนยัน9/9และ chain/currency เพียงพอสำหรับ planning เมื่อบันทึก; ordinary reference ใหม่ตรวจ9/9
+- Decision: gate ของ normal C02A เฉพาะการวางแผนเป็น ADEQUATE_FOR_PLANNING_ONLY; จัด [แผน4tasks](superpowers/plans/2026-10-22-c02a-normal-pvd.md) แบบ DRAFT_FOR_REVIEW ไม่ข้าม RED/GREEN หรือ pack/consumer review
+- Reason: ปิดช่องว่างเฉพาะที่ต้องใช้โดยแยก actual-credit/normal-remittance facts และ corporate expense consequences; ไม่รอหรืออ้างว่าปิดกฎหมายทุกสิทธิของ parent แล้ว
+- Boundary: C02 parent G1–G6 ไม่ถูกปิดรวม; ไม่รับรองกฎหมาย/ภาษี, ไม่ activate pack/catalog, ไม่เปลี่ยน runtime, ไม่ ACCEPTED. Plan review/execution choice ยัง pending ก่อน implementation
+
+## DEC-025 — อนุมัติแผน C02A และเริ่ม Native execution
+
+- Date: `2026-10-22`
+- Status: `AGREED`
+- Evidence: ผู้ใช้ตอบ “โอเครครับ ลุย!” หลังได้รับแผน4tasksและคำแนะนำNative
+- Decision: อนุมัติแผน2026-10-22-c02a-normal-pvd และใช้Nativeตามคำแนะนำ; เริ่มIN_PROGRESS ผูกAC01–09
+- Boundary: ไม่ขยายcoverage ไม่ถือว่าtests=ACCEPTED ไม่push/merge และคงC01/F09/parentC02เดิม
+
+## DEC-026 — Commit/push C02A checkpoint and continue remaining verification
+
+- Date: `2026-10-22`
+- Status: `AGREED`
+- Evidence: User instructed “commit and push แล้วทำที่เหลือต่อได้เลยครับ”.
+- Decision: Commit and push scoped C02A work to the existing feature branch, then complete outstanding request-size/rendered verification and synchronize progress documents.
+- Reason: Preserve the verified implementation before completing its remaining delivery checks.
+- Boundary: No merge, force-push, Stage4 draft, new deduction treatment, or automatic user/legal acceptance. Parent C02 legal gates and C01/F09 remain open. New feature requirements still require review.

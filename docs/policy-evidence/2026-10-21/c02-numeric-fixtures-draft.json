@@ -1,0 +1,230 @@
+{
+  "schema": "c02-research-fixtures-v1",
+  "date": "2026-10-21",
+  "status": "DRAFT_NOT_APPROVED_FOR_ENGINE",
+  "conditions": [
+    "All monetary inputs synthetic; Decimal strings in THB",
+    "Single employer, explicit PVD wage basis equals salary in these examples only",
+    "Eligibility and declaration facts assumed true solely for arithmetic; production must request evidence/facts",
+    "No other income/exemption/retirement inventory, all explicit zero; no transfer/redemption or recapture",
+    "Not a supported-coverage declaration; legal gaps in README remain OPEN"
+  ],
+  "cases": [
+    {
+      "id": "PVD-LOW-WAGE",
+      "ac": "C02-AC04",
+      "input": {
+        "salary": "180000",
+        "pvd_wage_basis": "180000",
+        "social_security_paid": "0",
+        "pvd_employee_paid": "27000",
+        "pvd_employer_paid": "99999",
+        "rmf_paid": "0",
+        "thai_esg_paid": "0"
+      },
+      "expected": {
+        "pvd_exemption": "17000",
+        "salary_expense": "81500",
+        "personal_allowance": "60000",
+        "pvd_allowance": "10000",
+        "rmf_claim": "0",
+        "thai_esg_claim": "0",
+        "taxable": "11500",
+        "pit": "0"
+      },
+      "status": "PROVISIONAL_ARITHMETIC_NOT_LEGAL_ACCEPTANCE"
+    },
+    {
+      "id": "PVD-NORMAL",
+      "ac": "C02-AC03",
+      "input": {
+        "salary": "990500",
+        "pvd_wage_basis": "990500",
+        "social_security_paid": "10500",
+        "pvd_employee_paid": "100000",
+        "pvd_employer_paid": "0",
+        "rmf_paid": "0",
+        "thai_esg_paid": "0"
+      },
+      "expected": {
+        "pvd_exemption": "90000",
+        "salary_expense": "100000",
+        "personal_allowance": "60000",
+        "pvd_allowance": "10000",
+        "rmf_claim": "0",
+        "thai_esg_claim": "0",
+        "taxable": "720000",
+        "pit": "60500"
+      },
+      "status": "PROVISIONAL_ARITHMETIC_NOT_LEGAL_ACCEPTANCE"
+    },
+    {
+      "id": "RMF-NORMAL",
+      "ac": "C02-AC05",
+      "input": {
+        "salary": "990500",
+        "pvd_wage_basis": "990500",
+        "social_security_paid": "10500",
+        "pvd_employee_paid": "0",
+        "pvd_employer_paid": "0",
+        "rmf_paid": "100000",
+        "thai_esg_paid": "0"
+      },
+      "expected": {
+        "pvd_exemption": "0",
+        "salary_expense": "100000",
+        "personal_allowance": "60000",
+        "pvd_allowance": "0",
+        "rmf_claim": "100000",
+        "thai_esg_claim": "0",
+        "taxable": "720000",
+        "pit": "60500"
+      },
+      "status": "PROVISIONAL_ARITHMETIC_NOT_LEGAL_ACCEPTANCE"
+    },
+    {
+      "id": "ESG-NORMAL",
+      "ac": "C02-AC06",
+      "input": {
+        "salary": "990500",
+        "pvd_wage_basis": "990500",
+        "social_security_paid": "10500",
+        "pvd_employee_paid": "0",
+        "pvd_employer_paid": "0",
+        "rmf_paid": "0",
+        "thai_esg_paid": "100000"
+      },
+      "expected": {
+        "pvd_exemption": "0",
+        "salary_expense": "100000",
+        "personal_allowance": "60000",
+        "pvd_allowance": "0",
+        "rmf_claim": "0",
+        "thai_esg_claim": "100000",
+        "taxable": "720000",
+        "pit": "60500"
+      },
+      "status": "PROVISIONAL_ARITHMETIC_NOT_LEGAL_ACCEPTANCE"
+    },
+    {
+      "id": "COMBINED",
+      "ac": "C02-AC08",
+      "input": {
+        "salary": "990500",
+        "pvd_wage_basis": "990500",
+        "social_security_paid": "10500",
+        "pvd_employee_paid": "100000",
+        "pvd_employer_paid": "0",
+        "rmf_paid": "100000",
+        "thai_esg_paid": "100000"
+      },
+      "expected": {
+        "pvd_exemption": "90000",
+        "salary_expense": "100000",
+        "personal_allowance": "60000",
+        "pvd_allowance": "10000",
+        "rmf_claim": "100000",
+        "thai_esg_claim": "100000",
+        "taxable": "520000",
+        "pit": "30500"
+      },
+      "status": "PROVISIONAL_ARITHMETIC_NOT_LEGAL_ACCEPTANCE"
+    },
+    {
+      "id": "RMF-PERCENT-CAP",
+      "ac": "C02-AC07",
+      "input": {
+        "salary": "990500",
+        "pvd_wage_basis": "990500",
+        "social_security_paid": "10500",
+        "pvd_employee_paid": "0",
+        "pvd_employer_paid": "0",
+        "rmf_paid": "350000",
+        "thai_esg_paid": "0"
+      },
+      "expected": {
+        "pvd_exemption": "0",
+        "salary_expense": "100000",
+        "personal_allowance": "60000",
+        "pvd_allowance": "0",
+        "rmf_claim": "297150",
+        "thai_esg_claim": "0",
+        "taxable": "522850",
+        "pit": "30927.50"
+      },
+      "status": "PROVISIONAL_ARITHMETIC_NOT_LEGAL_ACCEPTANCE"
+    },
+    {
+      "id": "ESG-PERCENT-CAP",
+      "ac": "C02-AC07",
+      "input": {
+        "salary": "990500",
+        "pvd_wage_basis": "990500",
+        "social_security_paid": "10500",
+        "pvd_employee_paid": "0",
+        "pvd_employer_paid": "0",
+        "rmf_paid": "0",
+        "thai_esg_paid": "350000"
+      },
+      "expected": {
+        "pvd_exemption": "0",
+        "salary_expense": "100000",
+        "personal_allowance": "60000",
+        "pvd_allowance": "0",
+        "rmf_claim": "0",
+        "thai_esg_claim": "297150",
+        "taxable": "522850",
+        "pit": "30927.50"
+      },
+      "status": "PROVISIONAL_ARITHMETIC_NOT_LEGAL_ACCEPTANCE"
+    },
+    {
+      "id": "RETIREMENT-CAP",
+      "ac": "C02-AC07",
+      "input": {
+        "salary": "4000000",
+        "pvd_wage_basis": "4000000",
+        "social_security_paid": "0",
+        "pvd_employee_paid": "500000",
+        "pvd_employer_paid": "0",
+        "rmf_paid": "100000",
+        "thai_esg_paid": "0"
+      },
+      "expected": {
+        "pvd_exemption": "490000",
+        "salary_expense": "100000",
+        "personal_allowance": "60000",
+        "pvd_allowance": "10000",
+        "rmf_claim": "0",
+        "thai_esg_claim": "0",
+        "taxable": "3340000",
+        "pit": "767000"
+      },
+      "status": "PROVISIONAL_ARITHMETIC_NOT_LEGAL_ACCEPTANCE"
+    },
+    {
+      "id": "PVD-BELOW-SPLIT",
+      "ac": "C02-AC04",
+      "input": {
+        "salary": "180000",
+        "pvd_wage_basis": "180000",
+        "social_security_paid": "0",
+        "pvd_employee_paid": "8000",
+        "pvd_employer_paid": "0",
+        "rmf_paid": "0",
+        "thai_esg_paid": "0"
+      },
+      "expected": {
+        "pvd_exemption": "0",
+        "salary_expense": "90000",
+        "personal_allowance": "60000",
+        "pvd_allowance": "8000",
+        "rmf_claim": "0",
+        "thai_esg_claim": "0",
+        "taxable": "22000",
+        "pit": "0"
+      },
+      "status": "PROVISIONAL_ARITHMETIC_NOT_LEGAL_ACCEPTANCE"
+    }
+  ]
+}

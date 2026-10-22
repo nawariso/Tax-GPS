@@ -12,7 +12,6 @@ from tax_gps.core.tax_year import TaxYear
 from tax_gps.engine import ENGINE_VERSION, calculate_tax
 from tax_gps.profile.models import (
     Child,
-    ExistingTaxBenefits,
     IncomeProfile,
     OpportunityFacts,
     Parent,
@@ -21,6 +20,7 @@ from tax_gps.profile.models import (
     UserProfile,
 )
 from tests.support.policy import production_pack
+from tests.support.profiles import complete_benefits
 
 
 def profile(salary: int, sso: int = 10500) -> UserProfile:
@@ -30,7 +30,7 @@ def profile(salary: int, sso: int = 10500) -> UserProfile:
         version="1",
         tax_year=TaxYear(2026),
         income=IncomeProfile(section_40_1=Money.of(salary)),
-        benefits=ExistingTaxBenefits(social_security_paid=Money.of(sso)),
+        benefits=complete_benefits(social_security_paid=Money.of(sso)),
     )
 
 
@@ -100,7 +100,7 @@ def test_profile_rejects_wrong_tax_year_and_negative_inputs() -> None:
     with pytest.raises(ValueError, match="negative"):
         IncomeProfile(section_40_1=Money.of(-1))
     with pytest.raises(ValueError, match="negative"):
-        ExistingTaxBenefits(social_security_paid=Money.of(-1))
+        complete_benefits(social_security_paid=Money.of(-1))
     with pytest.raises(ValueError, match="negative"):
         UnsupportedIncome("40(8)", Money.of(-1))
 
@@ -186,7 +186,7 @@ def test_capacity_serialization_covers_shared_limits() -> None:
 @pytest.mark.golden
 @pytest.mark.mandatory
 def test_supported_family_rights_have_independent_tax_golden() -> None:
-    benefits = ExistingTaxBenefits(
+    benefits = complete_benefits(
         social_security_paid=Money.of(10500),
         parents=(Parent("father", True), Parent("mother", True)),
         children=(
@@ -212,7 +212,7 @@ def test_supported_family_rights_have_independent_tax_golden() -> None:
 
 
 def test_retirement_capacity_does_not_authorize_an_incomplete_baseline() -> None:
-    benefits = ExistingTaxBenefits(
+    benefits = complete_benefits(
         retirement_contributions=(
             RetirementContribution("PVD", Money.of(400000)),
             RetirementContribution("eligible_retirement_pension", Money.of(100000)),

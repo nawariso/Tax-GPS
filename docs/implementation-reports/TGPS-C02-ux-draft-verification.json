@@ -1,0 +1,126 @@
+{
+  "date": "2026-10-22",
+  "scope": "C02 UX draft documentation only",
+  "runtime": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "win32",
+  "gates": [
+    {
+      "command": [
+        "uv",
+        "sync",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "record_method": "Recovered from observed exit0 in tool output before console encoding interruption",
+      "output_tail": [
+        "Resolved 16 packages in 0.87ms",
+        "Checked 16 packages in 1ms"
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "ruff",
+        "check",
+        "."
+      ],
+      "exit_code": 0,
+      "record_method": "Recovered from observed exit0 in tool output before console encoding interruption",
+      "output_tail": [
+        "All checks passed!"
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "exit_code": 0,
+      "record_method": "Recovered from observed exit0 in tool output before console encoding interruption",
+      "output_tail": [
+        "160 files already formatted"
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "mypy",
+        "--strict"
+      ],
+      "exit_code": 0,
+      "record_method": "Recovered from observed exit0 in tool output before console encoding interruption",
+      "output_tail": [
+        "Success: no issues found in 102 source files"
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "pytest",
+        "--cov=tax_gps",
+        "--cov-branch",
+        "--cov-report=term-missing",
+        "-q"
+      ],
+      "exit_code": 0,
+      "record_method": "Recovered from observed exit0 in tool output before console encoding interruption",
+      "output_tail": [
+        "src\\tax_gps\\policy\\readiness.py                   77      0     36      0   100%",
+        "src\\tax_gps\\policy\\rule_ids.py                     9      0      0      0   100%",
+        "src\\tax_gps\\profile\\__init__.py                    0      0      0      0   100%",
+        "src\\tax_gps\\profile\\models.py                    164      0     48      0   100%",
+        "------------------------------------------------------------------------------------------",
+        "TOTAL                                           2846      0    798      0   100%",
+        "Required test coverage of 100.0% reached. Total coverage: 100.00%",
+        "695 passed in 12.01s"
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "examples.check_web_demo"
+      ],
+      "exit_code": 0,
+      "record_method": "Recovered from observed exit0 in tool output before console encoding interruption",
+      "output_tail": [
+        "\u2139 tests 37",
+        "\u2139 suites 0",
+        "\u2139 pass 37",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 4546.9954"
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "build"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "Building source distribution...",
+        "Building wheel from source distribution...",
+        "Successfully built dist\\tax_gps_core-0.2.0.tar.gz",
+        "Successfully built dist\\tax_gps_core-0.2.0-py3-none-any.whl"
+      ]
+    }
+  ],
+  "acceptance": "NOT_CLAIMED"
+}

@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-22",
+  "scope": "Prototype browser review, not product or legal acceptance",
+  "browser": "Chrome via connected browser",
+  "server": {
+    "port": 56943,
+    "pid": 49732,
+    "host": "127.0.0.1"
+  },
+  "url": "http://127.0.0.1:56943",
+  "served_bytes_match": true,
+  "non_allowlisted_file_status": 404,
+  "observed": [
+    "Initial radio choices unselected; missing reasons named",
+    "Ready preset explicitly labelled illustrative, no calculated figures",
+    "Editing PVD wage hides ready details",
+    "Missing wage link focuses pvd-wage",
+    "Unsupported preset preserves history questions with no new contributions",
+    "Method detail opens at mobile320",
+    "No horizontal overflow:390 innerWidth /375 scrollWidth;320 /305",
+    "Browser captured no JavaScript error logs",
+    "Viewport reset; initial preset restored; preview tab marked deliverable"
+  ],
+  "not_claimed": [
+    "full keyboard audit",
+    "user usability acceptance",
+    "legal eligibility",
+    "C02 runtime implementation",
+    "financial input validation"
+  ],
+  "artifacts": [
+    {
+      "file": "docs/demo/c02-guided-rights-preview.html",
+      "sha256": "798b74414c4b1fd26fb2272b96dbda396cfffea77b28022fae6dfe916b294fa1",
+      "bytes": 23401
+    },
+    {
+      "file": "docs/demo/c02-guided-rights-preview-desktop.jpg",
+      "sha256": "c861aa39eca65170d54eba1ac967ee335f968a2685c2a867651582be197850f0",
+      "bytes": 156894
+    },
+    {
+      "file": "docs/demo/c02-guided-rights-preview-mobile.jpg",
+      "sha256": "16e96cf332a7841965bcb0da7fee37a4e419ce1a53072c0f9e27740d27d94756",
+      "bytes": 133477
+    }
+  ]
+}

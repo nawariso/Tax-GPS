@@ -25,6 +25,7 @@ from tax_gps.engine import calculate_tax
 from tax_gps.opportunity import opportunity_ids
 from tax_gps.opportunity.activation import ActivatedOpportunityCatalog
 from tax_gps.opportunity.models import (
+    OpportunityCategory,
     OpportunityDefinition,
     OpportunityStatus,
     OpportunityType,
@@ -34,7 +35,7 @@ from tax_gps.policy.activation import ActivatedRulePack
 from tax_gps.policy.models import RuleSource
 from tax_gps.profile.models import UserProfile
 
-DISCOVERY_ENGINE_VERSION = "tax-gps-discovery/0.3.0"
+DISCOVERY_ENGINE_VERSION = "tax-gps-discovery/0.4.0"
 T = TypeVar("T")
 
 
@@ -127,6 +128,24 @@ def _existing_rights(
                 source_ids=_source_ids_for(definition, pack, catalog),
                 reason_codes=reasons,
                 missing_fact_ids=missing,
+            )
+        )
+    if state.pvd is not None and state.pvd.employee_paid.is_positive():
+        definition = catalog.catalog.definition("TH-RIGHT-PVD")
+        rights.append(
+            DiscoveredRight(
+                right_id=definition.opportunity_id,
+                name=definition.name,
+                category=OpportunityCategory.CLAIM_EXISTING_RIGHT,
+                opportunity_type=OpportunityType.EXISTING_RIGHT,
+                status=OpportunityStatus.AVAILABLE,
+                requires_new_cash=False,
+                claimed_amount=state.pvd.allowance + state.pvd.exemption,
+                remaining_capacity=None,
+                tax_impact=None,
+                rule_ids=definition.rule_ids,
+                source_ids=_source_ids_for(definition, pack, catalog),
+                reason_codes=(DiscoveryReasonCode.EXISTING_RIGHT_AVAILABLE,),
             )
         )
     return tuple(rights)
@@ -317,7 +336,8 @@ def discover_opportunities(
         or expected_state.material_dict() != state.material_dict()
     ):
         raise ValueError("tax state does not match profile and activated policy")
-    if state.status is not TaxStatus.READY:
+    baseline_only = state.pvd is not None and state.pvd.employee_paid.is_positive()
+    if state.status is not TaxStatus.READY or baseline_only:
         result = DiscoveryResult(
             status=DiscoveryStatus.UNSUPPORTED,
             profile_hash=profile.profile_hash(),
@@ -326,11 +346,17 @@ def discover_opportunities(
             opportunity_catalog_hash=catalog.content_hash,
             tax_year=context.tax_year.gregorian,
             planning_date=context.planning_date,
-            existing_rights=(),
+            existing_rights=_existing_rights(profile, state, pack, catalog, context)
+            if baseline_only
+            else (),
             opportunities=(),
-            reason_codes=(DiscoveryReasonCode.UNSUPPORTED_TAX_STATE,),
-            rules_applied=(),
-            sources=(),
+            reason_codes=(
+                DiscoveryReasonCode.PVD_BASELINE_ONLY
+                if baseline_only
+                else DiscoveryReasonCode.UNSUPPORTED_TAX_STATE,
+            ),
+            rules_applied=state.rules_applied if baseline_only else (),
+            sources=state.sources if baseline_only else (),
             catalog_version=catalog.version,
             engine_version=engine_version,
             discovery_hash="",

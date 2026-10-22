@@ -26,7 +26,7 @@ from tax_gps.financial.state import (
 )
 from tax_gps.opportunity.models import OpportunityStatus, OpportunityType
 
-CANDIDATE_ENGINE_VERSION = "tax-gps-candidates/0.3.0"
+CANDIDATE_ENGINE_VERSION = "tax-gps-candidates/0.4.0"
 MAX_ALLOCATABLE_OPPORTUNITIES = 8
 
 

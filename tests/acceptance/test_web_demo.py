@@ -16,8 +16,10 @@ from examples.demo_errors import DemoInputError
 from examples.web_demo import DemoHandler
 
 from tests.acceptance.test_demo_profile import _profile as _extended_profile
+from tests.support.demo_profiles import explicit_demo_profile
 
 DEFAULTS = {
+    "profile": explicit_demo_profile(),
     "salary": "990500",
     "social_security": "10500",
     "assets": "500000",
@@ -268,8 +270,8 @@ def test_c01_ready_copy_is_scoped_and_names_unsupported_items() -> None:
     assert "สิทธิที่มีอยู่ถูกนำมาคำนวณแล้ว" not in page
     assert "รวมรายการที่รองรับและกรอกยืนยันแล้ว" in page
     assert "40(1) ปี 2569" in page
-    exclusions = page.split("ยังไม่รวม:", 1)[1].split("</p>", 1)[0]
-    for item in ("เงินออมเกษียณ", "PVD", "RMF", "Thai ESG", "รายได้อื่น"):
+    exclusions = page.split("รองรับ PVD กรณีปกติ", 1)[1].split("</p>", 1)[0]
+    for item in ("นายจ้างเดียว", "RMF", "สิทธิอื่น", "ประวัติ", "ปิดผล"):
         assert item in exclusions, item
 
 

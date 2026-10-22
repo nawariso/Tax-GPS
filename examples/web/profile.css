@@ -39,3 +39,5 @@
   .profile-summary dl > div { grid-template-columns: 1fr; gap: 4px; }
   .profile-summary dd { text-align: left; }
 }
+
+.c02-input{margin:1.2rem 0;padding:1.1rem;border:1px solid #c9d4c5;border-radius:16px;background:#f8faf4}.c02-input h3{margin-top:0}.c02-grid{display:grid;gap:1rem;grid-template-columns:repeat(2,minmax(0,1fr))}.c02-inventory{margin-top:1rem;padding-top:.8rem;border-top:1px solid #dbe2d4}.c02-inventory summary{cursor:pointer;font-weight:650}.c02-grid .field{min-width:0}.c02-grid input,.c02-grid select{width:100%;box-sizing:border-box}.c02-note{padding:1rem;background:#eaf1df;border-radius:12px;color:#284c37}@media(max-width:540px){.c02-grid{grid-template-columns:1fr}}

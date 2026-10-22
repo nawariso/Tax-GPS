@@ -34,3 +34,7 @@
 
 การอนุมัติที่ขอคือขอบเขตและสัญญาพฤติกรรมใน v0.1-draft ไม่ใช่การรับรองกฎหมาย
 หรือการอนุญาตให้ข้าม evidence gate. C01/F09 และ UI visual acceptance แยกกัน
+
+Follow-up2026-10-21: ผู้ใช้อนุมัติ scope/behavior และสั่งเดินต่อแล้วตามDEC-019;
+requirementเป็นv0.1 และกำลังreviewหลักฐาน ดู [matrix/remaining gaps](../policy-evidence/2026-10-21/README.md).
+ข้อความสถานะข้างต้นเป็นร่างก่อนอนุมัติ ไม่ใช่คำขออนุมัติเดิมซ้ำ

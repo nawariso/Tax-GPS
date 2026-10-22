@@ -13,6 +13,7 @@ from pathlib import Path
 
 from examples.demo_errors import DemoInputError, input_scope, invalid_input
 from examples.demo_profile import amount, parse_profile
+from examples.pvd_adapter import c02_reason
 from tax_gps.candidate.activation import activate_allocation_policy, bundled_allocation_policy
 from tax_gps.candidate.engine import build_candidates
 from tax_gps.core.money import Money
@@ -36,6 +37,7 @@ from tax_gps.profile.models import (
     SharedLimitUsage,
     UserProfile,
 )
+from tax_gps.profile.pvd import PvdWageBasisError
 
 ASSETS = Path(__file__).with_name("web")
 FIELDS = frozenset(
@@ -45,6 +47,7 @@ MAX_BODY = 4096
 STATIC = {
     "/": ("index.html", "text/html; charset=utf-8"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/pvd.js": ("pvd.js", "text/javascript; charset=utf-8"),
     "/profile.js": ("profile.js", "text/javascript; charset=utf-8"),
     "/profile.css": ("profile.css", "text/css; charset=utf-8"),
     "/style.css": ("style.css", "text/css; charset=utf-8"),
@@ -70,10 +73,7 @@ def _calculate(data: object) -> dict[str, object]:
     year = TaxYear(2026)
     usage = data["shared_usage"]
     benefits = ExistingTaxBenefits(social_security_paid=_money(data, "social_security"))
-    financial_profile = FinancialProfile(
-        liquid_assets=_money(data, "assets") if data["assets"] != "" else None,
-        monthly_essential_expenses=_money(data, "expenses") if data["expenses"] != "" else None,
-    )
+    financial_profile = FinancialProfile()
     if "profile" in data:
         benefits, financial_profile = parse_profile(
             data["profile"],
@@ -83,7 +83,7 @@ def _calculate(data: object) -> dict[str, object]:
         )
     profile = UserProfile(
         profile_id="local-demo",
-        version="1",
+        version="2",
         tax_year=year,
         income=IncomeProfile(section_40_1=_money(data, "salary")),
         benefits=benefits,
@@ -107,7 +107,7 @@ def _calculate(data: object) -> dict[str, object]:
             "SHARED_USAGE_REQUIRED": "ยังไม่ทราบยอดใช้วงเงินเดิม Thai ESG / ESGX โปรดตรวจสอบ",
         }
         raise DemoInputError(
-            " · ".join(messages[reason] for reason in tax.reason_codes),
+            " · ".join(messages.get(reason, c02_reason(reason)) for reason in tax.reason_codes),
             code="BASELINE_NOT_READY",
             status=tax.status.value,
             reason_codes=tax.reason_codes,
@@ -116,6 +116,31 @@ def _calculate(data: object) -> dict[str, object]:
     discovery = discover_opportunities(
         profile, tax, pack, catalog, DiscoveryContext(year, planning_date)
     )
+    if tax.planning_availability.value == "PVD_BASELINE_ONLY":
+        return {
+            "taxable_income": tax.taxable_income.canonical(),
+            "tax_before": tax.pit.canonical(),
+            "planning_availability": tax.planning_availability.value,
+            "pvd": tax.pvd.to_dict() if tax.pvd is not None else None,
+            "financial": None,
+            "guardrails": None,
+            "outcomes": None,
+            "discovery": discovery.to_dict(),
+            "tax_state": tax.to_dict(),
+            "submitted_profile": {"tax": profile.to_dict()},
+            "demo_scope": "C02A_OWN_PVD_BASELINE_ONLY",
+        }
+    financial_profile = FinancialProfile(
+        liquid_assets=_money(data, "assets") if data["assets"] != "" else None,
+        monthly_essential_expenses=_money(data, "expenses") if data["expenses"] != "" else None,
+    )
+    if "profile" in data:
+        _, financial_profile = parse_profile(
+            data["profile"],
+            assets=financial_profile.liquid_assets,
+            expenses=financial_profile.monthly_essential_expenses,
+            social=_money(data, "social_security"),
+        )
     context = FinancialPlanningContext(planning_date, _money(data, "budget"))
     financial_policy = activate_financial_policy(bundled_financial_policy(year))
     with input_scope("budget"):
@@ -134,6 +159,8 @@ def _calculate(data: object) -> dict[str, object]:
     )
     outcomes = build_candidates(tax, discovery, financial, guards, policy)
     return {
+        "planning_availability": tax.planning_availability.value,
+        "pvd": tax.pvd.to_dict() if tax.pvd is not None else None,
         "taxable_income": tax.taxable_income.canonical(),
         "tax_before": tax.pit.canonical(),
         "financial": financial.to_dict(),
@@ -150,7 +177,10 @@ def _calculate(data: object) -> dict[str, object]:
 
 def calculate(data: object) -> dict[str, object]:
     with input_scope("profile"):
-        return _calculate(data)
+        try:
+            return _calculate(data)
+        except PvdWageBasisError as exc:
+            raise invalid_input("pvd.wage_basis") from exc
 
 
 class DemoHandler(BaseHTTPRequestHandler):

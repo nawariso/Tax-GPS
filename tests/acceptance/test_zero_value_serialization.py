@@ -14,13 +14,13 @@ from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.engine import calculate_tax
 from tax_gps.profile.models import (
-    ExistingTaxBenefits,
     IncomeProfile,
     OpportunityFacts,
     UnsupportedIncome,
     UserProfile,
 )
 from tests.support.policy import production_pack
+from tests.support.profiles import complete_benefits
 
 
 def _profile(salary: int) -> UserProfile:
@@ -30,7 +30,7 @@ def _profile(salary: int) -> UserProfile:
         version="1",
         tax_year=TaxYear(2026),
         income=IncomeProfile(section_40_1=Money.of(salary)),
-        benefits=ExistingTaxBenefits(social_security_paid=Money.of(10500)),
+        benefits=complete_benefits(social_security_paid=Money.of(10500)),
     )
 
 

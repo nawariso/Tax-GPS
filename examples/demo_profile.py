@@ -8,6 +8,7 @@ from decimal import Decimal
 from typing import cast
 
 from examples.demo_errors import DemoInputError, field_label, input_scope, invalid_input
+from examples.pvd_adapter import parse_pvd_profile
 from tax_gps.core.decimal_context import EXACT
 from tax_gps.core.money import Money
 from tax_gps.financial.profile import (
@@ -163,7 +164,8 @@ def _commitments(items: list[object]) -> tuple[CommittedCashNeed, ...]:
 def _parse_profile(
     value: object, *, assets: Money | None, expenses: Money | None, social: Money
 ) -> tuple[ExistingTaxBenefits, FinancialProfile]:
-    if not isinstance(value, dict) or set(value) != SCALARS | LISTS:
+    groups = {"pvd", "other_rights", "fund_history"}
+    if not isinstance(value, dict) or set(value) - groups != SCALARS | LISTS:
         raise invalid_input("profile")
     scalars = _strings({key: value[key] for key in SCALARS}, SCALARS, "profile")
     if not all(isinstance(value[key], list) for key in LISTS):
@@ -188,7 +190,12 @@ def _parse_profile(
             reason_codes=("UNSUPPORTED_INCOME",),
         )
     retirement = amount(scalars["retirement_usage"], "retirement_usage")
+
+    pvd, other_rights, history = parse_pvd_profile(value)
     benefits = ExistingTaxBenefits(
+        pvd=pvd,
+        other_rights=other_rights,
+        fund_history=history,
         personal_eligible=_boolean(scalars["personal_eligible"], "personal_eligible"),
         social_security_paid=social,
         parents=_parents(lists["parents"]),

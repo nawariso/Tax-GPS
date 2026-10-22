@@ -7,7 +7,7 @@ const test = require('node:test');
 const vm = require('node:vm');
 const base = process.env.TAX_GPS_DEMO_URL || 'http://127.0.0.1:8765';
 assert.match(base, /^http:\/\/127\.0\.0\.1:\d+$/);
-const source = fs.readFileSync(path.join(__dirname, '../../examples/web/profile.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/app.js'), 'utf8');
+const source = fs.readFileSync(path.join(__dirname, '../../examples/web/pvd.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/profile.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/app.js'), 'utf8');
 
 class Element {
   constructor() {
@@ -47,6 +47,9 @@ function harness() {
   Object.entries(values).forEach(([key,value]) => { get(key).value = value; });
   Object.entries({personal_eligible:'true', mortgage_interest:'0', mortgage_eligible:'false',
     required_coverage:'', existing_coverage:'', other_income:'0', retirement_usage:'0'}).forEach(([key,value])=>{get(key).value=value;});
+  get('pvd_presence').value='false';
+  ['rmf','thai_esg','thai_esgx','gpf','teacher_fund','nsf','pension_insurance','ssf','spouse_pvd_claim','other_retirement_right'].forEach(key=>{get('other_rights_'+key).value='false';});
+  ['prior_conditional_rights','disposal_withdrawal_transfer','retirement_or_recapture','ltf_carryforward'].forEach(key=>{get('fund_history_'+key).value='false';});
   const calls = [];
   const timers = new Map();
   let timerSequence = 0;
@@ -86,6 +89,60 @@ function harness() {
   };
 }
 const settle = () => new Promise(resolve => setTimeout(resolve, 30));
+
+test('C02A unknown input hides every result',async()=>{
+  const app=harness(); app.get('pvd_presence').value='';
+  app.recalculate(); await app.resolve(app.calls.length-1,400);
+  assert.equal(app.latest(),null);assert.equal(app.export(),null);
+  assert.equal(app.get('download').disabled,true);
+});
+test('C02A PVD0 preserves history answers',async()=>{
+  const app=harness();app.get('fund_history_prior_conditional_rights').value='true';
+  app.get('pvd_presence').value='false';app.recalculate();
+  await app.resolve(app.calls.length-1,400);
+  assert.equal(app.latest(),null);assert.match(app.get('error').textContent,/ประวัติ/);
+  assert.equal(app.get('fund_history_prior_conditional_rights').value,'true');
+});
+test('C02A baseline-only shows breakdown and disables new cash',async()=>{
+  const app=harness();app.get('salary').value='180000';app.get('social_security').value='0';
+  app.get('pvd_presence').value='true';
+  Object.entries({employee_paid:'27000',wage_basis:'180000',fund_name:'Test fund',registered_fund:'true',
+    credited_in_tax_year:'true',single_employer:'true',single_fund:'true',ordinary_article_rate:'true',normal_remittance:'true'})
+    .forEach(([key,value])=>{app.get('pvd_'+key).value=value;});
+  app.get('budget').value='';app.recalculate();await app.resolve(app.calls.length-1);
+  assert.equal(app.latest().planning_availability,'PVD_BASELINE_ONLY');
+  assert.equal(app.get('comparisonTab').disabled,true);
+  assert.match(app.get('pvdBreakdown').textContent,/17,000.00/);
+  assert.equal(app.export().comparison_view.kind,'BASELINE_ONLY');
+});
+test('C02A edit and late response cannot restore old export',async()=>{
+  const app=harness();await app.resolve(0);
+  app.recalculate();app.get('pvd_presence').value='';
+  app.get('planner').listeners.input();await app.resolve(1);
+  assert.equal(app.latest(),null);assert.equal(app.export(),null);
+});
+test('C02A error links focus actual required field',async()=>{
+  const app=harness();app.get('pvd_presence').value='';app.recalculate();
+  await app.resolve(app.calls.length-1,400);
+  assert.equal(app.get('pvd_presence').attributes['aria-invalid'],'true');
+});
+test('C02A missing facts use Thai grouped links without internal field paths',async()=>{
+  const app=harness();app.get('pvd_presence').value='';
+  app.get('other_rights_rmf').value='';app.get('fund_history_ltf_carryforward').value='';
+  app.recalculate();await app.resolve(app.calls.length-1,400);
+  assert.doesNotMatch(app.get('error').textContent,/other_rights\.|fund_history\.|pvd\.employee_paid/);
+  assert.equal(app.get('error').children.filter(node=>node.className==='error-group').length,3);
+});
+for(const wage of ['0','180001'])test(`C02A contradictory wage ${wage} links to its actual field`,async()=>{
+  const app=harness();app.get('salary').value='180000';app.get('pvd_presence').value='true';
+  Object.entries({employee_paid:'27000',wage_basis:wage,fund_name:'Test fund',registered_fund:'true',
+    credited_in_tax_year:'true',single_employer:'true',single_fund:'true',ordinary_article_rate:'true',normal_remittance:'true'})
+    .forEach(([key,value])=>{app.get('pvd_'+key).value=value;});
+  app.recalculate();await app.resolve(app.calls.length-1,400);
+  assert.equal(app.get('pvd_wage_basis').attributes['aria-invalid'],'true');
+  assert.equal(app.latest(),null);assert.equal(app.export(),null);
+  assert.doesNotMatch(app.get('error').textContent,/180001/);
+});
 
 test('comparison starts with pinned NO_ACTION and no selected cash candidates',async()=>{
   const app=harness();await app.resolve(0);
@@ -265,7 +322,9 @@ test('C01 unknown usage cannot publish a baseline after a late earlier response'
   assert.equal(app.latest(),null);assert.equal(app.export(),null);
   assert.equal(app.get('result').hidden,true);
   assert.match(app.get('error').textContent,/ยังไม่ทราบ|ตรวจสอบ/);
-  assert.match(app.get('error').textContent,/ข้อมูลที่ยังขาด: opportunity_facts\.shared_limit_usage/);
+  // C02A-AC07: Thai guidance replaces internal paths; machine IDs stay in the API.
+  assert.match(app.get('error').textContent,/ยังไม่ทราบยอดใช้วงเงินเดิม Thai ESG \/ ESGX/);
+  assert.equal(app.get('shared_usage').attributes['aria-invalid'],'true');
   assert.doesNotMatch(app.get('error').textContent,/ตรวจจำนวนเงิน/);
 });
 

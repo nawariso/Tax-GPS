@@ -25,7 +25,7 @@ from tax_gps.policy.models import RuleStatus
 from tax_gps.profile.models import UserProfile
 
 BUNDLED_ALLOCATION_POLICY_ID = "TH-ALLOCATION-2026-001"
-BUNDLED_ALLOCATION_POLICY_VERSION = "1.0.1"
+BUNDLED_ALLOCATION_POLICY_VERSION = "1.1.0"
 BUNDLED_CANDIDATE_MAXIMUM = 32
 
 
@@ -65,6 +65,8 @@ def _validate_upstream(
         raise ValueError("tax state integrity mismatch")
     if (
         tax.status is not TaxStatus.READY
+        or tax.planning_availability.value != "AVAILABLE"
+        or (tax.pvd is not None and tax.pvd.employee_paid.is_positive())
         or discovery.status is not DiscoveryStatus.READY
         or tax.output_hash != discovery.tax_state_hash
         or tax.tax_year.gregorian != discovery.tax_year

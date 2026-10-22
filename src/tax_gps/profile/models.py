@@ -8,6 +8,7 @@ from tax_gps.core.canonical import canonical_json, sha256_hex
 from tax_gps.core.errors import InvalidValueError
 from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
+from tax_gps.profile.pvd import FundHistoryFacts, OtherRightsFacts, PvdFacts, facts_to_dict
 
 
 def _non_negative(amount: Money, field: str) -> None:
@@ -118,6 +119,9 @@ class ExistingTaxBenefits:
     mortgage_interest_paid: Money = field(default_factory=Money.zero)
     mortgage_eligible: bool = False
     retirement_contributions: tuple[RetirementContribution, ...] = ()
+    pvd: PvdFacts | None = None
+    other_rights: OtherRightsFacts | None = None
+    fund_history: FundHistoryFacts | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "parents", tuple(self.parents))
@@ -233,6 +237,9 @@ class UserProfile:
                 ],
             },
             "benefits": {
+                "pvd": facts_to_dict(self.benefits.pvd),
+                "other_rights": facts_to_dict(self.benefits.other_rights),
+                "fund_history": facts_to_dict(self.benefits.fund_history),
                 "personal_eligible": self.benefits.personal_eligible,
                 "social_security_paid": self.benefits.social_security_paid.canonical(),
                 "parents": [

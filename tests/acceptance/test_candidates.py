@@ -31,7 +31,6 @@ from tax_gps.financial.reason_codes import FinancialReasonCode
 from tax_gps.financial.state import FinancialState, compute_financial_state
 from tax_gps.opportunity import opportunity_ids
 from tax_gps.profile.models import (
-    ExistingTaxBenefits,
     IncomeProfile,
     OpportunityFacts,
     SharedLimitUsage,
@@ -39,6 +38,7 @@ from tax_gps.profile.models import (
 )
 from tests.support.catalog import production_catalog
 from tests.support.policy import production_pack
+from tests.support.profiles import complete_benefits
 
 
 def _profile(
@@ -53,7 +53,7 @@ def _profile(
         version="1",
         tax_year=TaxYear(2026),
         income=IncomeProfile(section_40_1=salary),
-        benefits=ExistingTaxBenefits(social_security_paid=Money.of(10500)),
+        benefits=complete_benefits(social_security_paid=Money.of(10500)),
         opportunity_facts=OpportunityFacts(shared_limit_usage=shared_limit_usage),
     )
 

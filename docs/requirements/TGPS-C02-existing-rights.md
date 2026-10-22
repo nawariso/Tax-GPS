@@ -1,9 +1,9 @@
 # TGPS-C02 — สิทธิเดิมของพนักงาน
 
-Version: `0.1-draft`
+Version: `0.1`
 Date: `2026-10-15` (Asia/Bangkok)
 Direction: **AGREED_DIRECTION** ตาม roadmap
-Detailed requirement: **REQUIREMENT_REVIEW** — รายละเอียดนี้เป็นข้อเสนอผู้เขียน
+Detailed requirement: **REQUIREMENT_REVIEW** — ผู้ใช้อนุมัติ scope/behavior 2026-10-21; legal evidence review ยังไม่ผ่าน
 Implementation: **NOT_STARTED** — ยังไม่อนุมัติ treatment ใหม่
 
 ## 1. เป้าหมายและฐานตั้งต้น
@@ -127,13 +127,14 @@ effective period, applicability ปี 2569, ข้อความที่ร�
 ## 7. Release / งานที่ยังไม่ทำ
 
 - [x] ร่าง scope, anti-double-count contracts, acceptance IDs และ evidence gaps
-- [ ] ผู้ใช้รีวิว/อนุมัติ requirement รายละเอียด และเพิ่ม DEC สำหรับ treatment/readiness ที่จะเปลี่ยน
+- [x] ผู้ใช้อนุมัติ scope/behavior ตาม review brief และ v0.1; DEC-019
+- [ ] ปิดรายละเอียด treatment/readiness หลัง evidence review และบันทึก DEC ก่อน implementation
 - [ ] ปิด legal evidence gate และจัด independent numeric fixtures
 - [ ] เขียน implementation plan ผูก AC IDs, version migration และ tasks
 - [ ] RED → GREEN, full gates, fresh review, mark progress และ acceptance record
 
 ดู [progress ledger](../implementation-reports/TGPS-C02-progress.md).
-ยังไม่มี implementation plan เพราะ requirement ยังไม่อนุมัติ; ห้ามสร้างสถานะ PLANNED
+ยังไม่มี implementation plan เพราะ evidence gate ยังไม่ผ่าน; ห้ามสร้างสถานะ PLANNED
 ให้ดูเหมือนข้าม legal/review gate แล้ว และห้ามเริ่ม product code จากร่างนี้
 
 ## Change log
@@ -141,3 +142,8 @@ effective period, applicability ปี 2569, ข้อความที่ร�
 | Date | Version | Change | Basis |
 | --- | --- | --- | --- |
 | 2026-10-15 | 0.1-draft | ร่างสิทธิเดิม/unknown/capacity/version/AC/evidence gaps; ไม่เพิ่ม treatment | ผู้ใช้ให้ทำงานรับช่วงและร่าง C02 ต่อ; DEC-015 |
+| 2026-10-21 | 0.1 | ผู้ใช้อนุมัติ scope/behavior หลัง review brief และสั่งทำ evidence/fixtures ต่อ; legal gate ยัง OPEN, ไม่เริ่ม treatment | DEC-019 |
+| 2026-10-22 | 0.1 (linked UX draft) | เพิ่ม [แบบ UX สำหรับรีวิว](TGPS-C02-guided-rights-ux.md) ตามเป้าหมายอ่านง่าย; รายละเอียดหน้าจอยัง AUTHORING_DETAIL ไม่เปลี่ยนสัญญา/อนุมัติ implementation | DEC-020 |
+| 2026-10-22 | 0.1 (UX approved) | ผู้ใช้อนุมัติแบบ UX; ทำ standalone prototypeในdocsและfield/copy inventory ไม่เปลี่ยนtax/HTTP contractหรือปิดlegal gate | DEC-021 |
+| 2026-10-22 | 0.1 (staging proposed) | เพิ่ม [C02A proposal](TGPS-C02A-pvd-first-slice.md) แยกสำหรับscope review; parentapprovedscopeยังไม่เปลี่ยน | DEC-022 AUTHORING_DETAIL |
+| 2026-10-22 | 0.1 (staging approved) | C02A scope approved; bounded evidence เพียงพอสำหรับ planning ของ normal PVD เท่านั้น; แผน4tasksรอรีวิว ไม่ปิด parent legal gates รวม | DEC-023 / DEC-024 |

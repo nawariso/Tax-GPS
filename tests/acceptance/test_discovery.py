@@ -46,6 +46,7 @@ from tests.support.catalog import (
     solar_unverified_catalog,
 )
 from tests.support.policy import production_pack
+from tests.support.profiles import complete_benefits
 
 PLANNING_DATE = date(2026, 6, 1)
 
@@ -81,7 +82,7 @@ def profile(
         version="1",
         tax_year=TaxYear(2026),
         income=IncomeProfile(section_40_1=Money.of(salary)),
-        benefits=benefits or ExistingTaxBenefits(social_security_paid=Money.of(sso)),
+        benefits=benefits or complete_benefits(social_security_paid=Money.of(sso)),
         opportunity_facts=(facts if facts is not None else OpportunityFacts(shared_limit_usage=())),
     )
 
@@ -134,7 +135,7 @@ def opportunity(result: DiscoveryResult, opportunity_id: str) -> DiscoveredOppor
 def test_disc_01_existing_rights_precede_new_cash_opportunities() -> None:
     result = discover(
         profile(
-            benefits=ExistingTaxBenefits(
+            benefits=complete_benefits(
                 social_security_paid=Money.of(10500),
                 parents=(Parent("father", True), Parent("mother", True)),
                 mortgage_interest_paid=Money.of(125000),
@@ -158,7 +159,7 @@ def test_disc_01_existing_rights_precede_new_cash_opportunities() -> None:
 def test_disc_02_two_eligible_parents_are_a_sixty_thousand_baht_existing_right() -> None:
     result = discover(
         profile(
-            benefits=ExistingTaxBenefits(
+            benefits=complete_benefits(
                 parents=(Parent("father", True), Parent("mother", True)),
             )
         )
@@ -174,7 +175,7 @@ def test_disc_02_two_eligible_parents_are_a_sixty_thousand_baht_existing_right()
 def test_disc_03_mortgage_interest_of_125000_is_capped_at_100000() -> None:
     result = discover(
         profile(
-            benefits=ExistingTaxBenefits(
+            benefits=complete_benefits(
                 mortgage_interest_paid=Money.of(125000), mortgage_eligible=True
             )
         )
@@ -185,7 +186,7 @@ def test_disc_03_mortgage_interest_of_125000_is_capped_at_100000() -> None:
         mortgage.claimed_amount
         == calculate_tax(
             profile(
-                benefits=ExistingTaxBenefits(
+                benefits=complete_benefits(
                     mortgage_interest_paid=Money.of(125000), mortgage_eligible=True
                 )
             ),
@@ -375,7 +376,7 @@ def test_disc_20_the_output_carries_no_ranking_or_recommendation_semantics() -> 
     forbidden = ("best", "recommended", "rank", "score", "priority_score")
     result = discover(
         profile(
-            benefits=ExistingTaxBenefits(
+            benefits=complete_benefits(
                 parents=(Parent("father", True),),
                 mortgage_interest_paid=Money.of(125000),
                 mortgage_eligible=True,
@@ -405,7 +406,7 @@ def test_g04_material_retirement_is_not_presented_as_an_applied_right() -> None:
     result = discover(
         profile(
             2800000,
-            benefits=ExistingTaxBenefits(
+            benefits=complete_benefits(
                 retirement_contributions=(RetirementContribution("PVD", Money.of(500000)),)
             ),
         )
@@ -434,7 +435,7 @@ def test_discovery_rejects_tax_material_mutation_with_an_unchanged_hash() -> Non
 def test_g08_parent_and_mortgage_rights_are_both_discovered() -> None:
     result = discover(
         profile(
-            benefits=ExistingTaxBenefits(
+            benefits=complete_benefits(
                 social_security_paid=Money.of(10500),
                 parents=(Parent("father", True), Parent("mother", True)),
                 children=(Child("c1", order=1, legally_eligible=True, birth_year=2017),),
@@ -644,7 +645,7 @@ def test_capacity_is_never_presented_as_an_amount_to_spend() -> None:
 
 
 def test_unknown_parent_eligibility_is_an_explicit_missing_input() -> None:
-    result = discover(profile(benefits=ExistingTaxBenefits(parents=(Parent("father", None),))))
+    result = discover(profile(benefits=complete_benefits(parents=(Parent("father", None),))))
     assert result.baseline_status == "REQUIRES_INPUT"
     assert result.missing_fact_ids == ("parent.father.eligible",)
     assert result.opportunities == ()
@@ -654,7 +655,7 @@ def test_unknown_parent_eligibility_is_an_explicit_missing_input() -> None:
 def test_explicitly_ineligible_rights_are_not_reported_as_available() -> None:
     result = discover(
         profile(
-            benefits=ExistingTaxBenefits(
+            benefits=complete_benefits(
                 parents=(Parent("father", False),),
                 children=(Child("c1", order=1, legally_eligible=False, birth_year=2018),),
                 mortgage_interest_paid=Money.of(125000),

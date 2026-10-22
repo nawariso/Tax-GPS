@@ -15,14 +15,16 @@ from tax_gps.policy.activation import activate_rule_pack
 from tax_gps.policy.loader import BUNDLED_PACK_ID_2026, load_bundled_rule_pack
 from tax_gps.profile.models import (
     Child,
-    ExistingTaxBenefits,
     IncomeProfile,
     OpportunityFacts,
     Parent,
     UserProfile,
 )
+from tests.support.demo_profiles import explicit_demo_profile
+from tests.support.profiles import complete_benefits
 
 DEFAULTS = {
+    "profile": explicit_demo_profile(),
     "salary": "990500",
     "social_security": "10500",
     "assets": "500000",
@@ -45,7 +47,7 @@ def _demo() -> ModuleType:
 
 
 def _profile() -> dict[str, object]:
-    return {
+    return explicit_demo_profile() | {
         "personal_eligible": "true",
         "parents": [],
         "children": [],
@@ -78,7 +80,7 @@ def test_family_uses_existing_core_tax_path() -> None:
             version="1",
             tax_year=TaxYear(2026),
             income=IncomeProfile(Money.of("990500")),
-            benefits=ExistingTaxBenefits(
+            benefits=complete_benefits(
                 social_security_paid=Money.of("10500"),
                 parents=(Parent("father", True),),
                 children=(

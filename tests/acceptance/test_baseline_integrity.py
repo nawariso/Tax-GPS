@@ -12,7 +12,6 @@ from tax_gps.discovery.engine import discover_opportunities
 from tax_gps.engine import calculate_tax
 from tax_gps.opportunity.opportunity_ids import THAI_ESG_2026_POOL
 from tax_gps.profile.models import (
-    ExistingTaxBenefits,
     IncomeProfile,
     OpportunityFacts,
     Parent,
@@ -23,6 +22,7 @@ from tax_gps.profile.models import (
 )
 from tests.support.catalog import production_catalog
 from tests.support.policy import production_pack
+from tests.support.profiles import complete_benefits
 
 
 def _profile(
@@ -36,7 +36,7 @@ def _profile(
         "1",
         TaxYear(2026),
         IncomeProfile(Money.of(990500)),
-        ExistingTaxBenefits(
+        complete_benefits(
             social_security_paid=Money.of(10500),
             parents=parents,
             retirement_contributions=retirement,
