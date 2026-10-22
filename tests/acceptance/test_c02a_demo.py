@@ -1,10 +1,14 @@
 """C02A-AC01/05/07: HTTP adapter preserves authoritative readiness."""
 
+import json
+from http.client import HTTPConnection
+from http.server import ThreadingHTTPServer
+from threading import Thread
 from typing import Any, cast
 
 import pytest
 from examples.demo_errors import DemoInputError
-from examples.web_demo import calculate
+from examples.web_demo import MAX_BODY, DemoHandler, calculate
 
 from tests.acceptance.test_demo_profile import DEFAULTS, _profile
 
@@ -121,3 +125,53 @@ def test_c02a_false_facts_name_the_excluded_case(field: str, explanation: str) -
     assert error.value.status == "UNSUPPORTED"
     assert explanation in str(error.value)
     assert "ข้อจำกัดของตัวทดลอง" in str(error.value)
+
+
+@pytest.mark.parametrize("paid", ["0", "27000"])
+def test_c02a_complete_thai_profile_fits_http_body_limit(paid: str) -> None:
+    """C02A-AC07: representative UTF-8 records reach both real HTTP paths."""
+    data = request(paid)
+    profile = data["profile"]
+    profile["pvd"]["fund_name"] = "กองทุนสำรองเลี้ยงชีพพนักงานบริษัทตัวอย่างซึ่งจดทะเบียนแล้ว"
+    profile["parents"] = [{"relationship": "father", "eligible": "true"}]
+    profile["children"] = [
+        {"child_id": "บุตรคนแรก", "order": "1", "birth_year": "2015", "legally_eligible": "true"}
+    ]
+    profile["debts"] = [
+        {
+            "debt_id": "สินเชื่อบ้านตัวอย่าง",
+            "category": "MORTGAGE",
+            "balance": "1000000",
+            "apr_percent": "4.5",
+            "minimum_payment": "8000",
+            "secured": "true",
+        }
+    ]
+    profile["commitments"] = [
+        {
+            "need_id": "ค่าใช้จ่ายการศึกษา",
+            "amount": "10000",
+            "due_date": "2026-11-01",
+            "mandatory": "true",
+            "description": "ค่าใช้จ่ายการศึกษาประจำภาคเรียนของบุตร",
+        }
+    ]
+    profile["required_coverage"] = "1000000"
+    profile["existing_coverage"] = "500000"
+    body = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    assert len(body) <= MAX_BODY
+    with ThreadingHTTPServer(("127.0.0.1", 0), DemoHandler) as server:
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        connection = HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+        try:
+            connection.request("POST", "/api/calculate", body, {"Content-Type": "application/json"})
+            response = connection.getresponse()
+            result = json.loads(response.read())
+            assert response.status == 200, result
+            expected = "AVAILABLE" if paid == "0" else "PVD_BASELINE_ONLY"
+            assert result["planning_availability"] == expected
+        finally:
+            connection.close()
+            server.shutdown()
+            thread.join(timeout=5)

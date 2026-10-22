@@ -342,3 +342,5 @@ C02A [scope](docs/requirements/TGPS-C02A-pvd-first-slice.md) ได้รับ�
 ## C02A current checkpoint — 2026-10-22
 
 Normal single-employer/single-fund PVD is integrated with the Thai demo. Core/package0.3.0, discovery/candidates0.4.0; positive PVD supports baseline/breakdown only. Explicit zero preserves supported planning when facts are complete. Local752 Python tests/100% core coverage/frontend45 and all seven gates pass. Remaining delivery checks and acceptance: [C02A progress](docs/implementation-reports/TGPS-C02A-progress.md). Earlier NOT_STARTED descriptions are historical; parent C02 legal gates and C01/F09 remain open.
+
+C02A delivery follow-up: checkpoint `fd5513a` pushed and [remote CI run15](https://github.com/nawariso/Tax-GPS/actions/runs/39778189799) passed Python752/coverage100%/frontend45 on Ubuntu/Python3.12. Tasks1–3 done; fresh reduced-motion runtime and explicit user acceptance remain open. Full parent C02 and C03 are not complete. See the current plan/ledger rather than earlier preparation summaries.

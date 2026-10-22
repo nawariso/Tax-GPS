@@ -3,7 +3,7 @@
 Version: `0.1`  
 Updated: `2026-10-15` (Asia/Bangkok)  
 Direction: **AGREED**  
-Current work: **C01 IMPLEMENTED — Task 1–5 ทำ/ตรวจ/รายงานแล้ว; Python 694, coverage 100%, frontend 24/24; F09 OPEN / acceptance conditional, ยังไม่ ACCEPTED**
+Current work: **C02A IN_PROGRESS — core/consumers/HTTP/UI implemented; request-size follow-up verified; reduced-motion runtime/user acceptance pending. C01 IMPLEMENTED / F09 OPEN; parent C02 legal review OPEN.**
 
 Presentation work: **TGPS-UI01 IMPLEMENTED / VISUAL_REVIEW_PENDING** — restyle และ automatic/source verification เสร็จแล้ว;
 ดู [ข้อเสนอ UI01](requirements/TGPS-UI01-fintech-restyle.md) / [DEC-012](DECISIONS.md#dec-012--ทิศทางปรับหน้าตาตาม-fintech-template).
@@ -202,3 +202,5 @@ parent C02 และ acceptance เดิมไม่เปลี่ยน
 ## Current checkpoint — 2026-10-22 / DEC-025–026
 
 C02A implementation **IN_PROGRESS**: core/consumer Tasks1–2 complete; integrated Thai UI implemented and reviewed, Tasks3–4 retain request-size and reduced-motion verification/documentation work. Python752/coverage100%/frontend45 pass all seven local gates. User authorized commit/push and continuation. Parent C02 remains legal REQUIREMENT_REVIEW, C01/F09 and user acceptance remain open. Earlier NOT_STARTED/plan-review summaries are historical and superseded for C02A only.
+
+Delivery follow-up2026-10-22 / DEC-026: checkpointfd5513a pushed; remote CI run15SUCCESS on exact head/merge, Python752/coverage100%/frontend45. C02A Tasks1–3DONE after representative Thai request-size characterization; Task4PARTIAL because fresh reduced-motion runtime remains unverified. Plan/current-work synchronized. Parent C02/C01F09/user acceptance unchanged.

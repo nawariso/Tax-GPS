@@ -148,3 +148,11 @@ userอนุมัติการปิดnew-cashสำหรับpositivePVD
 | --- | --- | --- |
 | 2026-10-22 | 0.1 | ผู้ใช้อนุมัติ C02A staged scope ตาม DEC-023 หลังอ่านข้อเสนอ; scoped evidence review และ implementation ยังไม่เสร็จ บันทึก builder review ข้างบนเป็นประวัติก่อนอนุมัติ |
 | 2026-10-22 | 0.1 (scoped evidence) | บันทึก chain/currency/actual-credit facts และ ordinary-employer reference9/9; ADEQUATE_FOR_PLANNING_ONLY ตาม independent review ไม่ใช่ legal certification หรือ product acceptance |
+
+## Delivery status correction — 2026-10-22 / DEC-025–026
+
+The preparation paragraph saying no product code exists is historical. Tasks1–3 are implemented; current status remains IN_PROGRESS while fresh reduced-motion runtime is unverified. Checkpointfd5513a is pushed, remote CI run15 succeeds; representative Thai HTTP body tests pass without changing4096. This is technical evidence, not user acceptance or closure of parent legal gates. See C02A progress/review/remote receipts.
+
+| Follow-up date | Version | Change |
+| --- | --- | --- |
+| 2026-10-22 | 0.1 delivery | DEC-026 authorized commit/push; Tasks1–3 done, real Thai HTTP body characterization added. Local754/coverage100%/frontend45 pass all gates. Task4 reduced-motion runtime remains unverified; implementation IN_PROGRESS, no coverage/treatment expansion or acceptance. |
