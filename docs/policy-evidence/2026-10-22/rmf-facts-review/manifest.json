@@ -1,0 +1,37 @@
+[
+  {
+    "file": "rd-current-law-index.html",
+    "url": "https://www.rd.go.th/21221.html",
+    "retrieved_at": "2026-10-22T12:46:45.182614+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 196864,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "419947e43dba700d3e43ccd2a5db199f13d03c3bcfd88b2977b9f7b167942ff2"
+  },
+  {
+    "file": "rd-clearcut-tax2563.html",
+    "url": "https://www.rd.go.th/62149.html",
+    "retrieved_at": "2026-10-22T12:46:45.453145+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 168663,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "636ebc8b0a42d6fc2a8a76859a5fdafa4a171c820aa338bd16c32853849aa2a3"
+  },
+  {
+    "file": "sec-tax-saving-funds.html",
+    "url": "https://insight-fund.sec.or.th/mutual-fund-info/tax-saving-fund",
+    "retrieved_at": "2026-10-22T12:46:45.645997+00:00",
+    "status": "FAILED",
+    "sha256": null,
+    "error_type": "HTTPError"
+  },
+  {
+    "file": "rd-ins90-tax2568.pdf",
+    "url": "https://www.rd.go.th/fileadmin/tax_pdf/pit/2568/Ins90_241268.pdf",
+    "retrieved_at": "2026-10-22T12:46:47.772136+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 797008,
+    "content_type": "application/pdf",
+    "sha256": "ece283c0fdd14becf9412da48852578f6ed3ba72aa39c378be80161cc79e5f4e"
+  }
+]

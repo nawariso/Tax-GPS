@@ -147,3 +147,17 @@ effective period, applicability ปี 2569, ข้อความที่ร�
 | 2026-10-22 | 0.1 (UX approved) | ผู้ใช้อนุมัติแบบ UX; ทำ standalone prototypeในdocsและfield/copy inventory ไม่เปลี่ยนtax/HTTP contractหรือปิดlegal gate | DEC-021 |
 | 2026-10-22 | 0.1 (staging proposed) | เพิ่ม [C02A proposal](TGPS-C02A-pvd-first-slice.md) แยกสำหรับscope review; parentapprovedscopeยังไม่เปลี่ยน | DEC-022 AUTHORING_DETAIL |
 | 2026-10-22 | 0.1 (staging approved) | C02A scope approved; bounded evidence เพียงพอสำหรับ planning ของ normal PVD เท่านั้น; แผน4tasksรอรีวิว ไม่ปิด parent legal gates รวม | DEC-023 / DEC-024 |
+
+## Evidence follow-up — 2026-10-22
+
+[RMF fact/time review](../policy-evidence/2026-10-22/rmf-facts-review/README.md)
+adds source-linked review questions and cases; it is not an amendment of readiness
+or a new supported slice. Parent implementation remains incomplete; C02A has its
+own implemented runtime/checkpoint and remaining verification gates. Historical
+NOT_STARTED text above must not be read as saying C02A code is absent today.
+
+| Date | Version | Change | Basis |
+| --- | --- | --- | --- |
+| 2026-10-22 | 0.1 evidence follow-up | Add RMF fact/time packet; declaration, manager reporting and future obligations separated for review; G3–G6 remain open, no coverage/readiness change | Continued evidence work under DEC-019; user continuation after C02A delivery |
+
+| 2026-10-22 | 0.1 staging proposal | [C02B](TGPS-C02B-rmf-first-slice.md) proposes first-ever RMF-only coverage for review; parent scope unchanged, no scope/plan/code authorization inferred | DEC-027 AUTHORING_DETAIL |

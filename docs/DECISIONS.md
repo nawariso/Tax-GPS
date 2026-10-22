@@ -270,3 +270,12 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Decision: Commit and push scoped C02A work to the existing feature branch, then complete outstanding request-size/rendered verification and synchronize progress documents.
 - Reason: Preserve the verified implementation before completing its remaining delivery checks.
 - Boundary: No merge, force-push, Stage4 draft, new deduction treatment, or automatic user/legal acceptance. Parent C02 legal gates and C01/F09 remain open. New feature requirements still require review.
+
+## DEC-027 — ข้อเสนอ C02B RMF ซื้อครั้งแรกโดยไม่มี PVD ร่วม
+
+- Date: `2026-10-22`
+- Status: `AUTHORING_DETAIL / REQUIREMENT_REVIEW` — staged scope ยังไม่อนุมัติ
+- Evidence: ผู้ใช้สั่ง “โอเครครับ ลุย!” หลังรายงาน C02A delivery; อนุญาตให้ทำงานต่อใน roadmap แต่ไม่ได้เลือก staged RMF scope ที่เพิ่งเสนอ
+- Proposal: [C02B v0.1-draft](requirements/TGPS-C02B-rmf-first-slice.md) เริ่ม own first-ever normal RMF purchases in2026, one fund/AMC, explicit noPVD/other rights/history; baseline-only สำหรับ positiveRMF. C02A positivePVD/RMFzero คงเดิม; combinedpositiveยังปิดผล
+- Reason: [fact/time packet](policy-evidence/2026-10-22/rmf-facts-review/README.md) ทำ present facts/future obligations/AMC reporting ให้รีวิวแยกกันได้ ขณะที่ combined-PVD RMF base ยังไม่มี direct authority ที่เพียงพอ
+- Boundary: ไม่แทน parent C02 approved scope หรืออนุมัติข้อจำกัดใหม่นี้แทนผู้ใช้; ไม่ปิด legal gates, ไม่กำหนด reporting-pending readiness, ไม่มี implementation plan/runtime changes. ต้องผ่าน scope/evidence/contract review ก่อน plan. C02A reduced-motion/user acceptance และ C01/F09 ไม่เปลี่ยน
