@@ -26,3 +26,13 @@ implementation NOT_STARTED; acceptance NOT_CLAIMED.
 Next step after user chooses/approves this staged scope: scoped evidence/fixture
 and fact/time contract review. Only then prepare an AC-linked implementation plan.
 Do not repeat earlier C02A tasks or promote combined-PVD hypotheses into rules.
+
+## Delivery receipt
+
+- Scope/evidence document checkpoint `03aa8b41a444003411dd368cb71125c6bec8fdb1`
+  committed and pushed to origin/feature/tgps-c01-baseline-integrity.
+- Remote CI run18 `39789515504` was IN_PROGRESS on first lookup; not claimed
+  passed at that point. Local seven-gate evidence above applies to unchanged
+  product source. Receipt-only follow-up changes no runtime/tests.
+- Only unrelated `docs/demo/stage4-local-profile-contract-draft.md` remains
+  untracked. No merge, scope approval or acceptance inferred from push success.
