@@ -253,3 +253,12 @@ Status: **REQUIREMENT_REVIEW / implementation NOT_STARTED**
 
 - C02A normal PVD and C02B first-purchase RMF-only are IMPLEMENTED. Current integrated build passed all seven local gates and reduced-motion checks. GitHub CI runs 22–23 passed; see [verification](./TGPS-C02AB-verification-2026-11-24.json). User acceptance is open.
 - Parent C02 stays in legal REQUIREMENT_REVIEW with G1–G6 open. Combined PVD/RMF and broader existing rights remain outside the implemented coverage. The [Roadmap](../ROADMAP.md) records the proposed review order before C03.
+
+## 2026-11-24 — รีวิว PVD ร่วม RMF และซิงก์ Git
+
+- ผู้ใช้ให้สานรีวิวและจัด Git ให้ล่าสุด การรับงาน C02A/C02B และการเลือกโปรไฟล์ MVP รอคำตัดสินที่ระบุขอบเขต
+- Commit ผลตรวจ C02A/C02B `8ddca8d13b8e0789638ef63ffc9dddfd9d49f643` push ไป branch เดิมของ PR #4 สำเร็จ [CI run 24](https://github.com/nawariso/Tax-GPS/actions/runs/45439491695) ผ่านบน merge SHA `b8a17c933a91cbf56d246e36b698668387465152` โดยได้ Python 814, coverage 100% และ frontend 52/52
+- เปิด [ชุดรีวิว PVD ร่วม RMF](../policy-evidence/2026-11-24/README.md) และเก็บต้นฉบับกรมสรรพากรเพิ่ม 3 รายการ คำชี้แจงปี 2559 ข้อ 4 อ้างข้อ 2(35) โดยตรงและสนับสนุนฐานก่อนหักส่วนยกเว้นในกฎเดิม การใช้กับประกาศ 401 ในปี 2569 ยังต้องทบทวนตามสายการแก้ไข
+- ตรวจภาพ PDF หน้า 5–6 หลังการรัน PyMuPDF แบบ offline พบว่าไม่มีแพ็กเกจในแคช รอบที่ดาวน์โหลดแยกสำเร็จโดยไม่แก้ dependencies ของโปรเจกต์
+- คำนวณ Decimal นอก engine 2 เคสผ่าน เคสเพดานตามฐานเงินได้ต่างกัน 2,700 บาท เคสที่ชนเพดานร่วมได้ผลตรงกัน เทสต์ก่อน commit เอกสาร Python 814 ผ่าน (12.13s), frontend 52/52, fail 0, skip 0
+- Task combined PVD/RMF evidence review PARTIAL: historical interpretation found; current applicability and scoped review remain open. ข้อเสนอคือคงกรณีร่วมไว้นอกขอบเขตที่แสดงผลของ MVP แรกจนตรวจหลักฐานได้ Parent C02 อยู่ REQUIREMENT_REVIEW
