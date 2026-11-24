@@ -10,7 +10,7 @@
 
 **Spec:** [C02A v0.1](../../requirements/TGPS-C02A-pvd-first-slice.md), [approved UX](../../requirements/TGPS-C02-guided-rights-ux.md), [scoped evidence](../../policy-evidence/2026-10-22/c02a-scope/README.md), DEC-023.
 
-Plan: **APPROVED** (DEC-025); implementation **IN_PROGRESS**. Evidence adequate for planning only; parent C02 remains open. Recommended execution: Native, because these four tasks share the same facts/state/version contracts; final independent review remains required. Native execution approved under DEC-025; current delivery checkpoint under DEC-026.
+Plan: **APPROVED** (DEC-025); implementation **IMPLEMENTED** (DEC-032). Native execution and independent review are recorded in the C02A ledger. Task 4 technical checks are complete; user acceptance and parent legal review are open.
 
 ## Global Constraints
 
@@ -37,7 +37,7 @@ Plan: **APPROVED** (DEC-025); implementation **IN_PROGRESS**. Evidence adequate 
 | 1 | New `profile/pvd.py`, `calculation/pvd.py`; modify profile/models.py, calculation/readiness.py, calculation/models.py, engine.py, policy/loader.py; new pack1.1.0; unit/acceptance tests | ✅ เสร็จ — checkpoint fd5513a; review/gates ผ่าน |
 | 2 | New calculation/availability.py; modify calculation/models.py, discovery/models.py + engine.py, candidate/activation.py + engine.py, opportunity/loader.py + new catalog1.1.0, audit.py; consumer/version tests | ✅ เสร็จ — checkpoint fd5513a; review/gates ผ่าน |
 | 3 | New examples/pvd_adapter.py and examples/web/pvd.js; modify demo_profile.py, web_demo.py, demo_errors.py, web/index.html + app.js + profile.js + profile.css; Python adapter and tests/web/test_app.cjs | ✅ เสร็จ — HTTP/UI และ UTF-8 request characterization ผ่าน |
-| 4 | Runtime verification, fresh review, progress/decision records; package metadata/version docs if required by changed public contract | 🟡 บางส่วน — fresh reduced-motion/user acceptance ยังค้าง |
+| 4 | Runtime verification, fresh review, progress/decision records; package metadata/version docs if required by changed public contract | 🟡 บางส่วน — ตรวจเชิงเทคนิคครบ; รอ user acceptance |
 
 Paths above are relative to src/tax_gps unless prefixed examples/tests/docs. Existing files stay in their current organization; no broad refactor. Preserve unrelated Stage4 draft. Existing feature branch has uncommitted docs; at execution start read using-git-worktrees and verify isolation before code, never stash/reset them.
 
@@ -104,10 +104,13 @@ Browser module exports `collectPvdProfile()`, `renderPvdProfile(data)`, `initPvd
 
 - [x] Read tgps-verify and verification-before-completion. Run all seven AGENTS§4 commands, with fresh-server wrapper and coverage100% statements/branches. Record Python/Node versions, counts and commands in `docs/implementation-reports/TGPS-C02A-progress.md`; any failure remains open.
   ↳ ทำแล้ว: seven local gates และ independent final review/fix pass ตาม checkpoint verification และ C02A-review; CI run15 ผ่านสำหรับ fd5513a. ไม่มี reviewer ใหม่ใน follow-up ที่เพิ่มเฉพาะ characterization test.
-- [ ] **🟡 บางส่วน** Render actual integrated demo at1440,390,360 and320px, keyboard-only/focus error links, reduced-motion mode and baseline-only/unknown/unsupported/zero states. Capture screenshots and specific interaction observations; prototype screenshots do not count as product QA. Do not terminate unrelated server processes.
+- [x] Render actual integrated demo at 1440, 390, 360 and 320px, with keyboard/focus and baseline-only/unknown/unsupported/zero states. Verify reduced motion.
+  ↳ ทำแล้ว: [normal-mode review](../../implementation-reports/TGPS-C02A-rendered-review.md) และ [Chrome reduced motion บน integrated build](../../implementation-reports/TGPS-C02AB-verification-2026-11-24.json) ผ่าน; ตรวจ pending, export, recalculation และ missing-field focus.
 - [x] Use requesting-code-review for one fresh independent final review of this change with spec/plan/ledger and exact diff scope, no unrelated Stage4. Address material findings with RED→GREEN and rerun affected checks; final completion claim requires passing relevant gates after last code change.
   ↳ ทำแล้ว: seven local gates และ independent final review/fix pass ตาม checkpoint verification และ C02A-review; CI run15 ผ่านสำหรับ fd5513a. ไม่มี reviewer ใหม่ใน follow-up ที่เพิ่มเฉพาะ characterization test.
-- [ ] **🟡 บางส่วน** Mark implementation only with actual evidence and DEC entry; C02 parent not IMPLEMENTED and C01/F09 unchanged. Update requirement/plan/roadmap/README ledger; tests do not mark ACCEPTED. Commit scoped work via tgps-git once reviewed; no push/merge without existing explicit authorization for that action. Report outcome, test counts and remaining acceptance work in Thai.
+- [x] Record the verified technical implementation in [DEC-032](../../DECISIONS.md#dec-032--c02a-implemented-and-c02ab-delivery-verification), requirement, roadmap, README and ledger.
+  ↳ ทำแล้ว: C02A IMPLEMENTED สำหรับขอบเขตที่อนุมัติ; PR #4 ยังเป็น draft.
+- [ ] **🟡 บางส่วน** Record explicit user acceptance when a review is available.
 
 ## Plan self-review
 
@@ -123,3 +126,7 @@ Task1 DONE; Task2 DONE; Task3 DONE. Task4 PARTIAL: actual1440/390/360/320 and ke
 Checkpoint fd5513a pushed to origin; CI run15 SUCCESS, exact head/merge and extracted logs in [remote receipt](../../implementation-reports/TGPS-C02A-remote-ci-2026-10-22.json). Request-size follow-up adds two characterization tests (no runtime change), both pass via real HTTP with Thai UTF-8 records. A lowered body limit or premature rejection would fail these tests. Existing over-limit rejection stays covered separately.
 
 Ruling: retain existing feature checkout and scoped native ledger per previous execution; Stage4 draft untouched. Do not rerun Task1–2 merely because the preparation checkboxes had not been updated.
+
+## Verification follow-up — 2026-11-24
+
+Task 4 technical checks complete on the current integrated build. C02A is IMPLEMENTED under DEC-032; user acceptance remains open.

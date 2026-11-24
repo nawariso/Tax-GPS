@@ -99,3 +99,16 @@ First all-gate receipt retained with failures: wrong historical hash helper and 
 Source `e3babbb3ed48cec308cf0745474307ebdcb1c7f7` and documentation `acbe3932ede477131ebf287131119547df58bd76` pushed to origin/feature/tgps-c01-baseline-integrity. `git ls-remote` independently confirms acbe393; sandbox network attempt failed, explicit escalation succeeded. DraftPR4 updated, remains draft/unmerged. CIrun22 /39800026973 for exact headacbe393, observed mergerefcd8d32adae2d5e16a358afeaf6621d82bd62ec39 and job119897761523 are **QUEUED**, conclusionnull at latest check. No remotePASS inferred. Local7gatesPASS remains separate Windows3.14 evidence; CI3.12 pending.
 
 Task4 delivery committed/pushed; still PARTIAL for remoteCI/reduced-motion/user acceptance. Only unrelated Stage4 draft remains untracked. This receipt-only follow-up changes no runtime/tests or source custody. Later head CI is separate. Parent legalG1–G6 and C01/F09 remain OPEN. No merge/release or acceptance performed.
+
+## 2026-11-24 — CI and reduced-motion follow-up
+
+- [x] ~~Remote CI run 22 queued~~ **CORRECTION:** this was the October observation. GitHub job results and logs confirm run 22 on `acbe393` and run 23 on current PR head `5b94c3d` both passed with 814 Python tests, 100% statement/branch coverage and 52/52 frontend. PR #4 remains open as a draft.
+- [x] Fresh local 814 tests, coverage 100%, frontend 52/52 and all seven gates passed on `5b94c3d` on Windows. No changes to source or tests relative to `e3babbb`.
+- [x] Chrome 158 reduced-motion emulation at 390px on a fresh loopback server passed. RMF amount edit cleared reporting status and hid result/export; explicit reselection allowed an updated baseline. Unknown declaration kept result/export hidden and the error link focused its field. The initial rerun documented expected unknown rights before a sample was selected. See [verification](./TGPS-C02AB-verification-2026-11-24.json).
+- Task 4 technical verification and remote CI DONE; user acceptance OPEN. C02B remains IMPLEMENTED. Parent legal G1–G6 and C01/F09 remain open.
+
+## 2026-11-24 — Git synchronization preparation
+
+- Fetched origin. Before staging, the feature branch and local main each matched their upstream. The feature branch contained the current origin/main (0 behind / 26 ahead).
+- Pre-commit verification passed all seven local gates on Windows Python 3.14.3 / Node 24.3.0: 814 tests (12.31s), 3,175 statements and 928 branches at 100%, frontend 52/52 with no failures/skips, clean lint/format/mypy and build 0.4.0.
+- The existing Stage 4 draft remains untracked; its raw Git blob hash before staging is `6fd88684a6e26d48446ed45edaf07754f35b169c`. This checkpoint stages C02A/B verification documentation only.

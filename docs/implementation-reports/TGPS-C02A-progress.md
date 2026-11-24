@@ -55,3 +55,9 @@ implementation NOT_STARTED, acceptance NOT_CLAIMED.
 - Post-follow-up all seven gates exit0: Python754/12.50s,2994statements/852branches100%; frontend45/45,fail0/skip0/4926.7373ms; ruffclean/format179/mypy114/build0.3.0. [Delivery verification](TGPS-C02A-delivery-verification.json). Two new tests are characterization; no runtime edits since fd5513a. Final diff self-review confirms real HTTP UTF-8 path, fresh-server cleanup and authoritative availability assertions; no extra independent-review claim.
 
 - Delivery commit `950fd96e500dafd95aa787a8c351cddb80f6f38b` pushed successfully. Remote CI run16/job119828537296 SUCCESS for that exact head/merge6ecfcd2: Python754/coverage100%/frontend45; all steps pass. [Receipt](TGPS-C02A-delivery-remote-ci.json). Existing draft PR4 title/body updated for final C01/UI/C02A scope; no merge or acceptance. Remaining working-tree item is the unrelated Stage4 draft. This receipt-only follow-up changes no runtime or tests.
+
+## 2026-11-24 — Technical verification complete / DEC-032
+
+- [x] Fresh local baseline 814 Python tests / frontend 52/52. All seven local gates passed with 100% core statement/branch coverage on `5b94c3d`. CI run 23 passed for the current PR head.
+- [x] Fresh Chrome 158 reduced-motion emulation at 390px on the integrated demo: PVD baseline recalculated after edit, pending state invalidated result and export, and missing fund registration linked to the actual field. The initial harness timeout was corrected by selecting a synthetic sample explicitly. See [verification](./TGPS-C02AB-verification-2026-11-24.json).
+- Tasks 1–3 DONE; Task 4 technical verification DONE / user acceptance OPEN. C02A is IMPLEMENTED under DEC-032. C01/F09 and parent C02 legal evidence remain open.

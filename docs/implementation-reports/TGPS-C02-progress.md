@@ -248,3 +248,8 @@ Status: **REQUIREMENT_REVIEW / implementation NOT_STARTED**
 
 - [C02B draft](../requirements/TGPS-C02B-rmf-first-slice.md) prepared as a concrete scope-review artifact after optional async approach question remained unanswered; proposed recommendation is explicitly agent-authored, not user-approved. DEC-027 is AUTHORING_DETAIL. No elapsed-time-as-approval inference.
 - Final verification [receipt](TGPS-C02-rmf-facts-verification.json): all seven gates exit0;754tests/12.48s,2994statements/852branches100%; fresh-serverfrontend45/45,fail0/skip0/5152.9558ms; ruffclean/format180/mypy114/build0.3.0. WindowsPython3.14.3. These gates validate existing product source, not legal acceptance of new evidence/draft.
+
+## 2026-11-24 — Current parent and slice status
+
+- C02A normal PVD and C02B first-purchase RMF-only are IMPLEMENTED. Current integrated build passed all seven local gates and reduced-motion checks. GitHub CI runs 22–23 passed; see [verification](./TGPS-C02AB-verification-2026-11-24.json). User acceptance is open.
+- Parent C02 stays in legal REQUIREMENT_REVIEW with G1–G6 open. Combined PVD/RMF and broader existing rights remain outside the implemented coverage. The [Roadmap](../ROADMAP.md) records the proposed review order before C03.

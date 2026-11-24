@@ -1,9 +1,9 @@
 # Tax GPS — Product Roadmap
 
 Version: `0.1`  
-Updated: `2026-10-15` (Asia/Bangkok)  
+Updated: `2026-11-24` (Asia/Bangkok)
 Direction: **AGREED**  
-Current work: **C02B IMPLEMENTED — first-purchase RMF-only verified814/100%/frontend52, delivery in progress; reduced-motion/user acceptance OPEN; C02A IN_PROGRESS — core/consumers/HTTP/UI implemented; request-size follow-up verified; reduced-motion runtime/user acceptance pending. C01 IMPLEMENTED / F09 OPEN; parent C02 legal review OPEN.**
+Current work: **C02A/C02B IMPLEMENTED** — PVD ปกติและ RMF ซื้อเองครั้งแรกแยกกรณีผ่านการตรวจเชิงเทคนิค รวม reduced motion และ CI. **User acceptance OPEN. Parent C02 REQUIREMENT_REVIEW / legal G1–G6 OPEN. C01 IMPLEMENTED / F09 OPEN.**
 
 Presentation work: **TGPS-UI01 IMPLEMENTED / VISUAL_REVIEW_PENDING** — restyle และ automatic/source verification เสร็จแล้ว;
 ดู [ข้อเสนอ UI01](requirements/TGPS-UI01-fintech-restyle.md) / [DEC-012](DECISIONS.md#dec-012--ทิศทางปรับหน้าตาตาม-fintech-template).
@@ -14,10 +14,10 @@ UI01 follow-up2026-10-20: ตรวจ rendered1440/390/360 และ keyboard �
 ยังรอ reduced-motion-mode check และ user visual acceptance;
 ดู [rendered review](implementation-reports/TGPS-UI01-visual-review-2026-10-20.md).
 
-Handoff: Windows Python3.14.3 และ isolated3.12.14 ผ่าน 695 tests, coverage100%,
+Historical handoff: Windows Python3.14.3 และ isolated3.12.14 ผ่าน 695 tests, coverage100%,
 frontend24/24 และทุก quality gate; remote Ubuntu/Node22 CI ยังไม่ได้รัน
 ([หลักฐาน](implementation-reports/TGPS-handoff-verification.json)).
-C02 มี [requirement v0.1](requirements/TGPS-C02-existing-rights.md)
+ณ จุดรับช่วงเดิม C02 มี [requirement v0.1](requirements/TGPS-C02-existing-rights.md)
 เป็น **REQUIREMENT_REVIEW / implementation NOT_STARTED**: scope/behavior approved
 ตาม DEC-019; legal evidence gate ยัง OPEN
 
@@ -62,7 +62,7 @@ MVP แรกเริ่มที่พนักงานเงินเดื�
 | ID | ช่วง | ขอบเขตหลัก | เกณฑ์ออกจากช่วง | สถานะ |
 | --- | --- | --- | --- | --- |
 | TGPS-C01 | ความถูกต้องของฐานปัจจุบัน | ปิดความไม่สอดคล้อง retirement, shared usage, unknown eligibility, provenance และตรวจ HTTP failure | core/UI ปิดผลที่ไม่ครบตรงกัน, supported golden cases ถูกต้อง, version/replay ตรวจได้, failure มีข้อสรุปและหลักฐาน | IMPLEMENTED (Task 1–5 ตรวจแล้ว; F09 OPEN / acceptance conditional; [report](implementation-reports/TGPS-C01.md), [review](implementation-reports/TGPS-C01-review.md)) |
-| TGPS-C02 | สิทธิเดิมของพนักงาน | รายการสิทธิที่จ่ายแล้ว เริ่ม PVD/RMF/Thai ESG; ต่อประกันและสิทธิครอบครัวเป็นงานย่อย | รายการที่รองรับลดฐานภาษีและใช้ capacity ครั้งเดียว; ระบุ missing/unsupported coverage; fixtures ตรวจตัวเลขโดยอิสระ | REQUIREMENT_REVIEW / implementation NOT_STARTED ([draft](requirements/TGPS-C02-existing-rights.md)) |
+| TGPS-C02 | สิทธิเดิมของพนักงาน | รายการสิทธิที่จ่ายแล้ว เริ่ม PVD/RMF/Thai ESG; ต่อประกันและสิทธิครอบครัวเป็นงานย่อย | รายการที่รองรับลดฐานภาษีและใช้ capacity ครั้งเดียว; ระบุ missing/unsupported coverage; fixtures ตรวจตัวเลขโดยอิสระ | **REQUIREMENT_REVIEW** สำหรับ [C02 ภาพรวม](requirements/TGPS-C02-existing-rights.md); [C02A](requirements/TGPS-C02A-pvd-first-slice.md) และ [C02B](requirements/TGPS-C02B-rmf-first-slice.md) **IMPLEMENTED** / user acceptance OPEN |
 | TGPS-C03 | ประมาณการภาษีทั้งปี | actual/forecast, โบนัส, withholding ที่รองรับ | แสดง annual PIT แยกยอดชำระเพิ่ม/คืน; unknown ไม่เป็นศูนย์; forecast ไม่แก้ actual | PLANNED |
 | TGPS-C04 | ทดลองใช้เงินก้อนใหม่ | จำนวนเงินที่ผู้ใช้เลือกบน budget เดิม; เพิ่มทางเลือก Thai ESG/RMF/ordinary investment/โปะหนี้ทีละประเภท | ทุก action มี tax/asset/debt treatment ตรงประเภท; เงินที่ไม่ใช้คงอยู่; ข้อจำกัดเงินสำรองยังทำงาน | PLANNED |
 | TGPS-C05 | ความคุ้มตามเวลา | horizon, unlock dates, fees, cash-flow scenarios และ break-even | ใช้ horizon เดียวกัน, ไม่บวก tax cash ซ้ำหรือใช้ก่อนมีจริง, แสดง assumption/risk และทางเลือกตามเป้าหมาย | PLANNED |
@@ -95,7 +95,7 @@ C02 แบ่งเป็น requirement ย่อยได้; ต้องก�
 ยังไม่ได้เริ่มหรืออนุมัติรายละเอียด Stage 4 storage จากการตกลง roadmap นี้
 ใช้ [Stage 4 draft](demo/stage4-local-profile-contract-draft.md) เป็นข้อมูลอ้างอิงต่อได้
 
-## 5. งานที่ทำต่อทันที
+## 5. จุดรับช่วงเดิมของ C01 และ C02
 
 งานแรกคือ [TGPS-C01 — Baseline Integrity](requirements/TGPS-C01-baseline-integrity.md)
 แก้ความถูกต้องและขอบเขตการเผยผลของความสามารถปัจจุบัน
@@ -137,6 +137,7 @@ acceptance cases, dependencies และ change log
 | 2026-10-22 | 0.1 | เพิ่มแบบ UX C02 สำหรับรีวิวตามคำขอความเข้าใจง่าย; ไม่เปลี่ยนสถานะ milestone | DEC-020 |
 | 2026-10-22 | 0.1 | อนุมัติแบบ UX C02และทำprototypeสำหรับลอง; parent legal/treatment statusไม่เปลี่ยน | DEC-021 |
 | 2026-10-22 | 0.1 | เสนอ C02A ordinaryPVD baselineเป็นขั้นแรก; ยังไม่อนุมัติ/เริ่ม implementation | DEC-022 AUTHORING_DETAIL |
+| 2026-11-24 | 0.1 | C02A IMPLEMENTED; ยืนยัน reduced motion ของ C02A/C02B และ CI run 22–23; ระบุสถานะ C02 ภาพรวมและงานย่อยในตาราง | [DEC-032](DECISIONS.md#dec-032--c02a-implemented-and-c02ab-delivery-verification) |
 
 ## UI02 presentation follow-up — 2026-10-20
 
@@ -214,3 +215,21 @@ DEC-027 AUTHORING_DETAIL: [C02B draft](requirements/TGPS-C02B-rmf-first-slice.md
 2026-10-22 / DEC-029: C02B scoped evidence/independent reference13/13 ADEQUATE_FOR_PLANNING_ONLY. [Draft4task plan](superpowers/plans/2026-10-22-c02b-first-rmf.md) and detailed fact/time/reporting snapshot contract ready for review; implementationNOT_STARTED. Parent/C02A/C01F09/acceptance unchanged.
 
 2026-10-22 / DEC-030–031: C02B approved detailed contract/plan executed with Native; first-purchase RMF-only technical IMPLEMENTED, all7gates814/coverage100%/frontend52. Independent review3findings fixed RED→GREEN; normal-mode rendered/keyboard verified. Task4 PARTIAL for reduced-motion/user acceptance. Source commit e3babbb; delivery receipt follows. Parent C02 G1–G6 and C01/F09 unchanged.
+
+## จุดรับช่วง — 2026-11-24
+
+C02A และ C02B ผ่านการตรวจ reduced motion บน Chrome กับเดโมที่ใช้งานอยู่จริง
+และ CI run 22–23 ผ่านทั้งสองรอบ โดย PR #4 ยังเป็น draft. Local ตรวจครบเจ็ด gate
+ได้ 814 Python tests, coverage 100% และ frontend 52/52. รายละเอียด SHA และขอบเขตการตรวจอยู่ใน
+[หลักฐานรอบนี้](implementation-reports/TGPS-C02AB-verification-2026-11-24.json). การรับงานของผู้ใช้ยังเปิดอยู่ทั้งสองงานย่อย
+
+ข้อเสนอสำหรับงานถัดไปตามลำดับเดิม
+
+1. ใช้ PR #4 รีวิวผลของ C02A/C02B และบันทึกผลรับงานของผู้ใช้สำหรับขอบเขตที่มีอยู่
+   ติดตาม C01/F09 ตามขั้นตอนเดิมเมื่อมีหลักฐานการเกิดซ้ำ
+2. ระบุโปรไฟล์ที่ต้องรองรับใน MVP แรกของ C02 ให้ชัด เริ่มรีวิวช่องว่าง PVD ร่วม RMF
+   เพราะโปรไฟล์นี้อยู่ระหว่างสองกรณีที่ทำเสร็จแล้วแต่ยังปิดผลทั้งหมด
+   ใช้ [cross-rule review](policy-evidence/2026-10-21/joint-follow-up/README.md)
+   เป็นจุดตั้งต้นสำหรับฐาน RMF และวงเงินร่วม ส่วนสิทธิ Thai ESG/ESGX ที่จ่ายไปแล้วมี gate ของตัวเอง
+3. เมื่อขอบเขตสิทธิเดิมของ MVP ชัดแล้ว ให้ร่าง requirement ของ C03 โดยแยกยอดรับจริงและภาษีหักแล้ว
+   ออกจากประมาณการเงินเดือนและโบนัส เพื่อคำนวณภาษีทั้งปีและยอดชำระเพิ่มหรือคืน

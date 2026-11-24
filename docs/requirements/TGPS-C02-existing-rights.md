@@ -4,7 +4,7 @@ Version: `0.1`
 Date: `2026-10-15` (Asia/Bangkok)
 Direction: **AGREED_DIRECTION** ตาม roadmap
 Detailed requirement: **REQUIREMENT_REVIEW** — ผู้ใช้อนุมัติ scope/behavior 2026-10-21; legal evidence review ยังไม่ผ่าน
-Implementation: **NOT_STARTED** — ยังไม่อนุมัติ treatment ใหม่
+Parent implementation plan: **NOT_STARTED**. Scoped implementation: [C02A](TGPS-C02A-pvd-first-slice.md) and [C02B](TGPS-C02B-rmf-first-slice.md) are **IMPLEMENTED**; user acceptance OPEN.
 
 ## 1. เป้าหมายและฐานตั้งต้น
 

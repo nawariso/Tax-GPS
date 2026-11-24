@@ -2,7 +2,7 @@
 
 Version: `0.1` · Date: `2026-10-22` (Asia/Bangkok)
 Detailed requirement: **AGREED_DIRECTION — staged scope approved; evidence ADEQUATE_FOR_PLANNING_ONLY**
-Implementation: **IN_PROGRESS** (DEC-025; Native execution)
+Implementation: **IMPLEMENTED** — technical verification complete under [DEC-032](../DECISIONS.md#dec-032--c02a-implemented-and-c02ab-delivery-verification); user acceptance OPEN.
 Parent: [C02 v0.1](TGPS-C02-existing-rights.md); staging approved under DEC-023 after DEC-022 proposal
 
 ## 1. ข้อเสนอที่ขอให้ตัดสินใจ
@@ -156,3 +156,9 @@ The preparation paragraph saying no product code exists is historical. Tasks1–
 | Follow-up date | Version | Change |
 | --- | --- | --- |
 | 2026-10-22 | 0.1 delivery | DEC-026 authorized commit/push; Tasks1–3 done, real Thai HTTP body characterization added. Local754/coverage100%/frontend45 pass all gates. Task4 reduced-motion runtime remains unverified; implementation IN_PROGRESS, no coverage/treatment expansion or acceptance. |
+
+### Change log — 2026-11-24
+
+| Date | Version | Change | Basis |
+| --- | --- | --- | --- |
+| 2026-11-24 | 0.1 | C02A IMPLEMENTED; technical reduced-motion verification complete; user acceptance OPEN | [Verification](../implementation-reports/TGPS-C02AB-verification-2026-11-24.json) |

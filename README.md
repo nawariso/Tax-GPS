@@ -18,15 +18,15 @@ The candidate implementation report is
 
 ## Product roadmap and requirements
 
-The agreed product direction is recorded in the [roadmap](docs/ROADMAP.md) and
-[decision log](docs/DECISIONS.md). The current milestone is
-[TGPS-C01: baseline integrity](docs/requirements/TGPS-C01-baseline-integrity.md).
-Its implementation is complete (Tasks 1–5, including fresh-review fixes); acceptance
-is conditional with F09 OPEN, not ACCEPTED. Final local checks: 694 Python tests, 100%
-statement/branch coverage, frontend 24/24 and build 0.2.0. See the
-[C01 report](docs/implementation-reports/TGPS-C01.md) and
-[C01 plan](docs/superpowers/plans/2026-10-15-c01-baseline-integrity.md) for per-task status. These records distinguish agreed direction, implementation evidence,
-and milestone acceptance.
+The agreed direction is recorded in the [roadmap](docs/ROADMAP.md) and [decision log](docs/DECISIONS.md).
+The current checkpoint covers [C02A normal PVD](docs/requirements/TGPS-C02A-pvd-first-slice.md) and
+[C02B first-purchase RMF](docs/requirements/TGPS-C02B-rmf-first-slice.md). Both are technically implemented.
+The [24 November verification](docs/implementation-reports/TGPS-C02AB-verification-2026-11-24.json) records 814 Python tests,
+100% statement/branch coverage, 52 frontend tests, GitHub CI runs 22–23 and reduced-motion browser checks.
+User acceptance is pending. [C02 overall](docs/requirements/TGPS-C02-existing-rights.md) remains in legal review.
+[C01 baseline integrity](docs/implementation-reports/TGPS-C01.md) is implemented with conditional acceptance and F09 open.
+The annual tax estimate and expected payment or refund are the first MVP, planned in C03.
+Earlier checkpoints are recorded below.
 
 ## Product and domain review
 
@@ -352,3 +352,7 @@ C02B scope approved underDEC-028. [Scoped evidence](docs/policy-evidence/2026-10
 C02B current checkpoint (supersedes earlier draft summaries): DEC-030 approved the detailed contract and four-task Native plan. First-purchase RMF-only core, consumers, Thai HTTP/UI and conditional baseline export implemented; final verification/delivery in progress. PositiveRMF disables new-cash planning; combinedPVD remains unsupported. Parent legal gates, reduced-motion verification and user acceptance remain open.
 
 C02B verified technical checkpoint / DEC-031: package/core0.4.0, pack/catalog1.2.0 and discovery/candidates0.5.0. All seven gates pass: Python814, core statements/branches100%, frontend52; independent review findings fixed and normal-mode responsive/keyboard checks recorded. [Current ledger](docs/implementation-reports/TGPS-C02B-progress.md) and [verification receipt](docs/implementation-reports/c02b-verification-complete-2026-10-22.json). IMPLEMENTED is not ACCEPTED: reduced-motion runtime, user acceptance and parent legal gates remain open.
+
+Verification follow-up 2026-11-24: C02A and C02B are **IMPLEMENTED**. The
+[current evidence](docs/implementation-reports/TGPS-C02AB-verification-2026-11-24.json) supersedes the pending CI and reduced-motion notes above.
+User acceptance, C01/F09 and parent C02 legal review are open.

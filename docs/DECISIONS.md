@@ -313,3 +313,11 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Evidence: final independent review TGPS-C02B-final-review.md; one material fix pass RED3/50→GREEN50/50; all7 local gates PASS, Python814, statements/branches100%, frontend52; rendered1440/390/360/320 and keyboard checks
 - Decision: Record first-ever own ordinary2026 RMF-only baseline as IMPLEMENTED; package/core0.4.0, pack/catalog1.2.0, discovery/candidates0.5.0. Commit/push existing feature branch under prior user authorization
 - Boundary: No automatic ACCEPTED, no merge/release. Reduced-motion runtime UNVERIFIED; explicit user acceptance and parent legal G1–G6 remain OPEN. C01/F09 and combinedPVD/RMF interpretation unchanged. Released artifacts preserved
+
+## DEC-032 — C02A IMPLEMENTED and C02AB delivery verification
+
+- Date: `2026-11-24`
+- Status: `IMPLEMENTED` for C02A (technical checkpoint)
+- Evidence: [Fresh all-seven local gates and integrated Chrome reduced-motion observations](implementation-reports/TGPS-C02AB-verification-2026-11-24.json); GitHub CI runs 22 and 23 succeeded. Existing C02A independent review, screenshot and HTTP evidence are linked from its ledger.
+- Decision: Record C02A as IMPLEMENTED under the existing C02A scope and plan. Record reduced-motion verification for C02A and C02B and completed delivery CI for C02B.
+- Boundary: User acceptance remains open. Parent C02 G1–G6 and C01/F09 remain open. PR #4 stays draft. No scope, tax contract or roadmap order change.

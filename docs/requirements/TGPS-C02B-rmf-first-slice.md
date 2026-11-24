@@ -1,8 +1,8 @@
 # TGPS-C02B — RMF ซื้อครั้งแรก โดยไม่มีสิทธิเกษียณอื่นร่วม
 
 Version: `0.1` · Date: `2026-10-22` (Asia/Bangkok)
-Status: **IMPLEMENTED — technical review/fix pass verified; reduced-motion and user/legal acceptance OPEN (DEC-031)**
-Implementation: **IMPLEMENTED** · Implementation plan: **APPROVED / Tasks1–3 DONE, Task4 delivery/acceptance PARTIAL** ([4 tasks](../superpowers/plans/2026-10-22-c02b-first-rmf.md))
+Status: **IMPLEMENTED** — technical review (DEC-031), remote CI and reduced-motion runtime verified; user acceptance OPEN.
+Implementation: **IMPLEMENTED** · Implementation plan: **APPROVED / Tasks 1–3 DONE, Task 4 user acceptance pending** ([4 tasks](../superpowers/plans/2026-10-22-c02b-first-rmf.md))
 Parent: [C02 v0.1](TGPS-C02-existing-rights.md)
 Evidence: [RMF facts/time packet](../policy-evidence/2026-10-22/rmf-facts-review/README.md)
 
@@ -173,3 +173,9 @@ reviewและrulingsใน[bounded packet](../policy-evidence/2026-10-22/c02b-
 ### Change log — 2026-10-22 execution
 
 DEC-030: user approved detailed contract/plan, Native execution started. DEC-031: technical IMPLEMENTED after independent review and one verified fix pass; all7gates814/100%/frontend52. Earlier unapproved-proposal language records preparation, superseded by these approval records. Reduced-motion/user/legal acceptance remains OPEN.
+
+### Change log — 2026-11-24
+
+| Date | Version | Change | Basis |
+| --- | --- | --- | --- |
+| 2026-11-24 | 0.1 | C02B IMPLEMENTED; delivery CI and reduced-motion verification complete; user acceptance OPEN | [Verification](../implementation-reports/TGPS-C02AB-verification-2026-11-24.json) |
