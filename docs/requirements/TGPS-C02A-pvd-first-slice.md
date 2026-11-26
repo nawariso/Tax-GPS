@@ -162,3 +162,9 @@ The preparation paragraph saying no product code exists is historical. Tasks1–
 | Date | Version | Change | Basis |
 | --- | --- | --- | --- |
 | 2026-11-24 | 0.1 | C02A IMPLEMENTED; technical reduced-motion verification complete; user acceptance OPEN | [Verification](../implementation-reports/TGPS-C02AB-verification-2026-11-24.json) |
+
+### Change log — 2026-11-26
+
+| Date | Version | Change | Basis |
+| --- | --- | --- | --- |
+| 2026-11-26 | 0.1 C04A revision | เส้นทาง C04A เปิดการทดลอง Thai ESG ให้ PVD บวกได้; ยังไม่สร้างวงเงิน RMF/เกษียณที่เหลือจากการลบยอด PVD เส้นทางเดโมเดิมและ candidate engine เดิมคง C02A-AC06 | [DEC-038](../DECISIONS.md#dec-038--c04a-review-decisions-d1d4-agreed) |

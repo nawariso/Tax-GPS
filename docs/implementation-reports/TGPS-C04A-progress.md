@@ -5,8 +5,18 @@
 - [x] ผู้ใช้ขอตัวช่วยลดหย่อนก่อนสิ้นปีและตอบ "โอเครครับ ลุย!" บันทึก [DEC-037](../DECISIONS.md#dec-037--open-c04a-thai-esg-year-end-what-if-requirement-review) และซิงก์ Roadmap
 - [x] สำรวจโค้ดที่ `67208cc`: catalog `@1.2.0` มี `TH-OPP-THAI-ESG-2026` (rate 0.30, cap 300,000, holding 5 ปี, source `SEC-THAI-ESG-2026`); `candidate/engine.py` สร้างเฉพาะจำนวนขอบเขตบนเส้นทางเดโมเดิมและคำนวณผ่าน `TaxState.tax_impact`; `candidate/activation.py:69` ปฏิเสธ PVD บวกตาม C02A-AC06 (staging boundary จาก C02A requirement); เส้นทาง C03 ไม่มีข้อมูล guardrail
 - [x] จัด [ร่าง C04A v0.1](../requirements/TGPS-C04A-thai-esg-year-end-what-if.md) ขอบเขต Thai ESG จำนวนเดียวบน C03, ข้อตัดสิน D1–D4, AC01–10, หลักฐาน E1–E2 เป็นเอกสารเท่านั้น ไม่มีการแก้โค้ด
-- [ ] ผู้ใช้ตัดสิน D1–D4
-- [ ] E1 ตรวจแหล่ง Thai ESG ปี 2569 ด้วย `tgps-policy-evidence`
-- [ ] แผนและตัวอย่างคำนวณอิสระหลังรับ requirement
+- [x] ↳ ทำแล้ว: ผู้ใช้ตัดสิน D1–D4 (ดูหัวข้อถัดไป)
+- [x] ↳ ทำแล้ว: E1 (ดูหัวข้อถัดไป)
+- [x] ↳ ทำแล้ว: แผนและตัวอย่างอ้างอิง (ดูหัวข้อถัดไป)
 
-Current task: `REQUIREMENT_REVIEW` · implementation `NOT_STARTED`
+## 2026-11-26 — D1–D4 agreed, E1 evidence, plan draft / DEC-038
+
+- [x] ผู้ใช้ตอบ "ผมโอเครกับคุณทุกข้อครับ ลุยได้เลย!" บันทึก [DEC-038](../DECISIONS.md#dec-038--c04a-review-decisions-d1d4-agreed) ซิงก์ Roadmap, C04A v0.1 และเพิ่ม change log ใน C02A requirement (revision ของ AC06 เฉพาะเส้นทาง C04A)
+- [x] E1 ด้วย `tgps-policy-evidence`: SEC Q&A PDF ยังดาวน์โหลดไม่ได้ (server ส่ง HTML 13,730 bytes) จึงใช้คำอธิบายแบบ ภ.ง.ด.94 ปีภาษี 2569 ของกรมสรรพากร (PDF 17 หน้า, SHA-256 `4de4d7e8…5b40`) หน้า 11 ข้อ 16.1–16.2 ยืนยัน 30% / 300,000 สำหรับการซื้อ 1 ม.ค. 2567–31 ธ.ค. 2569 และถือ 5 ปี หน้า 7–9 รายการวงเงินรวม 500,000 ไม่มี Thai ESG ตรวจจาก text extraction เท่านั้น (เครื่องไม่มี `pdftoppm` จึงตรวจภาพไม่ได้) บันทึกที่ [policy-evidence/2026-11-26](../policy-evidence/2026-11-26/README.md) catalog `@1.2.0` ไม่ถูกแก้
+- [x] ข้อค้นพบ F1 (สิทธิสับเปลี่ยน LTF→ESGX ปี 2569–2572 ที่ baseline ไม่ได้ถาม) และ F2 (เงื่อนไขแจ้ง บลจ. ข้อ 16.7) เสนอเป็น D5/D6 ใน requirement รอผู้ใช้ตัดสิน F3 ไม่กระทบ v0.1 เพราะ D2
+- [x] สำรวจโค้ดเพิ่ม: `TaxState.tax_impact` ปฏิเสธ PVD/RMF บวก (`calculation/models.py:162`) แผนจึงเรียก `calculate_tax_saving` ตรงและคง `tax_impact` เดิม; guardrail ใช้ `assess_new_cash_opportunity` ได้โดยไม่ต้องผ่าน discovery; ฐาน 30% ใช้ `tax.income.assessable_income` ตามเดิม
+- [x] [ตัวอย่างอ้างอิง](TGPS-C04A-acceptance-reference.md) คำนวณด้วย `Decimal` แยกจาก `tax_gps` แล้วเทียบ `calculate_tax_saving` ได้ 5/5 ตรงกัน และ ESG-FORECAST-EDIT ตรงกับ engine (ร่างแรกเขียนวิธีคิดผิดหนึ่งจุด แก้แล้ว ผลไม่เปลี่ยน)
+- [x] [แผน C04A](../superpowers/plans/2026-11-26-c04a-thai-esg-what-if.md) สี่ tasks + Task 1B แบบมีเงื่อนไข สถานะ `DRAFT_FOR_REVIEW`
+- [ ] ผู้ใช้ตัดสิน D5/D6 และอนุมัติแผน
+
+Current task: `REQUIREMENT_REVIEW` (D5/D6) + plan `DRAFT_FOR_REVIEW` · implementation `NOT_STARTED` · ไม่มีการแก้โค้ดในรอบนี้

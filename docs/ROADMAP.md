@@ -143,6 +143,7 @@ acceptance cases, dependencies และ change log
 | 2026-11-25 | 0.1 | อนุมัติแผนและเริ่ม C03 แบบ Native | [DEC-035](DECISIONS.md#dec-035--approve-c03-plan-and-start-native-implementation) |
 | 2026-11-26 | 0.1 | C03 IMPLEMENTED ตามผลตรวจในเครื่องและรีวิวอิสระ รอผู้ใช้ลองเดโม | [DEC-036](DECISIONS.md#dec-036--c03-implementation-verified-locally) |
 | 2026-11-26 | 0.1 | Commit C03 (`023a3ec`, `67208cc`) และเปิด C04A REQUIREMENT_REVIEW ทดลองซื้อ Thai ESG บนประมาณการ C03 | [DEC-037](DECISIONS.md#dec-037--open-c04a-thai-esg-year-end-what-if-requirement-review) |
+| 2026-11-26 | 0.1 | ผู้ใช้ตกลงข้อตัดสิน C04A D1–D4 ทั้งหมดตามข้อเสนอ | [DEC-038](DECISIONS.md#dec-038--c04a-review-decisions-d1d4-agreed) |
 
 ## UI02 presentation follow-up — 2026-10-20
 

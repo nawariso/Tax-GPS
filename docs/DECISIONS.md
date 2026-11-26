@@ -364,3 +364,12 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Decision: เปิด [C04A v0.1-draft](requirements/TGPS-C04A-thai-esg-year-end-what-if.md) ทดลองซื้อ Thai ESG ตามจำนวนที่ผู้ใช้เลือกบนประมาณการ C03 แสดง PIT และยอดเพิ่ม/คืนก่อนและหลัง RMF ซื้อเพิ่มแยกไป C04B
 - Reason: ให้ผู้ใช้เห็นผลภาษีของการซื้อสิทธิก่อนสิ้นปีภาษี 2569 โดยใช้ catalog, tax core และ guardrail ที่มีอยู่
 - Boundary: ข้อตัดสิน D1 (PVD บวก), D2 (ยอดซื้อ Thai ESG เดิม), D3 (ข้อมูล guardrail) และ D4 (จำนวนเกินวงเงิน) ยังเป็นข้อเสนอรอผู้ใช้ตัดสิน หลักฐาน E1 ต้องปิดก่อนเขียนแผน ไม่เปลี่ยน readiness, deduction treatment หรือ catalog ที่ออกแล้ว C03 user acceptance และ remote CI ยังเปิด
+
+## DEC-038 — C04A review decisions D1–D4 agreed
+
+- Date: `2026-11-26`
+- Status: `AGREED` for C04A v0.1 decisions D1–D4. Plan `NOT_STARTED`; implementation `NOT_STARTED`.
+- Evidence: ผู้ใช้ตอบ "ผมโอเครกับคุณทุกข้อครับ ลุยได้เลย!" ต่อข้อเสนอ D1–D4 ใน [C04A v0.1-draft](requirements/TGPS-C04A-thai-esg-year-end-what-if.md)
+- Decision: D1 เปิดการทดลอง Thai ESG ให้โปรไฟล์ PVD บวก เฉพาะ Thai ESG และยังห้ามสร้างวงเงิน RMF/เกษียณที่เหลือจากการลบยอด PVD (เป็น revision ของ C02A-AC06 สำหรับเส้นทาง C04A เท่านั้น) · D2 v0.1 ต้องยืนยันยอดซื้อ Thai ESG/ESGX ปีนี้เป็นศูนย์ ยอดบวกเป็น `UNSUPPORTED` · D3 เพิ่มข้อมูล guardrail ในเส้นทาง C03 ช่องว่างปิดเฉพาะส่วนทดลอง · D4 จำนวนเกินวงเงินสิทธิหรือเงินที่ใช้ได้ไม่คำนวณ แสดงสถานะและวงเงินสูงสุด
+- Reason: ให้ผู้ใช้ที่มี PVD ใช้ตัวทดลองได้ทันสิ้นปี โดยไม่เพิ่ม deduction treatment ใน baseline
+- Boundary: D1 ขึ้นกับผล E1 ว่า Thai ESG ไม่อยู่ในวงเงินเกษียณร่วม ถ้ายืนยันไม่ได้ให้คงปิดสำหรับ PVD บวก (fail closed) เส้นทางเดโมเดิมและ candidate engine เดิมคง C02A-AC06 ตามเดิม แผน C04A ต้องได้รับอนุมัติก่อน implementation
