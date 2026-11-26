@@ -4,19 +4,21 @@
 
 **Goal:** ผู้ใช้ใส่จำนวนเงินที่จะซื้อ Thai ESG ภายในปี 2569 บนประมาณการ C03 แล้วเห็น PIT และยอดชำระเพิ่ม/คืน ก่อนและหลัง พร้อมวงเงินสิทธิและผลตรวจเงินสำรอง
 
-**Architecture:** บริการ domain ใหม่รับ `AnnualEstimateResult` ที่ READY, จำนวนทดลอง, ยอดซื้อเดิม และ `FinancialProfile` วงเงินมาจาก `calculate_opportunity_capacity` เดิมด้วย catalog ที่ activate แล้ว เงินสำรองมาจาก `compute_financial_state` + `assess_new_cash_opportunity` เดิม และ PIT หลังซื้อมาจาก `calculate_tax_saving` เดิม ไม่มีสูตรภาษีหรือ guardrail ชุดที่สอง เส้นทางเดโมเดิม, `TaxState.tax_impact` และ candidate engine คง contract เดิม
+**Architecture:** บริการ domain ใหม่รับ `AnnualEstimateInput` + `AnnualEstimateResult` ของ C03 ที่ READY, จำนวนทดลอง และ `FinancialProfile` (ยอดซื้อ Thai ESG เดิมและวันที่วางแผนมาจาก C03 ไม่รับซ้ำ) วงเงินมาจาก `calculate_opportunity_capacity` เดิมด้วย catalog ที่ activate แล้ว เงินสำรองมาจาก `compute_financial_state` + `assess_new_cash_opportunity` เดิม และ PIT หลังซื้อมาจาก `calculate_tax_saving` เดิม ไม่มีสูตรภาษีหรือ guardrail ชุดที่สอง เส้นทางเดโมเดิม, `TaxState.tax_impact` และ candidate engine คง contract เดิม
 
 **Tech Stack:** Python standard library, frozen dataclasses, `Money`/`Decimal`, pytest/Ruff/mypy, เดโม local HTTP + HTML/CSS/JS เดิม
 
 **Spec:** [C04A v0.1](../../requirements/TGPS-C04A-thai-esg-year-end-what-if.md), [DEC-037](../../DECISIONS.md#dec-037--open-c04a-thai-esg-year-end-what-if-requirement-review), [DEC-038](../../DECISIONS.md#dec-038--c04a-review-decisions-d1d4-agreed), [หลักฐาน E1](../../policy-evidence/2026-11-26/README.md), [ตัวอย่างอ้างอิง](../../implementation-reports/TGPS-C04A-acceptance-reference.md)
 
-**สถานะแผน:** `DRAFT_FOR_REVIEW` · D5 (Task 1B) และ D6 รอผู้ใช้ตัดสิน · implementation `NOT_STARTED`
+**สถานะแผน:** `DRAFT_FOR_REVIEW` · D5 (Task 1B), D6, D7 รอผู้ใช้ตัดสิน · implementation `NOT_STARTED`
 
 ## ข้อกำหนดร่วม
 
 - ใช้ pack `TH-PIT-2026-001@1.2.0` และ catalog `TH-OPPORTUNITY-2026-001@1.2.0` เดิม ไม่ออก version ใหม่ใน v0.1 (D6 ข)
 - ลำดับสถานะของส่วนทดลอง: C03 ไม่ READY → `UNSUPPORTED` → `REQUIRES_INPUT` → ข้อจำกัด (เกินวงเงิน / guardrail) → `READY` แยก `None` จากศูนย์ทุกช่อง
-- ฐาน 30% ใช้ `tax.income.assessable_income` เหมือน discovery/candidate (PVD บวกจึงใช้เงินได้หลังส่วนยกเว้น PVD)
+- ฐาน 30% ใช้ `tax.income.assessable_income` เหมือน discovery/candidate กรณี PVD บวกค่านี้หลังหักส่วนยกเว้น PVD ซึ่งเป็นการตีความใหม่ที่ยังไม่มีหลักฐาน จึงต้องผ่าน D7 ก่อน (ข้อเสนอ: ใช้ฐานนี้และแสดงว่าเป็นวงเงินแบบระมัดระวัง) ~~(PVD บวกจึงใช้เงินได้หลังส่วนยกเว้น PVD)~~
+- ยอดซื้อ Thai ESG/ESGX เดิมเป็น fact ของ C03 อยู่แล้ว (`shared_limit_usage`, `other_rights.thai_esg/thai_esgx`) C03 ที่ READY จึงหมายถึงยอดเดิมเป็นศูนย์ ห้ามรับ input ซ้ำ
+- เมื่อจำนวนเกินทั้งวงเงินสิทธิและเพดาน guardrail ให้สถานะ `EXCEEDS_TAX_CAPACITY` ก่อน (ตรวจวงเงินสิทธิก่อน guardrail) และแสดงทั้งสองค่า
 - PVD บวก (`PVD_BASELINE_ONLY`) เปิดได้ตาม D1; RMF บวก (`RMF_BASELINE_ONLY`) เป็น `UNSUPPORTED` ใน v0.1; ห้ามคำนวณวงเงินเกษียณที่เหลือ
 - ข้อความไทย ไม่ชี้นำ ไม่จัดอันดับ ไม่ใส่ค่าที่กรอกใน error; deterministic, standard library, loopback, ไม่มี storage/log ยอดเงิน
 - Coverage 100% statements/branches และ 7 gates ตาม AGENTS §4
@@ -34,7 +36,7 @@
 | Task | งาน | สถานะ |
 | --- | --- | --- |
 | 1 | Domain what-if (AC01–05, 07–09) | ยังไม่เริ่ม |
-| 1B | คำถามสิทธิสับเปลี่ยน LTF→ESGX ใน C03 (D5, AC06) | รอ D5 |
+| 1B | ปรับข้อความช่องสิทธิ LTF ใน C03 (D5) | รอ D5 |
 | 2 | Snapshot, export, replay (AC10) | ยังไม่เริ่ม |
 | 3 | HTTP และเดโมภาษาไทย (AC01–10) | ยังไม่เริ่ม |
 | 4 | ตรวจรวม, Chrome, independent review | ยังไม่เริ่ม |
@@ -46,24 +48,25 @@
 **Interfaces ที่เสนอ**
 
 - `WhatIfStatus(StrEnum)`: `BASELINE_NOT_READY`, `UNSUPPORTED`, `REQUIRES_INPUT`, `EXCEEDS_TAX_CAPACITY`, `GUARDRAIL_LIMITED`, `READY`
-- Frozen `ThaiEsgWhatIfInput(amount: Money | None, prior_thai_esg_usage: Money | None, financial: FinancialProfile)`
-- `evaluate_thai_esg_what_if(estimate: AnnualEstimateResult, inputs: ThaiEsgWhatIfInput, catalog: ActivatedOpportunityCatalog, financial_policy: ActivatedFinancialPolicy, planning_date: date) -> ThaiEsgWhatIfResult`
+- Frozen `ThaiEsgWhatIfInput(amount: Money | None, financial: FinancialProfile)`
+- `evaluate_thai_esg_what_if(estimate_input: AnnualEstimateInput, estimate: AnnualEstimateResult, inputs: ThaiEsgWhatIfInput, catalog: ActivatedOpportunityCatalog, financial_policy: ActivatedFinancialPolicy) -> ThaiEsgWhatIfResult` ใช้ `estimate_input.cutoff_date` เป็น planning date และ `shared_limit_usage` ของ C03 เป็น `shared_amount_used`; ตรวจว่า `estimate` คำนวณจาก `estimate_input` นี้จริง
 - Frozen `ThaiEsgWhatIfResult`: `status`, `reason_codes`, `missing_fact_ids`, `capacity: OpportunityCapacity | None`, `guardrail: GuardrailAssessment | None`, `amount`, `impact: TaxImpact | None`, `settlement_before/after` (kind + amount, `None` เมื่อยอดหักขาด), `conditions` (lock-up และ evidence จาก catalog)
 
 **Steps**
 
-- [ ] RED: `test_c04a_amount_impact_matches_reference` (ESG-0/100K/CAP), `test_c04a_capacity_boundary` (CAP, OVER-CAP), `test_c04a_forecast_edit_moves_capacity`, `test_c04a_withholding_missing_keeps_pit`, `test_c04a_prior_usage` (1/ว่าง/0), `test_c04a_guardrail_inputs_and_limits`, `test_c04a_pvd_open_rmf_closed`, `test_c04a_blocked_baseline_hides_everything`, `test_c04a_amount_validation` (ติดลบ, เกินสตางค์ = input error ระบุช่อง)
+- [ ] RED: `test_c04a_amount_impact_matches_reference` (ESG-0/100K/CAP), `test_c04a_capacity_boundary` (CAP, OVER-CAP), `test_c04a_forecast_edit_moves_capacity`, `test_c04a_withholding_missing_keeps_pit`, `test_c04a_prior_usage_comes_from_c03` (1/ว่าง ทำให้ C03 ไม่ READY → `BASELINE_NOT_READY`; 0 คำนวณได้), `test_c04a_guardrail_inputs_and_limits`, `test_c04a_pvd_open_rmf_closed`, `test_c04a_blocked_baseline_hides_everything`, `test_c04a_amount_validation` (ติดลบ, เกินสตางค์ = input error ระบุช่อง)
 - [ ] รัน `uv run --locked pytest tests/acceptance/test_c04a_thai_esg_what_if.py -q` บันทึก RED (กรณีที่ผ่านตั้งแต่แรกบันทึกเป็น characterization)
-- [ ] Implement: ตรวจ C03 READY และ planning availability → prior usage → amount/financial ว่าง → capacity (`calculate_opportunity_capacity` กับ definition `TH-OPP-THAI-ESG-2026`, `shared_amount_used = prior`) → financial state + `assess_new_cash_opportunity(NewCashInputs(..., remaining_capacity=capacity.remaining, available_budget=amount, state))` → ถ้า amount > capacity หรือ > `max_feasible_allocation` ให้สถานะข้อจำกัด → `calculate_tax_saving(tax.taxable_income, amount, tax._activated_pack)` → settlement ก่อน/หลังด้วยฟังก์ชันเดียวกับ C03
+- [ ] Implement: ตรวจ C03 READY และ planning availability → amount/financial ว่าง → capacity (`calculate_opportunity_capacity` กับ definition `TH-OPP-THAI-ESG-2026`, `shared_amount_used` จาก C03) → financial state + `assess_new_cash_opportunity(NewCashInputs(..., remaining_capacity=capacity.remaining, available_budget=amount, state))` → ถ้า amount > capacity หรือ > `max_feasible_allocation` ให้สถานะข้อจำกัด → `calculate_tax_saving(tax.taxable_income, amount, tax._activated_pack)` → settlement ก่อน/หลังด้วยฟังก์ชันเดียวกับ C03
 - [ ] GREEN targeted แล้ว `uv run --locked pytest -q`; บันทึก ledger
 
-## Task 1B — สิทธิสับเปลี่ยน LTF→ESGX (เฉพาะเมื่อผู้ใช้ตกลง D5 ก)
+## Task 1B — ปรับข้อความช่องสิทธิ LTF (เฉพาะเมื่อผู้ใช้ตกลง D5 ก)
 
-**ไฟล์:** `src/tax_gps/calculation/annual_estimate.py`, `annual_estimate_audit.py`, `examples/annual_estimate_adapter.py`, tests C03 ที่เกี่ยวข้อง
+**ไฟล์:** `examples/web/index.html`, `tests/web/test_app.cjs`
 
-- [ ] RED: C03 ตอบ มี → `UNSUPPORTED` reason `LTF_ESGX_SWITCH_EXEMPTION_UNSUPPORTED`; ยังไม่ทราบ → `REQUIRES_INPUT` fact `ltf_esgx_switch_exemption`; ไม่มี → ผลเดิมทุกตัวเลข; precedence กับ `ADVANCED_TAX_PATH_REQUIRED` คงเดิม
-- [ ] เพิ่มฟิลด์ใน `AnnualEstimateRights` และ snapshot material; bump schema version ของ C03 snapshot และให้ replay ปฏิเสธ schema เดิมพร้อมข้อความชัด
-- [ ] บันทึก revision ใน C03 requirement change log อ้าง DEC ของ D5; เส้นทางเดโมเดิมไม่เปลี่ยน
+~~เดิมเสนอเพิ่มคำถามใหม่, reason code และ bump schema ของ C03 snapshot~~ CORRECTION: C03 ถาม `fund_history.ltf_carryforward` และ `other_rights.thai_esgx` อยู่แล้ว (`calculation/readiness.py:101-112`)
+
+- [ ] RED frontend: ข้อความช่อง `fund_history_ltf_carryforward` ระบุ "รวมสิทธิยกเว้นจากการสับเปลี่ยน LTF เป็น Thai ESGX"
+- [ ] แก้ข้อความ ไม่เปลี่ยน id, readiness, reason code หรือ snapshot
 
 ## Task 2 — Snapshot, export, replay
 

@@ -17,6 +17,18 @@
 - [x] สำรวจโค้ดเพิ่ม: `TaxState.tax_impact` ปฏิเสธ PVD/RMF บวก (`calculation/models.py:162`) แผนจึงเรียก `calculate_tax_saving` ตรงและคง `tax_impact` เดิม; guardrail ใช้ `assess_new_cash_opportunity` ได้โดยไม่ต้องผ่าน discovery; ฐาน 30% ใช้ `tax.income.assessable_income` ตามเดิม
 - [x] [ตัวอย่างอ้างอิง](TGPS-C04A-acceptance-reference.md) คำนวณด้วย `Decimal` แยกจาก `tax_gps` แล้วเทียบ `calculate_tax_saving` ได้ 5/5 ตรงกัน และ ESG-FORECAST-EDIT ตรงกับ engine (ร่างแรกเขียนวิธีคิดผิดหนึ่งจุด แก้แล้ว ผลไม่เปลี่ยน)
 - [x] [แผน C04A](../superpowers/plans/2026-11-26-c04a-thai-esg-what-if.md) สี่ tasks + Task 1B แบบมีเงื่อนไข สถานะ `DRAFT_FOR_REVIEW`
-- [ ] ผู้ใช้ตัดสิน D5/D6 และอนุมัติแผน
+- [ ] ↳ ย้ายไปหัวข้อถัดไป: ผู้ใช้ตัดสิน D5/D6 และอนุมัติแผน
 
 Current task: `REQUIREMENT_REVIEW` (D5/D6) + plan `DRAFT_FOR_REVIEW` · implementation `NOT_STARTED` · ไม่มีการแก้โค้ดในรอบนี้
+
+## 2026-11-26 — Review corrections before plan approval
+
+- [x] Reviewer ชี้สี่ข้อ ตรวจในโค้ดแล้ว:
+  1. ฐาน 30% ของ PVD บวกเป็นการตีความใหม่: engine ให้ assessable 970,500 สำหรับ C03 `pvd_input` (ตรวจด้วย `calculate_annual_estimate`; สคริปต์ตัวอย่างรอบแรกป้อนค่านี้เอง) เพิ่ม D7 และติดป้าย PVD-ESG-CAP เป็น provisional
+  2. ยอดซื้อ Thai ESG เดิมเป็น fact ของ C03 อยู่แล้ว (`annual_estimate.py:82`, adapter `shared_usage`) ตัด input ซ้ำออกจากแผน AC07 คาดหวัง `BASELINE_NOT_READY` และให้ planning date มาจาก cutoff ของ C03
+  3. RMF บวกปิดใน v0.1: ระบุใน AC09 ให้ตรงกับแผน
+  4. F1 ผิด: C03 ถาม `other_rights.thai_esgx` และ `fund_history.ltf_carryforward` อยู่แล้ว (`calculation/readiness.py:101-112`) แก้ README หลักฐานและ D5 ด้วยขีดฆ่า + CORRECTION; D5 เหลือเพียงปรับข้อความบนจอ ไม่ต้องเปลี่ยน readiness หรือ snapshot
+- [x] เพิ่มหมายเหตุว่า ภ.ง.ด.94 เป็นแบบครึ่งปีสำหรับ 40(5)–(8) และใช้อ้างเนื้อหากฎ Thai ESG เท่านั้น ระบุในแผนว่าเมื่อเกินทั้งวงเงินสิทธิและ guardrail ให้ `EXCEEDS_TAX_CAPACITY` ก่อน
+- [ ] ผู้ใช้ตัดสิน D5/D6/D7, อนุมัติแผน และอนุญาต push ครั้งแรก
+
+Current task: `REQUIREMENT_REVIEW` (D5–D7) + plan `DRAFT_FOR_REVIEW` · implementation `NOT_STARTED`

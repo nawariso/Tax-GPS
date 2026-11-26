@@ -35,10 +35,11 @@ C04A keeps that existing treatment and adds no second path.
 ## Findings for review
 
 - **F1 — LTF→Thai ESGX switch exemption in 2569.** Users who switched LTF units in 2568 get an
-  extra exemption in tax years 2569–2572. The current baseline (C01/C03) neither asks about it nor
+  extra exemption in tax years 2569–2572. ~~The current baseline (C01/C03) neither asks about it nor
   models it, so for those users the baseline PIT can be too high and a what-if saving would be
-  misleading. This is a coverage gap that existed before C04A. It is proposed as decision D5 in the
+  misleading. This is a coverage gap that existed before C04A.~~ It is proposed as decision D5 in the
   C04A requirement. No readiness change is made without a DEC.
+  **CORRECTION (2026-11-26):** the struck sentence is wrong. The baseline does ask. `other_rights.thai_esgx` (label "Thai ESGX"), `fund_history.ltf_carryforward` (label "สิทธิสืบเนื่องจาก LTF") and `fund_history.prior_conditional_rights` are required facts; `true` gives `UNSUPPORTED` and `null` gives `REQUIRES_INPUT` (`calculation/readiness.py:101-112`). The exemption is not modelled, but a user who answers truthfully is closed. The remaining risk is that the labels do not name the switch exemption explicitly, so D5 is reduced to label clarity.
 - **F2 — notify-the-AMC condition.** Item 16.7 is a real usage condition. Catalog `@1.2.0` only
   carries the evidence requirement `FUND-PURCHASE`. Showing the notification condition in the
   product needs a new catalog version, or it stays out of the UI in v0.1. It is not added silently.
@@ -47,6 +48,10 @@ C04A keeps that existing treatment and adds no second path.
   a confirmed zero for prior Thai ESG/ESGX purchases this year, so v0.1 does not depend on this point.
 
 ## Limitations
+
+- ภ.ง.ด.94 is the half-year return for Section 40(5)–(8) income. It is cited for the text of the
+  Thai ESG exemption rule, which item 16.4 applies to individual taxpayers generally. It is not a
+  Section 40(1)-specific instruction.
 
 - The SEC Q&A PDF already cited in the catalog was requested again. The server returned an HTML
   page (13,730 bytes), not a PDF, so no SEC bytes or checksum are claimed. The same limitation is
