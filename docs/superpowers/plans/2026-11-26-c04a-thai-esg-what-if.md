@@ -36,7 +36,7 @@
 | Task | งาน | สถานะ |
 | --- | --- | --- |
 | 1 | Domain what-if (AC01–05, 07–09) | เสร็จ · 25 tests (14 functions) · Python 907 · coverage 100% |
-| 1B | ปรับข้อความช่องสิทธิ LTF ใน C03 (D5) | รอ D5 |
+| 1B | ปรับข้อความช่องสิทธิ LTF ใน C03 (D5) | เสร็จ · frontend 59/59 |
 | 2 | Snapshot, export, replay (AC10) | ยังไม่เริ่ม |
 | 3 | HTTP และเดโมภาษาไทย (AC01–10) | ยังไม่เริ่ม |
 | 4 | ตรวจรวม, Chrome, independent review | ยังไม่เริ่ม |
@@ -68,8 +68,9 @@
 
 ~~เดิมเสนอเพิ่มคำถามใหม่, reason code และ bump schema ของ C03 snapshot~~ CORRECTION: C03 ถาม `fund_history.ltf_carryforward` และ `other_rights.thai_esgx` อยู่แล้ว (`calculation/readiness.py:101-112`)
 
-- [ ] RED frontend: ข้อความช่อง `fund_history_ltf_carryforward` ระบุ "รวมสิทธิยกเว้นจากการสับเปลี่ยน LTF เป็น Thai ESGX"
-- [ ] แก้ข้อความ ไม่เปลี่ยน id, readiness, reason code หรือ snapshot
+- [x] RED frontend: ข้อความช่อง `fund_history_ltf_carryforward` ระบุ "รวมสิทธิยกเว้นจากการสับเปลี่ยน LTF เป็น Thai ESGX"
+- [x] แก้ข้อความ ไม่เปลี่ยน id, readiness, reason code หรือ snapshot
+  ↳ ทำแล้ว: RED frontend 58/59 (test ใหม่ fail) → GREEN 59/59 ผ่าน `examples.check_web_demo`; Python 907 ผ่าน ช่องนี้ใช้ร่วมกันทั้งเส้นทางเดิมและ C03 จึงเห็นข้อความใหม่ทั้งสองเส้นทาง แต่ id/readiness ไม่เปลี่ยน
 
 ## Task 2 — Snapshot, export, replay
 

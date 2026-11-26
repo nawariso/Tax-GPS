@@ -40,5 +40,7 @@ Current task: `REQUIREMENT_REVIEW` (D5–D7) + plan `DRAFT_FOR_REVIEW` · implem
 - Ruling: guardrail budget = min(วงเงินสิทธิที่เหลือ, เงินสดคงเหลือ) เพราะ `compute_financial_state` ปฏิเสธ budget ที่เกินเงินสดที่ทราบ (fail closed เดิม) `max_feasible_allocation` จึงเป็นจำนวนสูงสุดที่ทั้งสิทธิและเงินสำรองอนุญาต
 - Ruling: entry point รับ `AnnualEstimateInput` + pack แล้วคำนวณ C03 ภายใน แทนการรับผลจากภายนอก เพื่อไม่ให้ผลกับ input ขัดกัน ยอดซื้อ Thai ESG เดิมและวันวางแผนมาจาก C03
 
-Current task: Task 1B (D5 label) → Task 2
+- [x] Task 1B DONE (D5): RED frontend 58/59 → GREEN 59/59 ผ่าน `examples.check_web_demo`; Python 907 ผ่าน ข้อความช่อง `fund_history_ltf_carryforward` ใช้ร่วมทั้งเส้นทางเดิมและ C03 ไม่เปลี่ยน id, readiness หรือ snapshot
+
+Current task: Task 2 (snapshot/replay)
 

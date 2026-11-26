@@ -203,6 +203,10 @@ test('C02B coverage describes the supported conditional RMF route',async()=>{
   assert.doesNotMatch(html,/RMF \/ สิทธิอื่นและประวัติที่อยู่นอกขอบเขตยังปิดผล/);
   assert.match(html,/PVD ปกติ หรือ RMF ซื้อเองครั้งแรก/);
 });
+test('C04A-D5 LTF carryforward label names the Thai ESGX switch exemption',async()=>{
+  const html=await (await fetch(base+'/')).text();
+  assert.match(html,/<label for="fund_history_ltf_carryforward">[^<]*รวมสิทธิยกเว้นจากการสับเปลี่ยน LTF เป็น Thai ESGX[^<]*<\/label>/);
+});
 test('C02B no purchase preserves C02A and history',async()=>{
   const app=harness();app.get('fund_history_prior_conditional_rights').value='true';
   app.get('other_rightsNone').click();
