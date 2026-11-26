@@ -3,7 +3,7 @@
 Version: `0.1`  
 Updated: `2026-11-26` (Asia/Bangkok)
 Direction: **AGREED**  
-Current work: **C03 IMPLEMENTED / user acceptance OPEN** — ประมาณการภาษีปี 2569 และยอดเพิ่มหรือคืนผ่านการตรวจในเครื่องตาม DEC-036. **C02A/C02B IMPLEMENTED / user acceptance OPEN. Parent C02 REQUIREMENT_REVIEW / legal G1–G6 OPEN. C01 IMPLEMENTED / F09 OPEN.**
+Current work: **C04A REQUIREMENT_REVIEW** — ทดลองซื้อ Thai ESG ก่อนสิ้นปีบนประมาณการ C03 ตาม DEC-037. **C03 IMPLEMENTED / user acceptance OPEN** — ประมาณการภาษีปี 2569 และยอดเพิ่มหรือคืนผ่านการตรวจในเครื่องตาม DEC-036. **C02A/C02B IMPLEMENTED / user acceptance OPEN. Parent C02 REQUIREMENT_REVIEW / legal G1–G6 OPEN. C01 IMPLEMENTED / F09 OPEN.**
 
 Presentation work: **TGPS-UI01 IMPLEMENTED / VISUAL_REVIEW_PENDING** — restyle และ automatic/source verification เสร็จแล้ว;
 ดู [ข้อเสนอ UI01](requirements/TGPS-UI01-fintech-restyle.md) / [DEC-012](DECISIONS.md#dec-012--ทิศทางปรับหน้าตาตาม-fintech-template).
@@ -64,7 +64,7 @@ MVP แรกเริ่มที่พนักงานเงินเดื�
 | TGPS-C01 | ความถูกต้องของฐานปัจจุบัน | ปิดความไม่สอดคล้อง retirement, shared usage, unknown eligibility, provenance และตรวจ HTTP failure | core/UI ปิดผลที่ไม่ครบตรงกัน, supported golden cases ถูกต้อง, version/replay ตรวจได้, failure มีข้อสรุปและหลักฐาน | IMPLEMENTED (Task 1–5 ตรวจแล้ว; F09 OPEN / acceptance conditional; [report](implementation-reports/TGPS-C01.md), [review](implementation-reports/TGPS-C01-review.md)) |
 | TGPS-C02 | สิทธิเดิมของพนักงาน | รายการสิทธิที่จ่ายแล้ว เริ่ม PVD/RMF/Thai ESG; ต่อประกันและสิทธิครอบครัวเป็นงานย่อย | รายการที่รองรับลดฐานภาษีและใช้ capacity ครั้งเดียว; ระบุ missing/unsupported coverage; fixtures ตรวจตัวเลขโดยอิสระ | **REQUIREMENT_REVIEW** สำหรับ [C02 ภาพรวม](requirements/TGPS-C02-existing-rights.md); [C02A](requirements/TGPS-C02A-pvd-first-slice.md) และ [C02B](requirements/TGPS-C02B-rmf-first-slice.md) **IMPLEMENTED** / user acceptance OPEN |
 | TGPS-C03 | ประมาณการภาษีทั้งปี | actual/forecast, โบนัส, withholding ที่รองรับ | แสดง annual PIT แยกยอดชำระเพิ่ม/คืน; unknown ไม่เป็นศูนย์; forecast ไม่แก้ actual | **IMPLEMENTED** / user acceptance OPEN / [v0.1](requirements/TGPS-C03-annual-tax-estimate.md) / [ผลตรวจ](implementation-reports/TGPS-C03-progress.md#2026-11-26--implementation-verification-and-review) |
-| TGPS-C04 | ทดลองใช้เงินก้อนใหม่ | จำนวนเงินที่ผู้ใช้เลือกบน budget เดิม; เพิ่มทางเลือก Thai ESG/RMF/ordinary investment/โปะหนี้ทีละประเภท | ทุก action มี tax/asset/debt treatment ตรงประเภท; เงินที่ไม่ใช้คงอยู่; ข้อจำกัดเงินสำรองยังทำงาน | PLANNED |
+| TGPS-C04 | ทดลองใช้เงินก้อนใหม่ | จำนวนเงินที่ผู้ใช้เลือกบน budget เดิม; เพิ่มทางเลือก Thai ESG/RMF/ordinary investment/โปะหนี้ทีละประเภท | ทุก action มี tax/asset/debt treatment ตรงประเภท; เงินที่ไม่ใช้คงอยู่; ข้อจำกัดเงินสำรองยังทำงาน | PLANNED; [C04A Thai ESG what-if](requirements/TGPS-C04A-thai-esg-year-end-what-if.md) **REQUIREMENT_REVIEW** |
 | TGPS-C05 | ความคุ้มตามเวลา | horizon, unlock dates, fees, cash-flow scenarios และ break-even | ใช้ horizon เดียวกัน, ไม่บวก tax cash ซ้ำหรือใช้ก่อนมีจริง, แสดง assumption/risk และทางเลือกตามเป้าหมาย | PLANNED |
 | TGPS-C06 | ใช้งานต่อเนื่อง | local profiles, แผนหลายปี และเพิ่มปีที่มี policy ตรวจแล้ว | เปิด/บันทึก/ลบถูกต้อง, privacy/storage ชัด, ผลเก่าไม่ถูกใช้เป็นผลปัจจุบันโดยไม่คำนวณใหม่ | PLANNED |
 
@@ -142,6 +142,7 @@ acceptance cases, dependencies และ change log
 | 2026-11-25 | 0.1 | บันทึกพฤติกรรม C03 v0.1 ที่ผู้ใช้ยืนยัน พร้อมแผนและตัวอย่าง AC01–09 สำหรับรีวิว | [DEC-034](DECISIONS.md#dec-034--c03-requirement-agreement-and-plan-review) |
 | 2026-11-25 | 0.1 | อนุมัติแผนและเริ่ม C03 แบบ Native | [DEC-035](DECISIONS.md#dec-035--approve-c03-plan-and-start-native-implementation) |
 | 2026-11-26 | 0.1 | C03 IMPLEMENTED ตามผลตรวจในเครื่องและรีวิวอิสระ รอผู้ใช้ลองเดโม | [DEC-036](DECISIONS.md#dec-036--c03-implementation-verified-locally) |
+| 2026-11-26 | 0.1 | Commit C03 (`023a3ec`, `67208cc`) และเปิด C04A REQUIREMENT_REVIEW ทดลองซื้อ Thai ESG บนประมาณการ C03 | [DEC-037](DECISIONS.md#dec-037--open-c04a-thai-esg-year-end-what-if-requirement-review) |
 
 ## UI02 presentation follow-up — 2026-10-20
 

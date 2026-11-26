@@ -58,3 +58,10 @@ Current task: requirement draft ready for review. Implementation `NOT_STARTED`.
 - Chrome headless 158.0.8127.37 เปิดเดโมจริงบน loopback พอร์ตว่าง ตรวจภาพ desktop 1440px และ mobile 390px โดยไม่มี horizontal overflow ใช้คีย์บอร์ดยืนยันวันที่และตรวจว่าการเปลี่ยนวันกลับเป็นวันเดิมยังต้องยืนยันใหม่ Desktop แสดง PIT 81,100.00 / หัก 75,000.00 / เพิ่ม 6,100.00 มือถือที่เว้นยอดหักช่วงที่เหลือยังเห็น PIT และบอกช่องที่ขาด ตรวจ reduced motion พบ animation ของยอดเป็น `none` การรัน harness แรกต้องตั้ง scenario ตัวอย่างก่อน การตรวจ viewport รอบถัดไปปรับการเทียบความกว้างเพื่อคิด scrollbar บน desktop
 - หลักฐานผูกกับ working tree เหนือฐาน `1063fef` โดย SHA-256 ของ 17 ไฟล์ source/test ที่แก้หรือเพิ่ม `65b6917f1070c03c9e12f0223652d50d7866ef794c067ff273f5d3957ca5571e` (เรียงพาธ UTF-8 คั่นพาธและ bytes ด้วย NUL) Pack และ catalog ที่ออกแล้วไม่มี diff
 - สถานะ `IMPLEMENTED` ตาม DEC-036 งานอยู่ใน feature working tree สำหรับรีวิว Remote CI และการรับงานผู้ใช้ยังเปิด
+
+## 2026-11-26 — Commit checkpoint
+
+- [x] รับช่วง session ใหม่ ตรวจ baseline ก่อน commit: `uv run --locked pytest -q` 882 ผ่านใน 13.65s และ `uv run --locked python -m examples.check_web_demo` 58/58 (fail 0, skip 0) จากนั้นรัน ruff check/format (206 ไฟล์), mypy strict (128 ไฟล์) และ pytest พร้อม coverage 882 ผ่าน, 3,394 statements / 998 branches ที่ 100% บน Windows Python 3.14.3 `uv build` ไม่ได้รันซ้ำในรอบนี้ (ผลล่าสุดอยู่ใน Task 4 ด้านบน)
+- [x] Commit บน `feature/tgps-c01-baseline-integrity`: `023a3ec` feat(c03) โค้ดและเทสต์ 17 ไฟล์ และ `67208cc` docs(c03) requirement/plan/ledger/DEC-033–036 ไม่รวม Stage 4 draft ที่ยังเป็น untracked
+- [ ] ยังไม่ push / remote CI ยังไม่รัน / user acceptance ยังเปิด
+- ต่อด้วย C04A requirement review ตาม [DEC-037](../DECISIONS.md#dec-037--open-c04a-thai-esg-year-end-what-if-requirement-review)

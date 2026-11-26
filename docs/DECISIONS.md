@@ -355,3 +355,12 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Evidence: [C03 verification and review](implementation-reports/TGPS-C03-progress.md#2026-11-26--implementation-verification-and-review) บันทึกผล Python 882, coverage 100%, frontend 58/58, ครบ 7 local gates และ Chrome 1440/390 พร้อม keyboard และ reduced motion ผลรีวิวอิสระสามข้อผ่าน RED → GREEN
 - Decision: ส่ง C03 ให้ผู้ใช้ลองเดโมและรีวิวผลจากยอดจริง ยอดคาด และภาษีหัก ณ ที่จ่าย พร้อม export ที่ replay ได้
 - Boundary: ฐานกฎและขอบเขตสิทธิตาม DEC-033/034 การรับงานและ remote CI ยังเปิดอยู่
+
+## DEC-037 — Open C04A Thai ESG year-end what-if requirement review
+
+- Date: `2026-11-26`
+- Status: `AGREED` to commit C03 and open C04A for requirement review. C04A detail is `AUTHORING_DETAIL / REQUIREMENT_REVIEW`. Implementation `NOT_STARTED`.
+- Evidence: ผู้ใช้ถามว่า "จะสิ้นปีแล้ว ผมอยากไดัตัวช่วยไปลดหย่อนภาษี" และตอบ "โอเครครับ ลุย!" ต่อข้อเสนอให้ commit C03 แล้วร่าง C04A ขอบเขตแคบสำหรับรีวิว
+- Decision: เปิด [C04A v0.1-draft](requirements/TGPS-C04A-thai-esg-year-end-what-if.md) ทดลองซื้อ Thai ESG ตามจำนวนที่ผู้ใช้เลือกบนประมาณการ C03 แสดง PIT และยอดเพิ่ม/คืนก่อนและหลัง RMF ซื้อเพิ่มแยกไป C04B
+- Reason: ให้ผู้ใช้เห็นผลภาษีของการซื้อสิทธิก่อนสิ้นปีภาษี 2569 โดยใช้ catalog, tax core และ guardrail ที่มีอยู่
+- Boundary: ข้อตัดสิน D1 (PVD บวก), D2 (ยอดซื้อ Thai ESG เดิม), D3 (ข้อมูล guardrail) และ D4 (จำนวนเกินวงเงิน) ยังเป็นข้อเสนอรอผู้ใช้ตัดสิน หลักฐาน E1 ต้องปิดก่อนเขียนแผน ไม่เปลี่ยน readiness, deduction treatment หรือ catalog ที่ออกแล้ว C03 user acceptance และ remote CI ยังเปิด
