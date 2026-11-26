@@ -13,6 +13,10 @@ const annualFields = {
 };
 const annualPeriodFields = ['wages','bonus','withholding','outside_coverage'];
 let lastCutoff = '';
+// Demo prefill is not the user's data: blank it in the annual route unless edited (D3).
+const financePrefill = ['assets','expenses'];
+const financeTouched = new Set();
+const financeStash = new Map();
 let confirmedCutoff = '';
 
 function annualMode() {
@@ -65,8 +69,22 @@ function updateAnnualCutoff() {
   $('annualPvdAssumption').hidden = !hasAnnualPvdForecast();
 }
 
+function updateFinancePrefill(active) {
+  for (const id of financePrefill) {
+    if (financeTouched.has(id)) continue;
+    if (active && !financeStash.has(id)) {
+      financeStash.set(id,$(id).value);
+      $(id).value = '';
+    } else if (!active && financeStash.has(id)) {
+      if ($(id).value === '') $(id).value = financeStash.get(id);
+      financeStash.delete(id);
+    }
+  }
+}
+
 function updateEstimateMode() {
   const active = annualMode();
+  updateFinancePrefill(active);
   $('annualInputs').hidden = $('annualInputs').disabled = !active;
   $('financeGroup').hidden = false;
   $('budgetField').hidden = active;
@@ -92,6 +110,9 @@ function updateEstimateMode() {
 }
 
 function initAnnualEstimate() {
+  for (const id of financePrefill) {
+    $(id).addEventListener('input', () => { financeTouched.add(id); financeStash.delete(id); });
+  }
   $('calculationMode').addEventListener('change', () => {
     updateEstimateMode();
     invalidateResults();

@@ -1,6 +1,7 @@
 """C04A-AC01–09: user-chosen Thai ESG amount on top of the C03 annual estimate."""
 
 from dataclasses import replace
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -23,10 +24,15 @@ from tax_gps.core.money import Money
 from tax_gps.core.tax_year import TaxYear
 from tax_gps.financial.models import GuardrailDecision
 from tax_gps.financial.policy import activate_financial_policy, bundled_financial_policy
-from tax_gps.financial.profile import Debt, DebtCategory, FinancialProfile
+from tax_gps.financial.profile import CommittedCashNeed, Debt, DebtCategory, FinancialProfile
 from tax_gps.financial.reason_codes import FinancialReasonCode
 from tax_gps.profile.models import SharedLimitUsage
-from tests.acceptance.test_c03_annual_estimate import base_input, pvd_input, rmf_input
+from tests.acceptance.test_c03_annual_estimate import (
+    base_input,
+    pvd_input,
+    rmf_input,
+    year_end_input,
+)
 from tests.support.catalog import artwork_ready_catalog, production_catalog
 from tests.support.policy import production_pack
 
@@ -339,3 +345,29 @@ def test_c04a_conditions_come_from_catalog() -> None:
     definition = production_catalog().catalog.definition("TH-OPP-THAI-ESG-2026")
     assert result.lockup == definition.lockup_metadata
     assert result.evidence_requirements == definition.evidence_requirements
+
+
+@pytest.mark.parametrize(
+    "financial",
+    [
+        HEALTHY,
+        replace(
+            HEALTHY,
+            committed_cash_needs=(
+                CommittedCashNeed("fee", Money.of(50000), date(2026, 11, 1), True, "paid"),
+            ),
+        ),
+    ],
+)
+def test_c04a_year_end_cutoff_uses_actual_income(financial: FinancialProfile) -> None:
+    """C04A-AC01 at 31 Dec: capacity from actual income; a past-due need is not near-term cash."""
+    result = evaluate(year_end_input(), financial=financial)
+    assert result.status is WhatIfStatus.READY
+    assert result.capacity is not None
+    assert result.capacity.remaining_capacity == Money.of(297150)
+    assert result.impact is not None
+    assert result.impact.pit_after == Money.of(62075)
+    assert result.settlement_after_kind is SettlementKind.REFUND
+    assert result.settlement_after_amount == Money.of(12925)
+    assert result.financial_state is not None
+    assert result.financial_state.near_term_committed_cash == Money.zero()

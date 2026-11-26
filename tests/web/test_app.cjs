@@ -242,6 +242,37 @@ test('C04A edits and stale responses cannot publish an old what-if',async()=>{
   await app.advanceTimers();await app.resolve(app.calls.length-1);
   assert.equal(app.export().material.amount,'50000.00');
 });
+test('C04A untouched demo prefill does not feed the guardrail',async()=>{
+  const app=harness();
+  assert.equal(app.get('assets').value,'500000');
+  setAnnualEstimate(app);
+  assert.equal(app.get('assets').value,'');
+  assert.equal(app.get('expenses').value,'');
+  app.get('thai_esg_amount').value='100000';
+  app.get('confirmCutoff').click();await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.equal(app.get('annualPit').textContent,'81,100.00 บาท');
+  assert.match(app.get('thaiEsgStatus').textContent,/สินทรัพย์สภาพคล่อง/);
+  assert.match(app.get('thaiEsgStatus').textContent,/ค่าใช้จ่ายจำเป็นต่อเดือน/);
+  assert.equal(app.get('thaiEsgGuardrailLimit').textContent,'—');
+  app.get('calculationMode').value='legacy';app.get('calculationMode').listeners.change();
+  assert.equal(app.get('assets').value,'500000');
+  assert.equal(app.get('expenses').value,'50000');
+});
+test('C04A edited finance values are kept when entering the annual route',async()=>{
+  const app=harness();
+  app.get('assets').value='800000';app.get('assets').listeners.input();
+  setAnnualEstimate(app);
+  assert.equal(app.get('assets').value,'800000');
+  assert.equal(app.get('expenses').value,'');
+});
+test('C04A invalid what-if input keeps the C03 estimate',async()=>{
+  const app=harness();setAnnualEstimate(app);setWhatIf(app);app.get('assets').value='abc';
+  app.get('confirmCutoff').click();await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.equal(app.get('annualPit').textContent,'81,100.00 บาท');
+  assert.match(app.get('thaiEsgStatus').textContent,/สินทรัพย์สภาพคล่อง/);
+  assert.doesNotMatch(app.get('thaiEsgStatus').textContent,/abc/);
+  assert.equal(app.export().schema,'tax-gps-annual-estimate/1');
+});
 test('C04A amount field only appears in the annual route',async()=>{
   const app=harness();
   assert.equal(app.get('thaiEsgAmountField').hidden,true);

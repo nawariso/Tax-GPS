@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from examples.demo_errors import FIELD_LABELS, input_scope, invalid_input
+from examples.demo_errors import FIELD_LABELS, DemoInputError, input_scope, invalid_input
 from examples.demo_profile import (
     optional_amount,
     optional_boolean,
@@ -132,6 +132,36 @@ def _what_if_error(result: ThaiEsgWhatIfResult) -> str | None:
     return " · ".join(reasons) or "จำนวนนี้เกินยอดที่การตรวจเงินสำรองอนุญาต"
 
 
+def _invalid_what_if(error: DemoInputError) -> dict[str, object]:
+    """A bad what-if field closes only the what-if; the message never echoes the value."""
+    return {
+        "status": "INVALID_INPUT",
+        "reason_codes": list(error.reason_codes),
+        "missing_fact_ids": list(error.missing_fact_ids),
+        "amount": None,
+        "capacity": None,
+        "capacity_basis": None,
+        "guardrail": None,
+        "impact": None,
+        "settlement_after_kind": None,
+        "settlement_after_amount": None,
+        "lockup": None,
+        "evidence_requirements": [],
+        "export": None,
+        "error": str(error),
+    }
+
+
+def _what_if_response(
+    inputs: AnnualEstimateInput, raw: object, pack: ActivatedRulePack
+) -> dict[str, object]:
+    try:
+        chosen, financial = parse_thai_esg_what_if(raw)
+        return _what_if(inputs, chosen, financial, pack)
+    except DemoInputError as exc:
+        return _invalid_what_if(exc)
+
+
 def _what_if(
     inputs: AnnualEstimateInput,
     chosen: Money | None,
@@ -160,7 +190,6 @@ def _what_if(
 def calculate_estimate(data: object) -> dict[str, object]:
     if not isinstance(data, dict) or set(data) - {_WHAT_IF_FIELD} != _FIELDS:
         raise invalid_input("request")
-    what_if = parse_thai_esg_what_if(data[_WHAT_IF_FIELD]) if _WHAT_IF_FIELD in data else None
     pack = activate_rule_pack(load_bundled_rule_pack())
     cutoff = _date(data["cutoff_date"], "cutoff_date")
     shared = optional_amount(_text(data["shared_usage"], "shared_usage"), "shared_usage")
@@ -188,8 +217,8 @@ def calculate_estimate(data: object) -> dict[str, object]:
         except PvdWageBasisError as exc:
             raise invalid_input("pvd.wage_basis") from exc
     response = annual_estimate_outputs(result)
-    if what_if is not None:
-        response[_WHAT_IF_FIELD] = _what_if(inputs, *what_if, pack)
+    if _WHAT_IF_FIELD in data:
+        response[_WHAT_IF_FIELD] = _what_if_response(inputs, data[_WHAT_IF_FIELD], pack)
     if result.tax is None:
         return response | {"export": None, "error": _baseline_error(result)}
     snapshot = annual_estimate_snapshot(inputs, result, pack)

@@ -7,7 +7,6 @@ from typing import Any
 
 import pytest
 from examples.annual_estimate_adapter import calculate_estimate
-from examples.demo_errors import DemoInputError
 
 from tax_gps.candidate.thai_esg_what_if import WhatIfStatus
 from tax_gps.candidate.thai_esg_what_if_audit import replay_thai_esg_what_if
@@ -149,24 +148,41 @@ def test_c04a_http_rmf_positive_is_explained() -> None:
         ({"debts": [{"debt_id": "x"}]}, "debts[0]"),
     ],
 )
-def test_c04a_http_invalid_input_names_field_without_value(
-    changes: dict[str, Any], fact: str
-) -> None:
-    """C04A-AC08: invalid what-if input names the field and never echoes the value."""
-    with pytest.raises(DemoInputError) as error:
-        calculate_estimate(with_what_if(**changes))
-    assert error.value.missing_fact_ids == (fact,)
+def test_c04a_http_invalid_what_if_input_keeps_c03(changes: dict[str, Any], fact: str) -> None:
+    """C04A-AC08: a bad what-if field closes only the what-if; C03 stays visible."""
+    response: dict[str, Any] = calculate_estimate(with_what_if(**changes))
+    assert response["tax"]["pit"] == "81100.00"
+    assert response["export"] is not None
+    block = response["thai_esg_what_if"]
+    assert block["status"] == "INVALID_INPUT"
+    assert block["missing_fact_ids"] == [fact]
+    assert block["impact"] is block["capacity"] is block["export"] is None
+    assert block["evidence_requirements"] == []
     for value in ("-1", "1.001", "abc"):
         if value in changes.values():
-            assert value not in str(error.value)
+            assert value not in block["error"]
 
 
-def test_c04a_http_rejects_unknown_block_shape() -> None:
+def test_c04a_http_unknown_block_shape_closes_only_what_if() -> None:
     request = request_data()
     request["thai_esg_what_if"] = {"amount": "1"}
-    with pytest.raises(DemoInputError) as error:
-        calculate_estimate(request)
-    assert error.value.missing_fact_ids == ("thai_esg_what_if",)
+    response: dict[str, Any] = calculate_estimate(request)
+    assert response["tax"]["pit"] == "81100.00"
+    assert response["thai_esg_what_if"]["status"] == "INVALID_INPUT"
+    assert response["thai_esg_what_if"]["missing_fact_ids"] == ["thai_esg_what_if"]
+
+
+def test_c04a_http_year_end_what_if() -> None:
+    """C04A-AC01 at the 31 Dec cutoff over HTTP."""
+    request = with_what_if()
+    request["cutoff_date"] = request["confirmed_for"] = "2026-12-31"
+    request["actual"].update(wages="900500", bonus="90000", withholding="75000")
+    request["forecast"].update(wages="0", bonus="0", withholding="0")
+    response: dict[str, Any] = calculate_estimate(request)
+    block = response["thai_esg_what_if"]
+    assert block["status"] == "READY"
+    assert block["impact"]["pit_after"] == "62075.00"
+    assert block["settlement_after_amount"] == "12925.00"
 
 
 def test_c04a_http_real_route(what_if_demo_server: ThreadingHTTPServer) -> None:
