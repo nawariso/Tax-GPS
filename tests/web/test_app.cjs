@@ -7,7 +7,8 @@ const test = require('node:test');
 const vm = require('node:vm');
 const base = process.env.TAX_GPS_DEMO_URL || 'http://127.0.0.1:8765';
 assert.match(base, /^http:\/\/127\.0\.0\.1:\d+$/);
-const source = fs.readFileSync(path.join(__dirname, '../../examples/web/rmf.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/pvd.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/profile.js'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../../examples/web/app.js'), 'utf8');
+const source = ['rmf.js','pvd.js','profile.js','annual-estimate.js','app.js']
+  .map(name=>fs.readFileSync(path.join(__dirname,'../../examples/web',name),'utf8')).join('\n');
 
 class Element {
   constructor() {
@@ -94,6 +95,92 @@ function setRmf(app) {
   app.get('other_rights_rmf').value='true';
   Object.entries({own_purchase_paid:'100000',fund_name:'กองทุนทดสอบ',amc_name:'บลจ.ทดสอบ',first_purchase_date:'2026-01-02',reporting_status:'NOT_YET_DUE',ordinary_own_purchase_confirmed:'true',single_fund:'true',single_amc:'true',first_ever_purchase_in_tax_year:'true',paid_through_assessment_date:'true',declaration_completed:'true',no_distributions_or_borrowing:'true',no_known_reporting_problem:'true',future_obligations_acknowledged:'true'}).forEach(([k,v])=>{app.get('rmf_'+k).value=v;});
 }
+
+function setAnnualEstimate(app) {
+  const values = {cutoff_date:'2026-10-31', annual_social_security:'0', annual_shared_usage:'0',
+    actual_wages:'600000', actual_bonus:'40000', actual_withholding:'45000', actual_outside_coverage:'false',
+    forecast_wages:'300500', forecast_bonus:'50000', forecast_withholding:'30000', forecast_outside_coverage:'false'};
+  for (const [key,value] of Object.entries(values)) app.get(key).value=value;
+  app.get('calculationMode').value='annual';
+  app.get('calculationMode').listeners.change();
+}
+
+test('C03 shows three amounts and RMF conditions',async()=>{
+  const app=harness();setAnnualEstimate(app);setRmf(app);
+  app.get('confirmCutoff').click();await app.advanceTimers();
+  const call=app.calls.at(-1);assert.equal(call.url,'/api/annual-estimate');
+  const inputs=JSON.parse(call.options.body);assert.equal(inputs.confirmed_for,'2026-10-31');
+  assert.equal(inputs.actual.bonus,'40000');assert.equal(inputs.forecast.bonus,'50000');
+  assert.equal(inputs.profile.other_income,undefined);
+  await app.resolve(app.calls.length-1);
+  assert.equal(app.get('annualPit').textContent,'62,075.00 บาท');
+  assert.equal(app.get('annualWithholding').textContent,'75,000.00 บาท');
+  assert.match(app.get('annualSettlement').textContent,/12,925.00/);
+  assert.match(app.get('annualSettlementLabel').textContent,/คืน/);
+  assert.match(app.get('rmfConditions').textContent,/2026-10-31/);
+  assert.equal(app.get('legacyResult').hidden,true);
+  assert.equal(app.export().schema,'tax-gps-annual-estimate/1');
+});
+test('C03 asks for reconfirmation after date edits',async()=>{
+  const app=harness();setAnnualEstimate(app);app.get('confirmCutoff').click();await app.advanceTimers();
+  const valid=app.calls.length-1;await app.resolve(valid);
+  for(const value of ['2026-11-30','2026-10-31']){
+    app.get('cutoff_date').value=value;app.get('planner').listeners.input();
+  }
+  assert.equal(app.export(),null);
+  await app.advanceTimers();
+  const newRequest=JSON.parse(app.calls.at(-1).options.body);
+  assert.equal(newRequest.confirmed_for,'');
+  await app.resolve(app.calls.length-1);
+  assert.equal(app.get('confirmCutoff').getAttribute('aria-invalid'),'true');
+  assert.equal(app.get('download').disabled,true);
+});
+test('C03 rejects stale responses on edits or route switch',async()=>{
+  const app=harness();setAnnualEstimate(app);app.get('confirmCutoff').click();await app.advanceTimers();
+  const pending=app.calls.length-1;
+  app.get('forecast_bonus').value='70000';app.get('planner').listeners.input();
+  await app.resolve(pending);assert.equal(app.export(),null);
+  await app.advanceTimers();
+  const second=app.calls.length-1;
+  app.get('calculationMode').value='legacy';app.get('calculationMode').listeners.change();
+  await app.resolve(second);assert.equal(app.export(),null);
+  await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.equal(app.latest().tax_before,'79000.00');
+});
+test('C03 displays a fractional result consistently',async()=>{
+  const app=harness();setAnnualEstimate(app);setRmf(app);
+  for(const [key,value] of Object.entries({rmf_own_purchase_paid:'297150.01',annual_social_security:'10500',
+    forecast_wages:'300500.01',actual_withholding:'30000',forecast_withholding:'927.50'}))app.get(key).value=value;
+  app.get('confirmCutoff').click();await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.equal(app.get('annualPit').textContent,'30,927.50105 บาท');
+  assert.equal(app.get('annualSettlement').textContent,'0.00105 บาท');
+  assert.match(app.get('rmfBreakdown').textContent,/297,150\.003 บาท/);
+  assert.match(app.get('rmfBreakdown').textContent,/0\.007 บาท/);
+  assert.equal(app.export().outputs.settlement_amount,'0.00105');
+});
+test('C03 does not retain the PVD employer assumption after removing PVD',async()=>{
+  const app=harness();setAnnualEstimate(app);
+  app.get('pvd_presence').value='true';
+  for(const [key,value] of Object.entries({employee_paid:'30000',wage_basis:'600000',fund_name:'Test fund',
+    registered_fund:'true',credited_in_tax_year:'true',single_employer:'true',single_fund:'true',
+    ordinary_article_rate:'true',normal_remittance:'true'}))app.get('pvd_'+key).value=value;
+  app.get('pvd_forecast_single_employer').value='true';
+  app.get('confirmCutoff').click();await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.match(app.get('annualBreakdown').textContent,/สมมติฐาน PVD/);
+  app.get('pvd_presence').value='false';app.get('planner').listeners.input();
+  await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.doesNotMatch(app.get('annualBreakdown').textContent,/สมมติฐาน PVD/);
+  assert.equal(app.export().material.pvd_forecast_single_employer,null);
+});
+test('C03 handles year-end and missing withholding',async()=>{
+  const app=harness();setAnnualEstimate(app);
+  for(const [key,value] of Object.entries({cutoff_date:'2026-12-31',actual_wages:'900500',actual_bonus:'90000',
+    actual_withholding:'75000',forecast_wages:'0',forecast_bonus:'0',forecast_withholding:''}))app.get(key).value=value;
+  app.get('confirmCutoff').click();await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.equal(app.get('annualPit').textContent,'81,100.00 บาท');
+  assert.match(app.get('annualMissing').textContent,/หัก.*ช่วงที่เหลือ/);
+  assert.equal(app.export().outputs.settlement_amount,null);
+});
 test('C02B conditional baseline shows every continuing obligation',async()=>{
   const app=harness();setRmf(app);app.recalculate();await app.resolve(app.calls.length-1);
   assert.equal(app.latest().planning_availability,'RMF_BASELINE_ONLY');

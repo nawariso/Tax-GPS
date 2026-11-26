@@ -11,6 +11,7 @@ from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from examples.annual_estimate_adapter import calculate_estimate
 from examples.demo_errors import DemoInputError, input_scope, invalid_input
 from examples.demo_profile import amount, parse_profile
 from examples.pvd_adapter import c02_reason
@@ -49,6 +50,7 @@ MAX_BODY = 4096
 STATIC = {
     "/": ("index.html", "text/html; charset=utf-8"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/annual-estimate.js": ("annual-estimate.js", "text/javascript; charset=utf-8"),
     "/rmf.js": ("rmf.js", "text/javascript; charset=utf-8"),
     "/pvd.js": ("pvd.js", "text/javascript; charset=utf-8"),
     "/profile.js": ("profile.js", "text/javascript; charset=utf-8"),
@@ -269,7 +271,7 @@ class DemoHandler(BaseHTTPRequestHandler):
             self._discard_rejected_body()
             self._json(403, {"error": "Local browser requests only"})
             return
-        if self.path != "/api/calculate":
+        if self.path not in {"/api/calculate", "/api/annual-estimate"}:
             self._discard_rejected_body()
             self._json(404, {"error": "Not found"})
             return
@@ -279,7 +281,9 @@ class DemoHandler(BaseHTTPRequestHandler):
                 raise ValueError("Invalid request size")
             self.connection.settimeout(5)
             data = json.loads(self.rfile.read(size))
-            result = calculate(data)
+            result = (
+                calculate_estimate(data) if self.path == "/api/annual-estimate" else calculate(data)
+            )
         except DemoInputError as exc:
             self._json(400, exc.to_dict())
             return

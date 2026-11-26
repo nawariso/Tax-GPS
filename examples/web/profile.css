@@ -41,3 +41,12 @@
 }
 
 .c02-input{margin:1.2rem 0;padding:1.1rem;border:1px solid #c9d4c5;border-radius:16px;background:#f8faf4}.c02-input h3{margin-top:0}.c02-grid{display:grid;gap:1rem;grid-template-columns:repeat(2,minmax(0,1fr))}.c02-inventory{margin-top:1rem;padding-top:.8rem;border-top:1px solid #dbe2d4}.c02-inventory summary{cursor:pointer;font-weight:650}.c02-grid .field{min-width:0}.c02-grid input,.c02-grid select{width:100%;box-sizing:border-box}.c02-note{padding:1rem;background:#eaf1df;border-radius:12px;color:#284c37}@media(max-width:540px){.c02-grid{grid-template-columns:1fr}}
+.estimate-mode { margin-bottom: 18px; }
+.annual-inputs { border: 0; margin: 0 0 24px; min-width: 0; padding: 0; }
+.annual-inputs > legend { font-weight: 700; margin-bottom: 14px; }
+.annual-periods { display: grid; gap: 12px; }
+.annual-period { border: 1px solid #d7dccf; border-radius: 12px; padding: 14px; }
+.annual-period h3 { margin: 0 0 12px; }
+.annual-period .field:last-child { margin-bottom: 0; }
+#annualResult h2 { margin-bottom: 6px; }
+#annualResult .metrics { margin-top: 14px; }

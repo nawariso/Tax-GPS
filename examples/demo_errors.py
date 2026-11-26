@@ -14,6 +14,20 @@ FIELD_LABELS = {
     "expenses": "ค่าใช้จ่ายจำเป็น",
     "budget": "งบทดลอง",
     "planning_date": "วันที่วางแผน",
+    "cutoff_date": "วันตัดข้อมูล",
+    "confirmed_for": "การยืนยันข้อมูลตามวันตัด",
+    "pvd_forecast_single_employer": "นายจ้างเดียวในช่วงที่เหลือ",
+    "tax_year": "ปีภาษี",
+    "actual.wages": "ค่าจ้างที่ได้รับจริง",
+    "actual.bonus": "โบนัสที่ได้รับจริง",
+    "actual.withholding": "ภาษีหัก ณ ที่จ่ายจริง",
+    "actual.outside_coverage": "รายได้นอกขอบเขตในช่วงจริง",
+    "forecast.wages": "ค่าจ้างที่คาดในช่วงที่เหลือ",
+    "forecast.bonus": "โบนัสที่คาดในช่วงที่เหลือ",
+    "forecast.withholding": "ภาษีหัก ณ ที่จ่ายที่คาดในช่วงที่เหลือ",
+    "forecast.outside_coverage": "รายได้นอกขอบเขตในช่วงที่เหลือ",
+    "actual": "ยอดจริง",
+    "forecast": "ยอดคาดช่วงที่เหลือ",
     "shared_usage": "ยอดใช้สิทธิเดิม Thai ESG / ESGX",
     "personal_eligible": "สิทธิส่วนตัว",
     "mortgage_interest": "ดอกเบี้ยบ้าน",
@@ -34,7 +48,9 @@ FIELD_LABELS = {
 
 def field_label(field_id: str) -> str:
     root = field_id.split("[", 1)[0].split(".", 1)[0]
-    return f"{FIELD_LABELS[root]} ({field_id})"
+    return (
+        f"{FIELD_LABELS[field_id] if field_id in FIELD_LABELS else FIELD_LABELS[root]} ({field_id})"
+    )
 
 
 class DemoInputError(ValueError):

@@ -77,7 +77,7 @@ def _confirmation(value: object) -> RmfReportConfirmation | None:
         )
 
 
-def parse_rmf_profile(value: object, *, assessment_date: date) -> RmfFacts | None:
+def parse_rmf_profile(value: object, *, assessment_date: date | None) -> RmfFacts | None:
     if value is None:
         return None
     names = {f.name for f in fields(RmfFacts)} - {"assessment_date"}

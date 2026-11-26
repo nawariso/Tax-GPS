@@ -10,6 +10,7 @@ from typing import cast
 from examples.demo_errors import DemoInputError, field_label, input_scope, invalid_input
 from examples.pvd_adapter import parse_pvd_profile
 from examples.rmf_adapter import parse_rmf_profile
+from tax_gps.calculation.annual_estimate import AnnualEstimateRights
 from tax_gps.core.decimal_context import EXACT
 from tax_gps.core.money import Money
 from tax_gps.financial.profile import (
@@ -70,14 +71,27 @@ def _boolean(value: str, name: str) -> bool:
     return value == "true"
 
 
+def optional_boolean(value: str, name: str) -> bool | None:
+    if value in {"", "unknown"}:
+        return None
+    if value not in {"true", "false"}:
+        raise invalid_input(name)
+    return value == "true"
+
+
+def optional_amount(value: str, name: str) -> Money | None:
+    return None if value == "" else amount(value, name)
+
+
 def _integer(value: str, name: str) -> int:
     if not re.fullmatch(r"[0-9]{1,4}", value):
         raise invalid_input(name)
     return int(value)
 
 
-def _parents(items: list[object]) -> tuple[Parent, ...]:
+def _parents(items: list[object], *, allow_unknown: bool = False) -> tuple[Parent, ...]:
     result = []
+    parse_eligible = optional_boolean if allow_unknown else _boolean
     for index, item in enumerate(items):
         row = f"parents[{index}]"
         with input_scope(row):
@@ -85,7 +99,7 @@ def _parents(items: list[object]) -> tuple[Parent, ...]:
             result.append(
                 Parent(
                     entry["relationship"],
-                    _boolean(
+                    parse_eligible(
                         entry["eligible"], parent_eligibility_fact_id(entry["relationship"], index)
                     ),
                 )
@@ -93,7 +107,7 @@ def _parents(items: list[object]) -> tuple[Parent, ...]:
     return tuple(result)
 
 
-def _children(items: list[object]) -> tuple[Child, ...]:
+def _children(items: list[object], *, unconfirmed: list[int] | None = None) -> tuple[Child, ...]:
     result = []
     for index, item in enumerate(items):
         row = f"children[{index}]"
@@ -101,6 +115,9 @@ def _children(items: list[object]) -> tuple[Child, ...]:
             entry = _strings(
                 item, frozenset({"child_id", "order", "birth_year", "legally_eligible"}), row
             )
+            if unconfirmed is not None and entry["legally_eligible"] in {"unknown", ""}:
+                unconfirmed.append(index)
+                continue
             result.append(
                 Child(
                     entry["child_id"],
@@ -242,3 +259,44 @@ def parse_profile(
         return _parse_profile(
             value, assets=assets, expenses=expenses, social=social, assessment_date=assessment_date
         )
+
+
+def parse_annual_rights(
+    value: object, *, social: Money | None, cutoff: date | None
+) -> AnnualEstimateRights:
+    scalar_fields = SCALARS - {"required_coverage", "existing_coverage", "other_income"}
+    groups = {"pvd", "other_rights", "fund_history", "rmf"}
+    if not isinstance(value, dict) or set(value) - groups != scalar_fields | {
+        "parents",
+        "children",
+    }:
+        raise invalid_input("profile")
+    scalars = _strings({key: value[key] for key in scalar_fields}, scalar_fields, "profile")
+    parents, children = value["parents"], value["children"]
+    if not isinstance(parents, list) or not isinstance(children, list):
+        raise invalid_input("profile")
+    pvd, other_rights, history = parse_pvd_profile(value)
+    retirement = optional_amount(scalars["retirement_usage"], "retirement_usage")
+    retirement_contributions = None
+    if retirement is not None:
+        retirement_contributions = (
+            (RetirementContribution("UNCLASSIFIED", retirement),)
+            if retirement.is_positive()
+            else ()
+        )
+    unconfirmed_children: list[int] = []
+    parsed_children = _children(children, unconfirmed=unconfirmed_children)
+    return AnnualEstimateRights(
+        parents=_parents(parents, allow_unknown=True),
+        retirement_contributions=retirement_contributions,
+        pvd=pvd,
+        other_rights=other_rights,
+        fund_history=history,
+        rmf=parse_rmf_profile(value.get("rmf"), assessment_date=cutoff),
+        children=parsed_children,
+        personal_eligible=optional_boolean(scalars["personal_eligible"], "personal_eligible"),
+        social_security_paid=social,
+        mortgage_interest_paid=optional_amount(scalars["mortgage_interest"], "mortgage_interest"),
+        mortgage_eligible=optional_boolean(scalars["mortgage_eligible"], "mortgage_eligible"),
+        unconfirmed_children=tuple(unconfirmed_children),
+    )

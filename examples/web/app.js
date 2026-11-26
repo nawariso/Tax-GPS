@@ -72,6 +72,7 @@ function selectComparison(id, checked, resultHash) {
   renderComparison(latest);return true;
 }
 function comparisonExport() {
+  if (annualMode()) return latest?.export ?? null;
   if(['PVD_BASELINE_ONLY','RMF_BASELINE_ONLY'].includes(latest?.planning_availability))return {...latest,comparison_view:{version:'1',kind:'BASELINE_ONLY',result_hash:latest.tax_state.output_hash}};
   if (!latest || !latest.outcomes || latest.outcomes.result_hash !== comparisonResultHash) return null;
   return {...latest,comparison_view:{version:'1',kind:'USER_SELECTED_COMPARISON',result_hash:latest.outcomes.result_hash,selected_candidate_ids:comparisonRows(latest).filter(c => c.allocations.length > 0).map(c => c.candidate_id)}};
@@ -145,8 +146,11 @@ function render(data) {
   const hashes = {result_hash: data.outcomes.result_hash, input_hash:data.outcomes.input_hash, policy_hash:data.outcomes.policy_hash, engine_version:data.outcomes.engine_version};
   Object.entries(hashes).forEach(([key,value]) => $('hashes').append(el('dt', key), el('dd', value)));
 }
+function calculationRequest() {
+  return annualMode() ? annualRequest() : {...Object.fromEntries(new FormData(form)),profile:collectProfile()};
+}
 function inputSnapshot() {
-  return JSON.stringify({...Object.fromEntries(new FormData(form)),profile:collectProfile()});
+  return JSON.stringify([annualMode(),calculationRequest()]);
 }
 function updateStatus(text) {
   $('inputStatus').textContent = text;
@@ -177,6 +181,7 @@ function clearPublishedResults() {
   document.querySelector('.results').setAttribute('aria-busy','true');
 }
 function invalidateResults() {
+  updateAnnualCutoff();
   const snapshot = inputSnapshot();
   if (snapshot === lastInputSnapshot) return;
   lastInputSnapshot = snapshot;
@@ -190,6 +195,10 @@ form.addEventListener('change', invalidateResults);
 
 const fieldNames = {salary:'รายได้จากเงินเดือนทั้งปี',social_security:'ประกันสังคมที่จ่ายแล้ว',assets:'สินทรัพย์สภาพคล่อง',expenses:'ค่าใช้จ่ายจำเป็นต่อเดือน',budget:'งบทดลอง',shared_usage:'ยอด Thai ESG / ESGX ที่ใช้ไปแล้ว',planning_date:'วันที่วางแผน',personal_eligible:'สิทธิส่วนตัว',mortgage_interest:'ดอกเบี้ยบ้าน',mortgage_eligible:'เงื่อนไขสิทธิดอกเบี้ยบ้าน',required_coverage:'ความคุ้มครองที่ต้องการ',existing_coverage:'ความคุ้มครองที่มีอยู่',other_income:'รายได้อื่น',retirement_usage:'เงินออมเกษียณ'};
 function fieldForFact(fact) {
+  if (annualMode()) {
+    const annualInput = annualFieldForFact(fact);
+    if (annualInput) return annualInput;
+  }
   const rmfInput=rmfFieldForFact(fact);if(rmfInput)return rmfInput;
   const pvdInput=pvdFieldForFact(fact);if(pvdInput)return pvdInput;
   if (fact === 'opportunity_facts.shared_limit_usage') return $('shared_usage');
@@ -220,11 +229,13 @@ function addErrorLink(input, label, target = $('error')) {
   target.append(link);
 }
 async function calculate(manual = false) {
+  updateAnnualCutoff();
   clearPublishedResults();
   lastInputSnapshot = inputSnapshot();
   updateGroupSummaries();
   const version = calculationVersion;
-  if (!form.checkValidity()) {
+  const annual = annualMode();
+  if (!annual && !form.checkValidity()) {
     updateStatus('ยังมีข้อมูลที่ต้องกรอก · ดูช่องที่ระบุด้านล่าง');
     $('error').textContent = 'กรอกข้อมูลที่จำเป็นให้ครบก่อน ระบบจะคำนวณต่อให้อัตโนมัติ';
     const invalid = Array.from(form.elements || []).filter(input=>input.willValidate && !input.validity.valid);
@@ -238,19 +249,21 @@ async function calculate(manual = false) {
   updateStatus('กำลังอัปเดตผลคำนวณ…');
   $('calculate').disabled = true;
   try {
-    const data = Object.fromEntries(new FormData(form));
-    data.profile = collectProfile();
-    const response = await fetch('/api/calculate', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+    const path = annual ? '/api/annual-estimate' : '/api/calculate';
+    const response = await fetch(path, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(calculationRequest())});
     if (version !== calculationVersion) return;
     const result = await response.json();
     if (version !== calculationVersion) return;
     if (!response.ok) throw Object.assign(new Error(result.error || 'คำนวณไม่สำเร็จ'), {envelope: result});
-    render(result);
+    if (annual && result.baseline_status !== 'READY') {
+      throw Object.assign(new Error(result.error), {envelope:{...result,code:'BASELINE_NOT_READY'}});
+    }
+    if (annual) renderAnnualEstimate(result); else render(result);
     latest = result;
     $('liveShell').hidden = true;
     $('download').disabled = false;
     $('result').hidden = false;
-    updateStatus(comparisonNeedsReselection ? 'อัปเดตแล้ว · โปรดเลือกรายการเปรียบเทียบใหม่หลังเปลี่ยนข้อมูล' : 'อัปเดตแล้ว · ผลคำนวณตรงกับข้อมูลล่าสุด');
+    updateStatus(!annual && comparisonNeedsReselection ? 'อัปเดตแล้ว · โปรดเลือกรายการเปรียบเทียบใหม่หลังเปลี่ยนข้อมูล' : 'อัปเดตแล้ว · ผลคำนวณตรงกับข้อมูลล่าสุด');
     comparisonNeedsReselection = false;
   } catch (error) {
     if (version !== calculationVersion) return;
@@ -258,7 +271,7 @@ async function calculate(manual = false) {
     const envelope = error.envelope;
     const scoped = envelope && ['BASELINE_NOT_READY','INPUT_REQUIRED','INVALID_INPUT'].includes(envelope.code);
     $('error').textContent = scoped
-      ? `ยังไม่แสดงผลคำนวณ: ${error.message.replace(/\s*\((?:pvd|rmf|other_rights|fund_history)\.[a-z_]+\)/g,'')}`
+      ? `ยังไม่แสดงผลคำนวณ: ${error.message.replace(/\s*\((?:pvd|rmf|other_rights|fund_history|actual|forecast)\.[a-z_]+\)/g,'')}`
       : `ยังไม่แสดงผลคำนวณ: โปรดตรวจจำนวนเงิน (ไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง) งบต้องไม่เกินสินทรัพย์ที่ทราบ และวันที่ต้องอยู่ในปี 2026 ตรวจสิทธิที่ยังไม่ทราบและรายการนอกขอบเขตด้วย — ${error.message}`;
     $('error').hidden = false;
     const c02Errors=new Map();
@@ -287,6 +300,8 @@ async function calculate(manual = false) {
 }
 form.addEventListener('submit', event => { event.preventDefault(); calculate(true); });
 $('scenario').addEventListener('change', () => {
+  $('calculationMode').value = 'legacy';
+  updateEstimateMode();
   resetProfile();
   const defaults = {salary:'990500',social_security:'10500',assets:'500000',expenses:'50000',budget:'100000',shared_usage:'0',planning_date:'2026-10-14'};
   const variants = {normal:{},tight:{assets:'200000'},unknown:{assets:'',budget:'0'},zero:{salary:'200000'},family:{},debt:{},commitment:{}};
@@ -308,11 +323,12 @@ $('download').addEventListener('click', () => {
   const url = URL.createObjectURL(new Blob([JSON.stringify(exported,null,2)], {type:'application/json'}));
   const link = el('a');
   link.href = url;
-  link.download = 'tax-gps-demo-2026.json';
+  link.download = annualMode() ? 'tax-gps-annual-estimate-2026.json' : 'tax-gps-demo-2026.json';
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 initProfile();
 initPvdProfile(invalidateResults);
 initRmfProfile(invalidateResults);
+initAnnualEstimate();
 calculate();

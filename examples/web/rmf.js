@@ -34,7 +34,7 @@ function rmfFieldForFact(fact) {
   if(fact==='rmf.report_confirmation')return document.getElementById('rmf_report_fund_name');
   return fact.startsWith('rmf.')&&rmfFields.includes(fact.slice(4))?document.getElementById('rmf_'+fact.slice(4)):null;
 }
-function renderRmfResult(data) {
+function renderRmfResult(data, formatBaht = baht) {
   const c=data.rmf_conditions;
   document.getElementById('rmfResult').hidden=!c;
   document.getElementById('rmfEstimate').textContent=c?data.estimate_label:'';
@@ -45,5 +45,5 @@ function renderRmfResult(data) {
   c.obligation_codes.forEach(code=>list.append(el('p',labels[code]||code)));
   if(c.report_confirmation)list.append(el('p',`ผู้ใช้ยืนยันรายงานยอดปัจจุบัน ณ ${c.report_confirmation.confirmed_on} · ไม่ใช่การตรวจระบบ บลจ.`));
   const dl=document.getElementById('rmfBreakdown');dl.replaceChildren();
-  [['ยอดซื้อที่จ่ายแล้ว',data.rmf.own_purchase_paid],['เพดานตามฐานเงินได้',data.rmf.percentage_cap],['สิทธิหลังค่าใช้จ่าย',data.rmf.claimed],['ยอดเกินสิทธิ',data.rmf.excess]].forEach(([label,value])=>dl.append(row(label,baht(value))));
+  [['ยอดซื้อที่จ่ายแล้ว',data.rmf.own_purchase_paid],['เพดานตามฐานเงินได้',data.rmf.percentage_cap],['สิทธิหลังค่าใช้จ่าย',data.rmf.claimed],['ยอดเกินสิทธิ',data.rmf.excess]].forEach(([label,value])=>dl.append(row(label,formatBaht(value))));
 }
