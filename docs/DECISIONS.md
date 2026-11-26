@@ -321,3 +321,37 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Evidence: [Fresh all-seven local gates and integrated Chrome reduced-motion observations](implementation-reports/TGPS-C02AB-verification-2026-11-24.json); GitHub CI runs 22 and 23 succeeded. Existing C02A independent review, screenshot and HTTP evidence are linked from its ledger.
 - Decision: Record C02A as IMPLEMENTED under the existing C02A scope and plan. Record reduced-motion verification for C02A and C02B and completed delivery CI for C02B.
 - Boundary: User acceptance remains open. Parent C02 G1–G6 and C01/F09 remain open. PR #4 stays draft. No scope, tax contract or roadmap order change.
+
+## DEC-033 — First tax estimate MVP coverage and C03 requirement review
+
+- Date: `2026-11-25`
+- Status: `AGREED` for the MVP drafting boundary; `REQUIREMENT_REVIEW` for C03 detail.
+- Evidence: The user replied “โอเครครับ ลุย!” after the recommendation to start from the existing supported separate routes and defer combined PVD/RMF, then draft C03 for review.
+- Decision: Use the supported salary baseline, normal PVD-only and first-purchase RMF-only as the first tax-estimate MVP boundary, with existing conditions. Defer combined PVD/RMF to its evidence review. Open [C03 v0.1-draft](requirements/TGPS-C03-annual-tax-estimate.md) for requirement review.
+- Reason: Provide a forecast for supported profiles while the combined-route legal question is still open.
+- Review status: C02A/C02B user demo acceptance remains open. C02 overall remains in legal review; C01/F09 is open. C03 input and output behavior is proposed in the draft for explicit review before planning.
+
+## DEC-034 — C03 requirement agreement and plan review
+
+- Date: `2026-11-25`
+- Status: `AGREED` for the two reviewed C03 behaviors. Technical details are `AUTHORING_DETAIL / DRAFT_FOR_REVIEW`. C03 implementation is `NOT_STARTED`.
+- Evidence: ผู้ใช้ตอบ “โอเครครับ เยี่ยมครับ ลุย!” หลังได้รับสองข้อเพื่อยืนยันและข้อเสนอว่าจะจัดแผนพร้อมตัวอย่างตรวจตาม AC01–09
+- Decision: แยกยอดจริงถึงวันตัดข้อมูลจากยอดคาดช่วงที่เหลือ ใช้ยอดจ่ายสิทธิที่เกิดขึ้นแล้วถึงวันตัดข้อมูล และแสดง PIT เมื่อ baseline `READY` แม้ยอดหัก ณ ที่จ่ายยังขาด โดยระบุช่องที่ขาดและเว้นยอดชำระเพิ่มหรือคืน จัด [แผน C03](superpowers/plans/2026-11-25-c03-annual-tax-estimate.md) และ [ตัวอย่างตรวจ](implementation-reports/TGPS-C03-acceptance-reference.md) จาก requirement v0.1 เพื่อรีวิวก่อน implementation
+- Reason: ผู้ใช้แก้ยอดคาดได้โดยคงยอดจริง และดูภาษีทั้งปีได้เมื่อข้อมูลที่ใช้คำนวณภาษีครบ
+- Boundary: ขอบเขต MVP ตาม DEC-033 การอนุมัติในรอบนี้ครอบคลุมพฤติกรรมที่รีวิวและการจัดแผน การอนุมัติแผนและการรับงานยังรอผลรีวิว C02A/C02B user acceptance, C02 legal G1–G6 และ C01/F09 ยังเปิดอยู่
+
+## DEC-035 — Approve C03 plan and start Native implementation
+
+- Date: `2026-11-25`
+- Status: `AGREED` / C03 `IN_PROGRESS`.
+- Evidence: ผู้ใช้ตอบ “โอเครครับ เยี่ยมครับ ลุย!” ต่อคำขอยืนยัน [แผน C03](superpowers/plans/2026-11-25-c03-annual-tax-estimate.md) และเริ่ม Task 1 แบบ Native
+- Decision: ดำเนินงาน C03 ตามแผนสี่ tasks และ AC01–09 โดยใช้ RED → GREEN และตรวจรวมก่อนส่งรีวิว
+- Boundary: ขอบเขตสิทธิและกฎภาษีตาม DEC-033/034 การรับงาน C03 เป็นขั้นหลัง implementation และ review
+
+## DEC-036 — C03 implementation verified locally
+
+- Date: `2026-11-26`
+- Status: C03 `IMPLEMENTED` / user acceptance `OPEN`.
+- Evidence: [C03 verification and review](implementation-reports/TGPS-C03-progress.md#2026-11-26--implementation-verification-and-review) บันทึกผล Python 882, coverage 100%, frontend 58/58, ครบ 7 local gates และ Chrome 1440/390 พร้อม keyboard และ reduced motion ผลรีวิวอิสระสามข้อผ่าน RED → GREEN
+- Decision: ส่ง C03 ให้ผู้ใช้ลองเดโมและรีวิวผลจากยอดจริง ยอดคาด และภาษีหัก ณ ที่จ่าย พร้อม export ที่ replay ได้
+- Boundary: ฐานกฎและขอบเขตสิทธิตาม DEC-033/034 การรับงานและ remote CI ยังเปิดอยู่

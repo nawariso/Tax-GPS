@@ -161,3 +161,11 @@ NOT_STARTED text above must not be read as saying C02A code is absent today.
 | 2026-10-22 | 0.1 evidence follow-up | Add RMF fact/time packet; declaration, manager reporting and future obligations separated for review; G3–G6 remain open, no coverage/readiness change | Continued evidence work under DEC-019; user continuation after C02A delivery |
 
 | 2026-10-22 | 0.1 staging proposal | [C02B](TGPS-C02B-rmf-first-slice.md) proposes first-ever RMF-only coverage for review; parent scope unchanged, no scope/plan/code authorization inferred | DEC-027 AUTHORING_DETAIL |
+
+### 2026-11-25 — ขอบเขตสิทธิเดิมสำหรับร่าง MVP แรก
+
+| Date | Version | Change | Basis |
+| --- | --- | --- | --- |
+| 2026-11-25 | 0.1 scope follow-up | ใช้ coverage ที่รองรับอยู่ รวมกรณีแยก C02A/C02B เป็นฐานร่าง C03 พัก PVD ร่วม RMF ไว้ใน legal review | [DEC-033](../DECISIONS.md#dec-033--first-tax-estimate-mvp-coverage-and-c03-requirement-review) |
+
+Parent C02 ยัง `REQUIREMENT_REVIEW` และ G1–G6 เปิดอยู่ การรับงาน C02A/C02B รอผลลองเดโม แบบร่างภาษีทั้งปีอยู่ใน [C03](TGPS-C03-annual-tax-estimate.md)

@@ -25,7 +25,7 @@ The [24 November verification](docs/implementation-reports/TGPS-C02AB-verificati
 100% statement/branch coverage, 52 frontend tests, GitHub CI runs 22–23 and reduced-motion browser checks.
 User acceptance is pending. [C02 overall](docs/requirements/TGPS-C02-existing-rights.md) remains in legal review.
 [C01 baseline integrity](docs/implementation-reports/TGPS-C01.md) is implemented with conditional acceptance and F09 open.
-The annual tax estimate and expected payment or refund are the first MVP, planned in C03.
+The [C03 annual tax estimate](docs/requirements/TGPS-C03-annual-tax-estimate.md) is implemented and ready for user review. In the demo, select **ประมาณจากยอดจริงและยอดที่เหลือ** under **วิธีระบุรายได้**. The first MVP uses the existing salary and separate PVD/RMF routes under their current coverage. Combined PVD/RMF remains in legal review. See the [verification ledger](docs/implementation-reports/TGPS-C03-progress.md#2026-11-26--implementation-verification-and-review).
 Earlier checkpoints are recorded below.
 
 ## Product and domain review
