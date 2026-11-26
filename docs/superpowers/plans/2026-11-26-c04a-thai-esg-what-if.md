@@ -10,7 +10,7 @@
 
 **Spec:** [C04A v0.1](../../requirements/TGPS-C04A-thai-esg-year-end-what-if.md), [DEC-037](../../DECISIONS.md#dec-037--open-c04a-thai-esg-year-end-what-if-requirement-review), [DEC-038](../../DECISIONS.md#dec-038--c04a-review-decisions-d1d4-agreed), [หลักฐาน E1](../../policy-evidence/2026-11-26/README.md), [ตัวอย่างอ้างอิง](../../implementation-reports/TGPS-C04A-acceptance-reference.md)
 
-**สถานะแผน:** `APPROVED` / Native ตาม [DEC-039](../../DECISIONS.md#dec-039--c04a-d5d7-agreed-plan-approved-and-native-implementation-started) · D5 (ก), D6 (ข), D7 (ก) · implementation `IN_PROGRESS`
+**สถานะแผน:** `IMPLEMENTED` ตาม [DEC-040](../../DECISIONS.md#dec-040--c04a-implemented-locally) · D5 (ก), D6 (ข), D7 (ก) · User acceptance `OPEN`
 
 ## ข้อกำหนดร่วม
 
@@ -39,7 +39,7 @@
 | 1B | ปรับข้อความช่องสิทธิ LTF ใน C03 (D5) | เสร็จ · frontend 59/59 |
 | 2 | Snapshot, export, replay (AC10) | เสร็จ · 20 tests · Python 927 · coverage 100% |
 | 3 | HTTP และเดโมภาษาไทย (AC01–10) | เสร็จ · HTTP 16 tests · frontend 66/66 |
-| 4 | ตรวจรวม, Chrome, independent review | ยังไม่เริ่ม |
+| 4 | ตรวจรวม, Chrome, independent review | เสร็จ · 7 gates · Chrome · review 3 ข้อแก้แล้ว |
 
 ## Task 1 — Domain what-if
 
@@ -92,8 +92,11 @@
 
 ## Task 4 — ตรวจรวมและส่งรีวิว
 
-- [ ] `tgps-verify` ครบ 7 gates บันทึกตัวเลขจริง
+- [x] `tgps-verify` ครบ 7 gates บันทึกตัวเลขจริง
+  ↳ ทำแล้ว (หลังแก้ผลรีวิว ที่ `652d4b9`): ruff 216 ไฟล์, format, mypy strict 133 ไฟล์, Python 946, coverage 3,558/1,024 = 100%, frontend 69/69 (0 fail/0 skip), build 0.4.0 บน Windows Python 3.14.3 / Node 24.3.0
 - [x] Chrome 1440/390, keyboard, reduced motion บน server ใหม่พอร์ตว่าง
   ↳ ทำแล้ว: Chrome headless 158 ผ่าน CDP บน server ใหม่ (พอร์ตว่าง) ตัวเลขตรงตัวอย่างอ้างอิงทั้ง 1440 และ 390, over-cap แสดงวงเงินและไม่คำนวณ, ยอดว่างแจ้งช่องที่ขาด, overflow 0, reduced motion = animation `none`, Enter เปิดหัวข้อ 3 แล้ว Tab ถึงช่องจำนวน ([receipt](../../implementation-reports/TGPS-C04A-chrome-2026-11-27.json)) รอบแรกสคริปต์ไม่ได้ตอบสิทธิ จึงถูกปิดผลตามกฎ และ Chrome จากสคริปต์เปิดไม่ขึ้นในรอบหลัง จึงเปิดเองแล้วให้สคริปต์ต่อ
-- [ ] Independent review เทียบกับ `b825c5a`; แก้ผลด้วย RED→GREEN
-- [ ] `tgps-mark-progress` + DEC สถานะ IMPLEMENTED; user acceptance เปิดไว้
+- [x] Independent review เทียบกับ `b825c5a`; แก้ผลด้วย RED→GREEN
+  ↳ ทำแล้ว: รีวิวโดย advisor (reviewer model ที่เห็น transcript ทั้งหมด) ไม่ใช่คนรีวิว พบ 3 ข้อ: (1) ค่าตัวอย่างเงินสด/ค่าใช้จ่ายของเดโมถูกใช้ใน guardrail → frontend RED 2 → GREEN; (2) ช่อง what-if ผิดทำให้ผล C03 หาย → HTTP RED 5 + frontend RED 1 → GREEN, block ได้สถานะ `INVALID_INPUT`; (3) วันตัด 31 ธ.ค. ยังไม่มี test → เพิ่ม domain 2 + HTTP 1 ผ่านตั้งแต่แรก (characterization) แก้ใน `652d4b9`
+- [x] `tgps-mark-progress` + DEC สถานะ IMPLEMENTED; user acceptance เปิดไว้
+  ↳ ทำแล้ว: DEC-040

@@ -2,7 +2,7 @@
 
 Version `0.1` · 26 พฤศจิกายน 2569 (Asia/Bangkok)
 
-Status **IN_PROGRESS** (plan approved, [DEC-039](../DECISIONS.md#dec-039--c04a-d5d7-agreed-plan-approved-and-native-implementation-started)) · Implementation **IN_PROGRESS** · เปิดรีวิวตาม [DEC-037](../DECISIONS.md#dec-037--open-c04a-thai-esg-year-end-what-if-requirement-review) · D1–D4 **AGREED** ตาม [DEC-038](../DECISIONS.md#dec-038--c04a-review-decisions-d1d4-agreed) · E1 **corroborated** ([หลักฐาน E1](../policy-evidence/2026-11-26/README.md)) · D5–D7 **AGREED** ตามข้อเสนอ (DEC-039)
+Status **IMPLEMENTED** ([DEC-040](../DECISIONS.md#dec-040--c04a-implemented-locally)) · User acceptance **OPEN** · เปิดรีวิวตาม [DEC-037](../DECISIONS.md#dec-037--open-c04a-thai-esg-year-end-what-if-requirement-review) · D1–D4 **AGREED** ตาม [DEC-038](../DECISIONS.md#dec-038--c04a-review-decisions-d1d4-agreed) · E1 **corroborated** ([หลักฐาน E1](../policy-evidence/2026-11-26/README.md)) · D5–D7 **AGREED** ตามข้อเสนอ (DEC-039)
 
 ต่อจาก [C03 ประมาณการภาษีทั้งปี](TGPS-C03-annual-tax-estimate.md) · ช่วงงาน [C04 ใน Roadmap](../ROADMAP.md) · ledger [C04A progress](../implementation-reports/TGPS-C04A-progress.md) · [แผน (DRAFT_FOR_REVIEW)](../superpowers/plans/2026-11-26-c04a-thai-esg-what-if.md) · [ตัวอย่างอ้างอิง](../implementation-reports/TGPS-C04A-acceptance-reference.md)
 
@@ -91,3 +91,4 @@ Status **IN_PROGRESS** (plan approved, [DEC-039](../DECISIONS.md#dec-039--c04a-d
 | 2026-11-26 | 0.1 | E1 corroborated จากแบบ RD ปีภาษี 2569 ([หลักฐาน E1](../policy-evidence/2026-11-26/README.md)); เสนอ D5 (สิทธิสับเปลี่ยน LTF→Thai ESGX) และ D6 (เงื่อนไขแจ้ง บลจ.) รอผู้ใช้ตัดสิน |
 | 2026-11-26 | 0.1 | แก้ตามรีวิว: CORRECTION ของ D5 (C03 ถามสิทธิ ESGX/LTF อยู่แล้ว เหลือเพียงปรับข้อความ), เพิ่ม D7 ฐาน 30% สำหรับ PVD บวก, AC07 ใช้ข้อมูลยอดซื้อเดิมจาก C03 ไม่ถามซ้ำ, AC09 ระบุว่า RMF บวกปิดใน v0.1 |
 | 2026-11-27 | 0.1 | ผู้ใช้ตกลง D5–D7 ตามข้อเสนอและอนุมัติแผน เริ่ม implementation ตาม [DEC-039](../DECISIONS.md#dec-039--c04a-d5d7-agreed-plan-approved-and-native-implementation-started) |
+| 2026-11-27 | 0.1 | Implementation ครบ Tasks 1–4, แก้ผลรีวิว 3 ข้อ และ CI ผ่านที่ `652d4b9` ตาม [DEC-040](../DECISIONS.md#dec-040--c04a-implemented-locally) รอผู้ใช้รับงาน |

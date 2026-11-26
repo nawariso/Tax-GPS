@@ -48,5 +48,15 @@ Current task: `REQUIREMENT_REVIEW` (D5–D7) + plan `DRAFT_FOR_REVIEW` · implem
 
 - [x] Task 4 Chrome: headless Chrome 158 ผ่าน CDP บน server ใหม่ ตรวจ 1440/390, over-cap, ยอดว่าง, reduced motion และ keyboard ผลตรงตัวอย่างอ้างอิง overflow 0 ([receipt](TGPS-C04A-chrome-2026-11-27.json)) รอบแรกสคริปต์ไม่ได้ตอบคำถามสิทธิ จึงถูกปิดผลตามกฎ (ไม่ใช่ bug) และ Chrome ที่สคริปต์เปิดเองเปิดไม่ขึ้นในรอบหลัง จึงเปิด Chrome เองแล้วให้สคริปต์ต่อ ปิด Chrome และ server ที่เปิดไว้แล้ว
 
-Current task: Task 4 (review)
+- [x] Task 4 review (advisor reviewer model ที่เห็น transcript ทั้งหมด ไม่ใช่ human review) พบ 3 ข้อ แก้ใน `652d4b9`:
+  1. ค่าตัวอย่างเงินสด 500,000 / ค่าใช้จ่าย 50,000 ของเดโมถูกใช้ใน guardrail ทั้งที่ผู้ใช้ไม่ได้กรอก (ขัด D3) → frontend RED 2 → GREEN: โหมดทั้งปีล้างค่าที่ผู้ใช้ยังไม่แก้และคืนค่าเมื่อกลับเส้นทางเดิม ค่าที่ผู้ใช้แก้แล้วคงไว้
+  2. ช่อง what-if ที่ผิดรูปแบบ (ยอด, เงินสด, แถวหนี้, รูปแบบ block) ทำให้ทั้ง request 400 และผล C03 หาย → HTTP RED 5 + frontend RED 1 → GREEN: block ได้สถานะ `INVALID_INPUT` พร้อมชื่อช่องและข้อความไทยที่ไม่สะท้อนค่า ผล C03 และ export คงอยู่ (test HTTP เดิมที่คาด `DemoInputError` เปลี่ยนความหมายตาม AC08 นี้)
+  3. วันตัด 31 ธ.ค. และภาระจ่ายที่เลยกำหนดก่อนวันตัดยังไม่มี test → domain 2 + HTTP 1 ผ่านตั้งแต่แรก (characterization): วงเงินมาจากเงินได้จริงทั้งปี และ `compute_financial_state` ไม่นับภาระที่เลยกำหนดเป็นเงินกันไว้
+- [x] ตรวจครบ 7 gates ที่ `652d4b9` บน Windows Python 3.14.3 / Node 24.3.0: ruff 216 ไฟล์, format, mypy strict 133 ไฟล์, Python 946 ผ่าน, coverage 3,558 statements / 1,024 branches 100%, frontend 69/69 (0 fail/0 skip), build 0.4.0 Chrome receipt ตรวจที่ `6839686` ก่อนแก้ข้อ 1–2 ส่วนที่แก้ครอบคลุมด้วย frontend test (ไม่ได้ render ซ้ำ) และแก้ note ใน receipt ว่า `#error.hidden` ไม่ได้ตรวจตรง
+- Known gaps (ไม่บล็อก ส่งให้ผู้ใช้รีวิว): แสดงวงเงินสิทธิที่เหลือก่อนซื้อเท่านั้น ยังไม่แสดงวงเงินหลังซื้อ; เหตุผลด้าน protection gap จาก guardrail ยังไม่แสดงในส่วน what-if; หน้ามือถือ 390px ตัวเลขขึ้นบรรทัดใหม่ที่คำว่า "บาท"
+- [x] push `a617c26..652d4b9` ไป origin PR #4 รัน CI (pull_request) run `45868522352` บน `652d4b9`
+
+- [x] CI PR #4 [run 45868522352](https://github.com/nawariso/Tax-GPS/actions/runs/45868522352) บน `652d4b9`: completed / success, job "Python 3.12 quality gates" ทุก step success (อ่านผ่าน GitHub API แบบไม่ยืนยันตัวตน จึงไม่เห็นจำนวน test ใน log) บันทึก [DEC-040](../DECISIONS.md#dec-040--c04a-implemented-locally) และซิงก์ Roadmap, requirement, plan และ README
+
+Current task: C04A `IMPLEMENTED` · รอผู้ใช้ลองเดโมและรับงาน
 

@@ -26,6 +26,8 @@ The [24 November verification](docs/implementation-reports/TGPS-C02AB-verificati
 User acceptance is pending. [C02 overall](docs/requirements/TGPS-C02-existing-rights.md) remains in legal review.
 [C01 baseline integrity](docs/implementation-reports/TGPS-C01.md) is implemented with conditional acceptance and F09 open.
 The [C03 annual tax estimate](docs/requirements/TGPS-C03-annual-tax-estimate.md) is implemented and ready for user review. In the demo, select **ประมาณจากยอดจริงและยอดที่เหลือ** under **วิธีระบุรายได้**. The first MVP uses the existing salary and separate PVD/RMF routes under their current coverage. Combined PVD/RMF remains in legal review. See the [verification ledger](docs/implementation-reports/TGPS-C03-progress.md#2026-11-26--implementation-verification-and-review).
+
+The [C04A Thai ESG what-if](docs/requirements/TGPS-C04A-thai-esg-year-end-what-if.md) is implemented and ready for user review. In the annual estimate route, open **เงินที่อยากนำมาลอง**, enter your own liquid assets and monthly expenses, then the Thai ESG amount you want to try. The page shows PIT and pay-more/refund before and after that amount, the remaining Thai ESG capacity and the reserve guardrail limit. It evaluates only the amount you choose; it does not recommend, rank or pick a fund. PVD-positive profiles use a conservative 30% base (D7); RMF purchases this year keep the what-if closed in v0.1. See the [C04A ledger](docs/implementation-reports/TGPS-C04A-progress.md).
 Earlier checkpoints are recorded below.
 
 ## Product and domain review

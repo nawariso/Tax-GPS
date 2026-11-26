@@ -382,3 +382,11 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Decision: D5 ปรับข้อความช่อง "สิทธิสืบเนื่องจาก LTF" ให้ระบุสิทธิสับเปลี่ยน LTF เป็น Thai ESGX โดยไม่เปลี่ยน readiness · D6 v0.1 ไม่แสดงเงื่อนไขแจ้ง บลจ. และไม่ออก catalog version ใหม่ · D7 ฐาน 30% ของ PVD บวกใช้ `assessable_income` หลังหักส่วนยกเว้น PVD และแสดงว่าเป็นวงเงินแบบระมัดระวัง · อนุมัติแผนและเริ่ม Task 1 แบบ Native (RED → GREEN) · อนุญาต push branch feature ไป origin
 - Reason: ให้ตัวทดลองพร้อมก่อนสิ้นปีภาษี 2569 โดยไม่แสดงภาษีที่ลดลงเกินจริง
 - Boundary: D7 ยังไม่ใช่ข้อยืนยันทางกฎหมาย ต้องหาหลักฐานต่อ RMF บวกยังปิดใน v0.1 การรับงาน C03/C04A และ merge เข้า main ต้องรีวิวแยก
+
+## DEC-040 — C04A implemented locally
+
+- Date: `2026-11-27`
+- Status: C04A `IMPLEMENTED` / user acceptance `OPEN`.
+- Evidence: [C04A ledger](implementation-reports/TGPS-C04A-progress.md) บันทึก RED → GREEN ทุก task, ครบ 7 local gates ที่ `652d4b9` (Python 946, coverage 100%, frontend 69/69, build 0.4.0), [Chrome receipt](implementation-reports/TGPS-C04A-chrome-2026-11-27.json) และรีวิวโดย advisor 3 ข้อที่แก้แล้ว Remote CI ของ PR #4 [run 45868522352](https://github.com/nawariso/Tax-GPS/actions/runs/45868522352) บน `652d4b9` ผ่าน (Python 3.12 quality gates, ทุก step success)
+- Decision: ส่ง C04A ให้ผู้ใช้ลองใส่จำนวน Thai ESG ของตนบนประมาณการ C03 และรีวิวผล ก่อน/หลัง, วงเงิน, การตรวจเงินสำรอง และ export ที่ replay ได้
+- Boundary: รีวิวในรอบนี้เป็น advisor model ไม่ใช่ human review; IMPLEMENTED ไม่ใช่ ACCEPTED ฐาน 30% ของ PVD บวกยังเป็นแบบระมัดระวังตาม D7; RMF บวกยังปิด; known gaps ใน ledger (วงเงินหลังซื้อ, protection gap, การขึ้นบรรทัดบนมือถือ) ยังเปิด

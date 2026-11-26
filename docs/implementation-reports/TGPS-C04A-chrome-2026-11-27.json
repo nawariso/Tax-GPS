@@ -129,6 +129,8 @@
   "notes": [
     "First runs showed no result because the script left PVD/other-rights/fund-history unknown; the domain correctly closed the estimate. Script then set every rights select explicitly.",
     "A later Chrome launch from the script failed to start; Chrome was started manually on a fixed debug port and the script attached to it.",
-    "Mobile 390px metric values wrap 'บาท' onto a second line; no horizontal overflow (scrollWidth - clientWidth = 0)."
+    "Mobile 390px metric values wrap 'บาท' onto a second line; no horizontal overflow (scrollWidth - clientWidth = 0).",
+    "CORRECTION: the dropped `error` field held text left from the initial unanswered load. `#error.hidden` was not asserted in this run; that it was hidden is inferred from `clearPublishedResults`, not observed.",
+    "Rendered check ran at 6839686, before the review fixes in 652d4b9 (prefill blanking and INVALID_INPUT block); those are covered by frontend tests, not re-rendered in Chrome."
   ]
 }
