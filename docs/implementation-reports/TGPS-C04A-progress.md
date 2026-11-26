@@ -60,3 +60,19 @@ Current task: `REQUIREMENT_REVIEW` (D5–D7) + plan `DRAFT_FOR_REVIEW` · implem
 
 Current task: C04A `IMPLEMENTED` · รอผู้ใช้ลองเดโมและรับงาน
 
+
+## 2026-11-27 — บันทึกพักงานและจุดรับช่วง
+
+ผู้ใช้ขอให้บันทึกไว้เพื่อกลับมาทำต่อ หยุดที่ C04A `IMPLEMENTED` / user acceptance `OPEN` ตาม [DEC-040](../DECISIONS.md#dec-040--c04a-implemented-locally)
+
+- Git: `feature/tgps-c01-baseline-integrity` ที่ `847dffb` ตรงกับ origin (PR #4 เปิดอยู่ ยังไม่ merge) Working tree สะอาด ยกเว้น `docs/demo/stage4-local-profile-contract-draft.md` ที่เป็น untracked ของเดิม ไม่เกี่ยวกับงานนี้
+- CI: PR #4 run [45868522352](https://github.com/nawariso/Tax-GPS/actions/runs/45868522352) บน `652d4b9` (โค้ดล่าสุด) success และ run [45868823374](https://github.com/nawariso/Tax-GPS/actions/runs/45868823374) บน `847dffb` (เอกสาร) success ตรวจผ่าน GitHub API เมื่อ 2026-11-27
+- Local gates ล่าสุดที่ `652d4b9`: Python 946, coverage 100%, frontend 69/69, ruff/mypy/build ผ่าน (Windows Python 3.14.3 / Node 24.3.0)
+
+เมื่อกลับมา ให้เริ่มตามลำดับนี้
+
+1. รัน `tgps-session-start` (baseline ควรได้ Python 946 / frontend 69)
+2. ถามผลการลองเดโมของผู้ใช้กับตัวเลขจริง (C03 + C04A) และถามข้อเท็จจริงที่ยังไม่ได้คำตอบ: มี PVD หรือไม่ ปีนี้ซื้อ RMF หรือ Thai ESG ไปแล้วหรือยัง ถ้าผู้ใช้ยืนยันรับงาน ให้บันทึก DEC สถานะ ACCEPTED แยกของ C03 และ C04A
+3. Known gaps ที่ยังเปิด (ไม่บล็อก): แสดงวงเงินสิทธิที่เหลือหลังซื้อ, แสดงเหตุผล protection gap ในส่วนทดลอง, ตัวเลขบนมือถือ 390px ขึ้นบรรทัดที่คำว่า "บาท" และยังไม่ได้ render หน้า Chrome ซ้ำหลังแก้ผลรีวิวใน `652d4b9`
+4. งานถัดไปที่เป็นไปได้ (ต้องมี requirement/DEC ก่อน): C04B RMF ซื้อเพิ่ม (ติดคำถามหลักฐาน PVD ร่วม RMF ตาม DEC-033), หลักฐานฐาน 30% ของ PVD บวก (D7), D6 เงื่อนไขแจ้ง บลจ. ใน catalog version ใหม่, รองรับยอดซื้อ Thai ESG เดิม (D2 ข / C04A.1)
+5. งานเดิมที่ยังเปิด: C02A/C02B user acceptance, C02 legal G1–G6, C01/F09, การ merge PR #4 เข้า `main` ต้องให้ผู้ใช้ตัดสิน
