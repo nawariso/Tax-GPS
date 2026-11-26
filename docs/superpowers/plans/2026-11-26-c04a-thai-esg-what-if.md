@@ -35,7 +35,7 @@
 
 | Task | งาน | สถานะ |
 | --- | --- | --- |
-| 1 | Domain what-if (AC01–05, 07–09) | ยังไม่เริ่ม |
+| 1 | Domain what-if (AC01–05, 07–09) | เสร็จ · 25 tests (14 functions) · Python 907 · coverage 100% |
 | 1B | ปรับข้อความช่องสิทธิ LTF ใน C03 (D5) | รอ D5 |
 | 2 | Snapshot, export, replay (AC10) | ยังไม่เริ่ม |
 | 3 | HTTP และเดโมภาษาไทย (AC01–10) | ยังไม่เริ่ม |
@@ -54,10 +54,13 @@
 
 **Steps**
 
-- [ ] RED: `test_c04a_amount_impact_matches_reference` (ESG-0/100K/CAP), `test_c04a_capacity_boundary` (CAP, OVER-CAP), `test_c04a_forecast_edit_moves_capacity`, `test_c04a_withholding_missing_keeps_pit`, `test_c04a_prior_usage_comes_from_c03` (1/ว่าง ทำให้ C03 ไม่ READY → `BASELINE_NOT_READY`; 0 คำนวณได้), `test_c04a_guardrail_inputs_and_limits`, `test_c04a_pvd_open_rmf_closed`, `test_c04a_blocked_baseline_hides_everything`, `test_c04a_amount_validation` (ติดลบ, เกินสตางค์ = input error ระบุช่อง)
-- [ ] รัน `uv run --locked pytest tests/acceptance/test_c04a_thai_esg_what_if.py -q` บันทึก RED (กรณีที่ผ่านตั้งแต่แรกบันทึกเป็น characterization)
-- [ ] Implement: ตรวจ C03 READY และ planning availability → amount/financial ว่าง → capacity (`calculate_opportunity_capacity` กับ definition `TH-OPP-THAI-ESG-2026`, `shared_amount_used` จาก C03) → financial state + `assess_new_cash_opportunity(NewCashInputs(..., remaining_capacity=capacity.remaining, available_budget=amount, state))` → ถ้า amount > capacity หรือ > `max_feasible_allocation` ให้สถานะข้อจำกัด → `calculate_tax_saving(tax.taxable_income, amount, tax._activated_pack)` → settlement ก่อน/หลังด้วยฟังก์ชันเดียวกับ C03
-- [ ] GREEN targeted แล้ว `uv run --locked pytest -q`; บันทึก ledger
+- [x] RED: `test_c04a_amount_impact_matches_reference` (ESG-0/100K/CAP), `test_c04a_capacity_boundary` (CAP, OVER-CAP), `test_c04a_forecast_edit_moves_capacity`, `test_c04a_withholding_missing_keeps_pit`, `test_c04a_prior_usage_comes_from_c03` (1/ว่าง ทำให้ C03 ไม่ READY → `BASELINE_NOT_READY`; 0 คำนวณได้), `test_c04a_guardrail_inputs_and_limits`, `test_c04a_pvd_open_rmf_closed`, `test_c04a_blocked_baseline_hides_everything`, `test_c04a_amount_validation` (ติดลบ, เกินสตางค์ = input error ระบุช่อง)
+- [x] รัน `uv run --locked pytest tests/acceptance/test_c04a_thai_esg_what_if.py -q` บันทึก RED (กรณีที่ผ่านตั้งแต่แรกบันทึกเป็น characterization)
+  ↳ ทำแล้ว: RED = collection error `ModuleNotFoundError: tax_gps.candidate.thai_esg_what_if` (ทุก test ยังไม่มีโค้ดรองรับ ไม่มี characterization)
+- [x] Implement: ตรวจ C03 READY และ planning availability → amount/financial ว่าง → capacity (`calculate_opportunity_capacity` กับ definition `TH-OPP-THAI-ESG-2026`, `shared_amount_used` จาก C03) → financial state + `assess_new_cash_opportunity(NewCashInputs(..., remaining_capacity=capacity.remaining, available_budget=amount, state))` → ถ้า amount > capacity หรือ > `max_feasible_allocation` ให้สถานะข้อจำกัด → `calculate_tax_saving(tax.taxable_income, amount, tax._activated_pack)` → settlement ก่อน/หลังด้วยฟังก์ชันเดียวกับ C03
+- [x] GREEN targeted แล้ว `uv run --locked pytest -q`; บันทึก ledger
+  ↳ ทำแล้ว: รอบแรก 20/25 ผ่าน — guardrail 4 ราย fail เพราะ `FinancialPlanningContext` ห้าม budget เกินเงินสดที่ทราบ จึงใช้ budget = min(วงเงินสิทธิ, เงินสดคงเหลือ); test ยอด 0.001 สร้าง `Money.of` ไม่ได้ จึงสร้างด้วย `Money(Decimal)` ตรง → 25/25 · full 907 passed · coverage 3,493 statements / 1,014 branches 100% · ruff/format/mypy strict (130 files) ผ่าน
+  ↳ ต่างจาก interface ที่เสนอ: รับ `pack` แล้วคำนวณ C03 ภายใน (ไม่รับ `AnnualEstimateResult` จากภายนอก) เพื่อให้ผล C03 กับ input ตรงกันเสมอ; แยก `settle()` ใน `annual_estimate.py` ใช้ร่วมโดยผล C03 ไม่เปลี่ยน (test C03 เดิมผ่านครบ)
 
 ## Task 1B — ปรับข้อความช่องสิทธิ LTF (เฉพาะเมื่อผู้ใช้ตกลง D5 ก)
 

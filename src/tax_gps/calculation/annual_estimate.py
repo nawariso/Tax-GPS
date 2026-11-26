@@ -227,10 +227,14 @@ def calculate_annual_estimate(
         return AnnualEstimateResult(baseline, tax, TaxStatus.REQUIRES_INPUT, withholding_missing)
 
     withholding = cast(Money, inputs.actual.withholding) + cast(Money, inputs.forecast.withholding)
-    difference = tax.pit - withholding
-    if difference.is_negative():
-        kind, amount = SettlementKind.REFUND, Money.zero() - difference
-    else:
-        kind = SettlementKind.BALANCED if difference.is_zero() else SettlementKind.PAY_MORE
-        amount = difference
+    kind, amount = settle(tax.pit, withholding)
     return AnnualEstimateResult(baseline, tax, TaxStatus.READY, (), withholding, kind, amount)
+
+
+def settle(pit: Money, withholding: Money) -> tuple[SettlementKind, Money]:
+    """Classify ``pit - withholding``; the amount is the non-negative magnitude."""
+    difference = pit - withholding
+    if difference.is_negative():
+        return SettlementKind.REFUND, Money.zero() - difference
+    kind = SettlementKind.BALANCED if difference.is_zero() else SettlementKind.PAY_MORE
+    return kind, difference

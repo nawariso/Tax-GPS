@@ -32,3 +32,13 @@ Current task: `REQUIREMENT_REVIEW` (D5/D6) + plan `DRAFT_FOR_REVIEW` · implemen
 - [ ] ผู้ใช้ตัดสิน D5/D6/D7, อนุมัติแผน และอนุญาต push ครั้งแรก
 
 Current task: `REQUIREMENT_REVIEW` (D5–D7) + plan `DRAFT_FOR_REVIEW` · implementation `NOT_STARTED`
+
+## 2026-11-27 — Native execution / DEC-039
+
+- [x] ผู้ใช้ตกลง D5–D7, อนุมัติแผน และอนุญาต push บันทึก [DEC-039](../DECISIONS.md#dec-039--c04a-d5d7-agreed-plan-approved-and-native-implementation-started) push `feature/tgps-c01-baseline-integrity` ไป origin ที่ `a617c26` (`1063fef..a617c26`) ยังไม่ได้ตรวจผล CI ของ SHA นี้
+- [x] Task 1 DONE (AC01–05, 07–09): RED collection ขาดโมดูล `tax_gps.candidate.thai_esg_what_if` → GREEN รอบแรก 20/25 (guardrail budget เกินเงินสดที่ทราบ, fixture 0.001) แก้แล้ว 25/25 ตัวเลขตรงกับ [ตัวอย่างอ้างอิง](TGPS-C04A-acceptance-reference.md) ทุกแถว รวม PVD-ESG-CAP (provisional, D7) Python 907 ผ่านใน 14.34s, coverage 3,493 statements / 1,014 branches ที่ 100%, ruff check/format 213 ไฟล์ และ mypy strict 130 ไฟล์ผ่าน บน Windows Python 3.14.3
+- Ruling: guardrail budget = min(วงเงินสิทธิที่เหลือ, เงินสดคงเหลือ) เพราะ `compute_financial_state` ปฏิเสธ budget ที่เกินเงินสดที่ทราบ (fail closed เดิม) `max_feasible_allocation` จึงเป็นจำนวนสูงสุดที่ทั้งสิทธิและเงินสำรองอนุญาต
+- Ruling: entry point รับ `AnnualEstimateInput` + pack แล้วคำนวณ C03 ภายใน แทนการรับผลจากภายนอก เพื่อไม่ให้ผลกับ input ขัดกัน ยอดซื้อ Thai ESG เดิมและวันวางแผนมาจาก C03
+
+Current task: Task 1B (D5 label) → Task 2
+
