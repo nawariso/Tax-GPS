@@ -33,6 +33,7 @@ from tax_gps.opportunity.models import EvidenceRequirement, LockupMetadata
 from tax_gps.opportunity.opportunity_ids import THAI_ESG
 from tax_gps.policy.activation import ActivatedRulePack
 
+WHAT_IF_ENGINE_VERSION = "tax-gps-thai-esg-what-if/0.1.0"
 AMOUNT_FACT_ID = "thai_esg_what_if.amount"
 EXCEEDS_TAX_CAPACITY_REASON = "THAI_ESG_AMOUNT_EXCEEDS_TAX_CAPACITY"
 _OPEN_AVAILABILITY = (PlanningAvailability.AVAILABLE, PlanningAvailability.PVD_BASELINE_ONLY)

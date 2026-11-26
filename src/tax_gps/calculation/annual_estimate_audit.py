@@ -241,6 +241,11 @@ def _inputs(value: JsonValue) -> AnnualEstimateInput:
     )
 
 
+def decode_annual_estimate_input(material: JsonValue) -> AnnualEstimateInput:
+    """Decode snapshot material; callers re-create and compare the snapshot to verify it."""
+    return _inputs(material)
+
+
 def replay_annual_estimate(
     snapshot: Mapping[str, JsonValue], pack: ActivatedRulePack
 ) -> AnnualEstimateResult:

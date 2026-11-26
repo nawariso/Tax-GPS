@@ -37,7 +37,7 @@
 | --- | --- | --- |
 | 1 | Domain what-if (AC01–05, 07–09) | เสร็จ · 25 tests (14 functions) · Python 907 · coverage 100% |
 | 1B | ปรับข้อความช่องสิทธิ LTF ใน C03 (D5) | เสร็จ · frontend 59/59 |
-| 2 | Snapshot, export, replay (AC10) | ยังไม่เริ่ม |
+| 2 | Snapshot, export, replay (AC10) | เสร็จ · 20 tests · Python 927 · coverage 100% |
 | 3 | HTTP และเดโมภาษาไทย (AC01–10) | ยังไม่เริ่ม |
 | 4 | ตรวจรวม, Chrome, independent review | ยังไม่เริ่ม |
 
@@ -76,9 +76,10 @@
 
 **ไฟล์:** สร้าง `src/tax_gps/candidate/thai_esg_what_if_audit.py`, `tests/acceptance/test_c04a_thai_esg_what_if_audit.py`
 
-- [ ] RED: snapshot ผูก C03 snapshot hash, catalog content hash, financial policy hash, จำนวน, ยอดซื้อเดิม, financial profile material, ผลทั้งหมด; replay คำนวณซ้ำได้ผลเดิม; payload ที่แก้จำนวนแต่ใช้ hash เดิมถูกปฏิเสธ; สถานะไม่ READY ไม่มี snapshot
-- [ ] Implement ด้วย `canonical_json` + `sha256_hex`; ไม่ใช้ `json.dumps` กับ model ที่ freeze
-- [ ] GREEN และ full suite
+- [x] RED: snapshot ผูก C03 snapshot hash, catalog content hash, financial policy hash, จำนวน, ยอดซื้อเดิม, financial profile material, ผลทั้งหมด; replay คำนวณซ้ำได้ผลเดิม; payload ที่แก้จำนวนแต่ใช้ hash เดิมถูกปฏิเสธ; สถานะไม่ READY ไม่มี snapshot
+- [x] Implement ด้วย `canonical_json` + `sha256_hex`; ไม่ใช้ `json.dumps` กับ model ที่ freeze
+- [x] GREEN และ full suite
+  ↳ ทำแล้ว: RED collection ขาด `thai_esg_what_if_audit` → GREEN 17/17 รอบแรก แต่ coverage 99% (บรรทัดตรวจ record/array ผิดรูปแบบ) เพิ่ม malformed cases เป็น 20/20 → Python 927, coverage 3,558/1,024 = 100%; mypy รอบแรกพบ helper ใน test ไม่มี annotation แก้แล้ว; snapshot ฝัง C03 snapshot ทั้งชุด (ไม่ใช่เฉพาะ hash) เพื่อ replay ตรวจ C03 material ได้ และเพิ่ม `decode_annual_estimate_input` แบบ public ใน C03 audit
 
 ## Task 3 — HTTP และเดโมภาษาไทย
 

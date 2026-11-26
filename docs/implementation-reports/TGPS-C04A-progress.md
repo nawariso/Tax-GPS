@@ -42,5 +42,7 @@ Current task: `REQUIREMENT_REVIEW` (D5–D7) + plan `DRAFT_FOR_REVIEW` · implem
 
 - [x] Task 1B DONE (D5): RED frontend 58/59 → GREEN 59/59 ผ่าน `examples.check_web_demo`; Python 907 ผ่าน ข้อความช่อง `fund_history_ltf_carryforward` ใช้ร่วมทั้งเส้นทางเดิมและ C03 ไม่เปลี่ยน id, readiness หรือ snapshot
 
-Current task: Task 2 (snapshot/replay)
+- [x] Task 2 DONE (AC10): RED collection ขาดโมดูล audit → GREEN 17/17 แล้วเพิ่ม malformed cases ปิด coverage → 20/20; Python 927 ผ่านใน 13.87s, coverage 3,558 statements / 1,024 branches 100%, ruff 215 ไฟล์, mypy strict 132 ไฟล์ผ่าน Snapshot schema `tax-gps-thai-esg-what-if/1` ผูก engine `tax-gps-thai-esg-what-if/0.1.0`, catalog และ financial policy hash, ฝัง C03 snapshot ทั้งชุด สถานะไม่ READY ไม่มี export
+
+Current task: Task 3 (HTTP + demo)
 
