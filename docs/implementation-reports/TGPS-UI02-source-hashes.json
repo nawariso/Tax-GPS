@@ -1,0 +1,8 @@
+{
+  "examples/web/index.html": "747f70e5c48e696a43ef1b7e8e8c87bc4efa777cf25c23c5f161f3f176fa1ef8",
+  "examples/web/app.js": "b911160b2e629a9f6ece6f007a97298e051003e501c24e605eb07c3df5b7c9fd",
+  "examples/web/profile.js": "18e3324015ed7e67e26f47a17e5c044e9970f8ed56ac55967705e5bc460d63fb",
+  "examples/web/style.css": "9dc0868ff1b388401013d6d7fa02182b94e0260790f2b03ca9d2fb8ae6837b59",
+  "examples/web/profile.css": "09e4446ae692e251846804bdf5156d27390ec170ef0bc72a85beb475c5c2eeb4",
+  "tests/web/test_app.cjs": "fcefebf1f361bad6f482d5efba0a05c9d602e2697d65c0a2768580e909411b10"
+}

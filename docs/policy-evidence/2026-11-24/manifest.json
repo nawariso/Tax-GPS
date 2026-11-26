@@ -1,0 +1,29 @@
+[
+  {
+    "file": "rd-pit-2569-index.html",
+    "url": "https://www.rd.go.th/68191.html",
+    "retrieved_date": "2026-11-24 (Asia/Bangkok)",
+    "document_date": null,
+    "content_type": "text/html",
+    "bytes": 40884,
+    "sha256": "2f529634069af4caf0a0e52a5d007514bd58cbd7f0c8e716fe64bd0a4a30e5f1"
+  },
+  {
+    "file": "rd-rmf-ltf-basis-explanation.pdf",
+    "url": "https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/1397959r21_Explan59.pdf",
+    "retrieved_date": "2026-11-24 (Asia/Bangkok)",
+    "document_date": "2016-01-11",
+    "content_type": "application/pdf",
+    "bytes": 199988,
+    "sha256": "c471ef050229b7139f1699a90e1f38eff5eed062ad1682bf56016d4684092ca5"
+  },
+  {
+    "file": "rd-ruling-0702-9814.html",
+    "url": "https://www.rd.go.th/54492.html",
+    "retrieved_date": "2026-11-24 (Asia/Bangkok)",
+    "document_date": "2014-12-30",
+    "content_type": "text/html",
+    "bytes": 43871,
+    "sha256": "52b786929534f4d70d4c3480d75c9b3314724e0d188541acc0e863b372778939"
+  }
+]

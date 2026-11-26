@@ -1,0 +1,106 @@
+# SDD ledger — plan: docs/superpowers/plans/2026-10-15-c01-baseline-integrity.md
+
+Spec: TGPS-C01 v0.1. User authorized implementation after receiving the detailed requirement links.
+
+- Workspace: current checkout, branch feature/tgps-c01-baseline-integrity. Preserve unrelated pre-existing Stage 4 draft.
+- Execution: inline, native Windows commands; persistent ledger replaces POSIX task helper tooling.
+- Pre-flight: Task 1 TaxState evidence → Task 2 discovery/HTTP; Task 3 bundle selection → all fixtures and Task 2; Task 4 response handling → Task 2 envelopes. No conflicting interfaces.
+- Baseline: uv sync --locked succeeded; uv run --locked pytest -q → 650 passed.
+- Task 1 RED: new baseline suite → 13 failed / 1 passed (missing readiness/evidence and unrecognized pool acceptance).
+- Task 1 GREEN: new baseline suite → 14 passed after readiness/core/discovery evidence changes.
+- Migration: explicit zero added only to known-complete salary/artwork/solar fixtures; positive prior usage/retirement expectations changed to blocked baseline, with standalone capacity math retained.
+- Task 1/2 integrity finding: discovery compared carried output_hash only. New real test changed PIT with unchanged hash → FAILED (DID NOT RAISE); compare both replayed hash and material output. Cost if omitted: stale tax amounts could accompany a valid-looking hash.
+- Task 1: integration verification in progress.
+- Resume 2026-10-15: full suite was 224 failed / 449 passed. Single cause: test catalog helper serialized `catalog_to_dict` (frozen mappingproxy) with json.dumps. Helper now reads the raw current 1.0.1 catalog resource → 673 passed.
+- Open after resume: ~~Node `tests/web/test_app.cjs` 21/23 (demo still returns 200)~~ **CORRECTION:** this run hit a stale server already listening on 127.0.0.1:8765 (PID 12788, pre-change code). Via `examples.check_web_demo` (fresh server) the suite was already 23/23. Rule: verify frontend only through `uv run --locked python -m examples.check_web_demo`. ruff 32 findings, ruff format 17 files, mypy 3 errors — all in uncommitted C01 work; deferred to Task 2/5.
+- Task 2/3 note: partial uncommitted work exists (web demo/JS RED tests; versioned 1.0.1 pack/catalog, loader version/hash selectors, policy-evidence record).
+- Task 1: DONE (Python suite 673 passed). Lint/format/mypy findings carried to Task 5.
+- Task 2: DONE. Added: 7 structured extended-profile error cases (AC09/AC11); 2 `build_candidates` non-READY rejections isolated from the profile-hash check (AC09); READY copy scope test. RED→GREEN shown for: scoped error text/missing ids (frontend 21/23 → 23/23), READY exclusions copy (1 failed → passed). Unknown retirement/other income now carry reason codes. Python 683 passed; frontend 23/23.
+- Task 2 known limitations (not fixed): parser-level REQUIRES_INPUT uses code `INPUT_REQUIRED` while domain uses `BASELINE_NOT_READY`; some missing ids are prose (`personal eligibility`, `mandatory payment`); unknown commitment `mandatory` is tagged `ELIGIBILITY_REQUIRED`; generic INVALID_INPUT no longer names the malformed amount field.
+- Task 5 drift to fix: README and `docs/demo/input-coverage.md` still describe shared usage as a capacity fact only / retirement blocked by the demo; behavior now comes from the domain.
+- Process note: during Task 2 a `git stash push examples/demo_profile.py` was run by mistake and immediately restored with `git stash pop`; diff verified intact.
+- Task 3: PARTIAL — evidence record, 1.0.1 resources, loader selectors, version tests present.
+- Task 4: PARTIAL — `Connection: close`, `_discard_rejected_body` and a rejected-POST test exist; diagnosis evidence (repetition counts/runtimes) still missing.
+- Task 5: pending.
+- Commits 2026-10-15: code `6428809` (C01 Task 1-2 + Task 3 partial, WIP), docs `2cc5dca`; pushed to origin/feature/tgps-c01-baseline-integrity. Remote CI runs only on PR/main, so no CI result for these SHAs yet.
+- Status check 2026-10-15 (no implementation change): `uv sync --locked` succeeded; `uv run --locked pytest -q` → 683 passed in 8.63s; `uv run --locked python -m examples.check_web_demo` → 23/23 passed, no skips. Commands required escalation after the sandbox process launcher reported `helper_unknown_error: setup refresh had errors`. `git status --short` showed only the pre-existing untracked Stage 4 draft before this ledger update. Git log/diff commands could not launch, so current commit and diff were not independently verified. Full lint/format/mypy/coverage/build gates were not rerun; milestone remains IN_PROGRESS.
+- Resume / Task 3 audit 2026-10-15: HEAD `80afe5a`, branch `feature/tgps-c01-baseline-integrity`; normal checkout as previously authorized in plan (no new worktree). Python baseline 683 and frontend 23/23 already ran this session; not repeated just to start another task. Preserve unrelated untracked Stage 4 draft. Use inline Windows commands and this persistent ledger instead of POSIX SDD helpers, as previously recorded.
+- Task 3 characterization: historical-catalog rejection was already present in `test_c01_artifact_versions.py` despite the pending plan checkbox. Extended assertions exercise direct allocation activation with a historical catalog and a forged current catalog hash; passed immediately, so these are characterization, not RED→GREEN. Artifact/baseline/discovery targeted run: 60 passed in 0.90s.
+- Task 3 historical bytes verified against pre-C01 commit `de85aee67e3da34e6a83c296ad88d6e377f0858a`: old pack SHA-256 `593ada7f90289adeb941599bf043f25f9d5dad1e4f87a8e95c371fc2b1ef839f`, old catalog `1c2bc2d38e682eea6412f825096a407b980415fbafd8d9d9223b10993cee814d`. Git archive extracted to ignored `tmp/c01-history` without swapping working files; real old core 0.1.1 + pack/catalog 1.0.0 replay succeeded, PIT 79000, output hash `ef38a41f9760e1272a486c1daecc6731055722e232d0532f9a668476c4482650`. Current core 0.2.0 + default unknown usage returns null PIT on the same historical profile, intentionally. Current discovery/candidate versions both 0.3.0; allocation policy 1.0.1. Package distribution version remains a separate identity pending final audit.
+- Task 3 evidence recheck: official SEC PDF page 1 table / page 2 Q4 text retrieved again; direct Gazette PDF retrieved. Existing source scope/limits retained; no released pack/catalog bytes edited. SEC raw PDF checksum remains unavailable. Reproduction instructions and final evidence mapping belong in the implementation report.
+- Task 5 initial gates: lint 36 findings, format 17 files, strict mypy 3 errors. Full suite 683 passed in 9.39s but coverage gate FAILED at 99.78% (4 statements/4 branches). Formatting restricted to Python files changed since pre-C01 base; imports/type assertions repaired without changing expected behavior. Mypy then clean (102 files).
+- Task 5 refactor: three uncovered discovery paths became unreachable after the public replayed READY gate forbids unknown/positive shared usage. Removed redundant downstream usage handling; kept standalone capacity calculations and public non-READY regression tests. This is a behavior-preserving refactor under existing AC05/06 tests, not a new feature or claimed RED→GREEN. Fourth uncovered branch (allocation catalog-hash mismatch) now has a real forged-policy rejection characterization case.
+- Task 4 controlled Windows probe: 100 rejected-Origin POSTs against archived pre-C01 code and 100 against current code. Both delivered 100/100 complete 403 responses with no transport errors; old handler left 100 unread `{}` bodies, current drained 100. Times 0.565s / 0.454s. Confirms lifecycle difference but does NOT reproduce WinError 10053 or prove its original cause. Runtime CPython 3.14.3 / Windows-11-10.0.26300-SP0. F09 remains OPEN pending causal reproduction; acceptance must remain conditional. Probe code/results currently in ignored `tmp/c01_*` / `tmp/c01-*-probe.json`; persistent summary/reproduction to follow in report.
+- Task 3 RED→GREEN (AC15): current discovery and public candidate build allowed caller-supplied historical engine labels. Two new real-engine regressions FAILED (DID NOT RAISE); added version guards matching the core's existing rule. Full suite then 685 passed in 8.45s. Core remains 0.2.0, discovery/candidates 0.3.0; package version updated to 0.2.0 with offline lock refresh (no runtime dependencies added).
+- Task 3: DONE — historical selection/rejection, direct historical allocation activation rejection, current replay, real archived 0.1.1 replay, resource byte integrity and consumer versions checked. New catalog-hash rejection assertions passed immediately (characterization). Historical reproduction and source limitations documented, no released JSON modified.
+- Task 4: DONE for investigation/reporting (AC16); F09 itself OPEN / conditional acceptance. Existing narrow rejected-body regression passed 10/10 independent pytest invocations (1.271–1.376s wall time each); repeated full suite 685 passed (8.735s wall time). Durable raw evidence in `TGPS-C01-http-evidence.json`; exact scratch script sources and reproduction method in `TGPS-C01-http-diagnosis.md`. No need to reconstruct or rerun this investigation absent new evidence/runtime changes.
+- Task 5 documentation: README runnable example now explicitly declares complete empty shared usage; current artifact path, READY/NO_ACTION scope, shared usage and retirement explanations corrected in README/input contract/demo guide. Historical handoff reports preserved. Verification/fresh review still pending at this line.
+- Task 5 coverage correction: ~~Fourth uncovered branch was allocation catalog-hash mismatch.~~ **CORRECTION:** after direct hash-rejection characterization, coverage still missed `candidate/activation.py:205` (DRAFT/non-EFFECTIVE policy rejection), not catalog-hash mismatch. Added `test_c01_ac13_draft_allocation_policy_cannot_grant_production_authority`; passes immediately (characterization). Coverage then reached 100%: 2842 statements / 796 branches, zero misses; 686 passed in 9.12s. Earlier 99.95% gate failure retained in report.
+- Task 5 verification: all seven locked CI-equivalent gates passed locally: sync, ruff check, format (138 files), strict mypy (102 files), pytest 686 / 100% branch+statement coverage, fresh-server frontend 23/23, uv build sdist+wheel 0.2.0. Raw exact results in `TGPS-C01-verification.json`. Verification helper initially failed decoding Node UTF-8 as Windows cp874, then printing its checkmark with cp874; the frontend process itself exited 0. Fixed scratch capture/stdout to UTF-8 and resumed outstanding gates without rerunning already-green Python tests. Build succeeded afterward.
+- Task 5 pre-review diff: `git diff --check` clean; no released JSON changed. Production/test/metadata diff from pre-C01 has SHA-256 `b1f2dbf2b71f1c44a24adbd18267adc22ef1412f09f3d8bfbf99b46a24b22bda`. Full current code diff retained in ignored `tmp/c01-code.diff` for review; source of truth is HEAD `80afe5a` plus working tree, not a new commit. Fresh read-only reviewer dispatched per plan; final task/milestone status still pending review. CRLF warnings reflect retained existing working-file endings, not deliberate normalization.
+- Final fresh review: `c01_final_review`, read-only from pre-C01 base through HEAD+working tree. Verdict WITH FIXES: Important (1) generic malformed HTTP errors lost field identity and repeated-record unknown flags lacked row index; Important (2) arbitrary parent relationship text reflected in parser errors and domain missing IDs. No Critical or Minor findings. Verified both technically before changes; accepted both as Important.
+- Final fix-pass RED: new core/parser/real HTTP cases 6 failed, plus child/debt/commitment row cases 3 failed (commitment overlaps first run); fresh-server frontend 23 passed / 1 failed. Actual causes matched findings (raw parent label, absent field IDs, prose record IDs). These are AC09 privacy/error-contract regressions, not new tax treatment.
+- Final fix-pass GREEN: introduced code-owned canonical field paths/record indices and Thai error labels; parser constructor validation retains its safe scope; invalid-amount envelopes name exact field and contain no submitted values. Standard father/mother IDs remain; caller-defined parent labels use `parent[index].eligible` in both parser and domain. UI handles structured INVALID_INPUT without unrelated generic amount advice. Eight targeted Python regressions passed, frontend 24/24. Full suite/gates recorded next.
+- Final: Ruling: independent legal/milestone acceptance was declined by reviewer — retain NOT ACCEPTED and explicit source/hash limits; this implementation review cannot certify all law. Cost if mistaken: overclaiming supported coverage/legal authority.
+- Final: Ruling: F09 causal closure was declined by reviewer — retain OPEN/conditional despite successful probes because WinError 10053 was not reproduced. Cost if mistaken: intermittent transport failure could remain.
+- Final: Ruling: remote CI/Python 3.12 and manual visual layout were declined by reviewer — retain UNVERIFIED for this working tree; local CPython 3.14.3 and automated lifecycle are the actual evidence. Cost if mistaken: runtime/layout differences could be missed.
+
+- Final: fixed field/row identity — eight targeted core/parser/HTTP regressions GREEN after observed RED; browser malformed-field case RED→GREEN, frontend 24/24. Full suite 694 passed in 9.92s. No second reviewer dispatched; final fix-pass verified by tests as planned.
+- Final: fixed raw parent identity reflection — shared code-owned role/index helper used in parser and domain; standard father/mother contract preserved, arbitrary labels never copied to error metadata. Same regression/gate evidence; no new tax treatment/readiness precedence.
+- Task 5 final gates: all seven passed after fixes; final coverage suite 694 passed in 10.51s, 2846 statements / 798 branches / zero misses = 100%. Format 139 files, strict mypy 102 files, frontend 24/24, build 0.2.0. Raw after-review JSON retained separately from before-review evidence. Final code diff SHA-256 `8f6fc6c4e21277bd9a763a9e7af8a09f1701fecbf02fc1055638addb8ed3ee48`; HEAD 80afe5a + uncommitted working tree.
+- Task 5: DONE — implementation report/AC01–18 mapping, migration/source/replay/HTTP reproduction, fresh review + Important fix-pass, gates and tracking synchronized. DEC-011 records IMPLEMENTED; F09 OPEN / acceptance conditional; C01/P1-004 are NOT ACCEPTED. Deferred minors: none. No commit/push/merge; Stage 4 draft preserved. Final documentation/diff audit follows without rerunning green Python tests unless code changes.
+- Final documentation audit: first `git diff --check` flagged retained Markdown hard-break trailing spaces on the modified requirement header; removed them and split the long header. Rerun clean. Final code fingerprint unchanged; historical 1.0.0 raw bytes still match pre-C01, no released pack/catalog diff. Format after final reports: 140 files clean; rebuild sdist/wheel 0.2.0 succeeded. Final status contains only C01-owned changes/new reports plus untouched pre-existing Stage 4 draft. Code tests were not rerun after prose-only tracking changes; actual post-fix suite remains 694 / coverage 100%, frontend 24/24. Corrected changelog row spacing and added per-checkbox completion notes for the final handoff.
+- Interactive handoff 2026-10-15: user requested to see/play the changes. Started a NEW current-checkout loopback server on OS-selected port 54957 (`http://127.0.0.1:54957/`, actual server PID 35328; parent launcher PID 13480), without stopping other servers. Temporary launcher/check scripts in ignored `tmp/c01_play_demo.py` / `tmp/c01_play_check.py`, session metadata `tmp/c01-play-session.json`. Smoke checks 5/5: page scope text, supported PIT/saving + candidate engine 0.3.0, blank usage requires input, positive usage unsupported, malformed salary reports its field without echoing the amount. Opened default browser and left server running for user testing. No implementation changes or redundant full-suite rerun; previous 694/100% and frontend 24/24 evidence remains distinct from this 5-check smoke test. User manual acceptance is not yet claimed.
+
+- Handoff verification 2026-10-15: reran all seven gates on default CPython3.14.3,
+  then isolated Windows CPython3.12.14 via UV_PROJECT_ENVIRONMENT=tmp/ci312-venv,
+  UV_PYTHON=3.12 and UV_PYTHON_DOWNLOADS=never. Both passed: Python695, 100% core
+  statements/branches, fresh-server frontend24/24, lint/format/strict mypy/build clean.
+  Exact commands/output/code fingerprint: TGPS-handoff-verification.json. Coverage
+  statement counts can differ by interpreter; retain raw totals for each runtime.
+  Node24.3.0 local differs from Node22/Ubuntu GitHub Actions; remote CI NOT RUN.
+  VIRTUAL_ENV warning correctly ignored default .venv for isolated env; no failing gate.
+  CUA still apps=[]/browsers=[]; rendered review UNVERIFIED. F09 remains OPEN;
+  these checks do not make C01/UI01 ACCEPTED. Local code checkpoint and separate
+  documentation checkpoint prepared; shared acceptance file covers both C01 and UI01,
+  so keep this already-reviewed code delta atomic rather than reworking test history.
+- Local code checkpoint: `4774983` on feature/tgps-c01-baseline-integrity; verified
+  code delta matches handoff JSON fingerprint. Documentation is a separate checkpoint;
+  preview rechecked9/9. No push/PR/merge; remote CI and F09 remain open.
+- Remote handoff: user authorized push/draft PR; pushed c4527c9e2a2c3b041ff72e96ac5f404c06a94170,
+  opened PR#4 (draft, not merged). CI run38765573860/job116527763633 SUCCESS:
+  Ubuntu24.04.5, Python3.12.15, Node22.23.3; Python695/100%/frontend24/24,
+  lint/format147/mypy102/build clean. Checkout tested merge ref b9015a3ba9103664a2d143ec40677e029ab81214
+  for that exact head, not a later commit. Evidence TGPS-remote-ci.json; F09 OPEN,
+  acceptance conditional. Following commit changes documentation only, not tax code.
+
+- Status check 2026-10-16 (no product-code changes): `uv sync --locked` passed;
+  `uv run --locked pytest -q` passed 695 tests in 10.47s;
+  `uv run --locked python -m examples.check_web_demo` passed 24/24, zero failures/skips.
+  Commands required escalation after sandbox launcher `helper_unknown_error: setup refresh had errors`.
+  Git log confirms HEAD c4527c9; status shows existing documentation updates and
+  untracked Stage 4 draft/remote-CI evidence, preserved. Full lint/format/mypy/coverage/build
+  and remote PR/CI state were not rechecked this session; previous evidence remains
+  scoped to its recorded SHA/runtime. C01 IMPLEMENTED, F09 OPEN, UI01 visual review
+  pending, C02 REQUIREMENT_REVIEW / NOT_STARTED; no acceptance or scope changes.
+
+- Handoff checkpoint 2026-10-16: user explicitly requested a continuation note and
+  commit/push. Added ordered resume checklist to TGPS-handoff.md; included existing
+  remote-CI documentation/evidence, excluding unrelated Stage4 draft. No product-code,
+  requirement, readiness or milestone-acceptance changes.
+  Full pre-commit gates on Windows CPython3.14.3: locked sync passed; ruff clean;
+  format148 files clean; strict mypy102 files clean; pytest695 passed in11.63s;
+  coverage100% (2846 statements/798 branches, zero misses); fresh-server frontend24/24,
+  zero failures/skips; sdist/wheel0.2.0 built. These are local results, not remote CI
+  for the forthcoming documentation commit. F09/visual acceptance remain open.
+- Push receipt 2026-10-16: documentation checkpoint `a906737` successfully pushed
+  to origin/feature/tgps-c01-baseline-integrity (previous remote head `c4527c9`).
+  This receipt is a documentation-only follow-up; no remote CI result claimed for
+  these new commits and no PR merge performed.
+
+- 2026-10-21 executor acceptance handoff review: Task1–5 remain IMPLEMENTED;
+  historical F09 still OPEN/not reproduced, no new cause claim. Current code checkpoint
+  805e2d9 changes presentation/frontend tests only; Python695/10.67s, frontend37/37.
+  Reviewed existing matrix/source limitations and documented remaining independent
+  acceptance decisions in TGPS-C01-review-follow-up-2026-10-21.md. This is not a new
+  independent legal review or C01 ACCEPTED record.

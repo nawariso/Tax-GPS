@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'; connect-src 'none'">
+<title>Tax GPS — ต้นแบบสิทธิเดิม</title>
+<style>
+:root{color-scheme:light;--ink:#203c32;--muted:#637168;--paper:#f7f6ef;--line:#dce1d5;--soft:#eaf0e3;--accent:#d5e4a6;--warn:#755220}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.7 Tahoma,"Leelawadee UI",sans-serif}button,input,summary{font:inherit}button,a,input,summary{touch-action:manipulation}button,summary{cursor:pointer}button{border:1px solid var(--line);border-radius:12px;padding:10px 17px;min-height:44px;background:#fff;color:var(--ink)}button:hover{border-color:#6f846a}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #a27b2b;outline-offset:4px}a{color:inherit;text-underline-offset:4px}input[type=text]{width:100%;border:1px solid #c9d2c0;border-radius:12px;padding:12px;background:#fff;color:var(--ink);min-height:48px}input[type=radio]{accent-color:#28543f;width:18px;height:18px}input:disabled{background:#f2f3ed;color:#737b71}h1,h2,h3,p{margin:0}h1{font-size:clamp(30px,4.2vw,52px);line-height:1.38;letter-spacing:-1px;max-width:800px}h2{font-size:23px}h3{font-size:18px}small,.hint{font-size:14px;color:var(--muted)}[hidden]{display:none!important}
+.wrap{max-width:1200px;margin:auto;padding:0 32px}.mast{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 0;border-bottom:1px solid var(--line)}.brand{font-size:21px;font-weight:700;letter-spacing:2px}.badge{font-size:13px;background:var(--soft);padding:6px 12px;border-radius:20px}.hero{padding:44px 0 26px}.eyebrow{font-size:12px;letter-spacing:2px;margin-bottom:12px;color:var(--muted)}.hero p{margin-top:18px;color:var(--muted)}.notice{background:#fff3d8;color:#624a21;border-radius:12px;padding:12px 16px;margin-bottom:24px;font-size:14px}.modes{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 28px}.modes span{margin-right:8px;font-size:14px}.modes button[aria-pressed=true]{background:var(--ink);color:white;border-color:var(--ink)}.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:26px;min-width:0}.heading{display:flex;gap:12px;align-items:center;margin-bottom:20px}.step{display:inline-grid;place-items:center;width:32px;height:32px;border:1px solid #ced6c7;border-radius:50%;flex:none;font-size:14px}.field{display:block;margin-top:18px}.field span{display:block;font-size:14px;margin-bottom:7px}.field small{display:block;margin-top:7px}.amount{position:relative}.amount input{padding-right:80px}.amount b{position:absolute;right:14px;top:12px;font-weight:400;font-size:14px;color:var(--muted)}.section{border-top:1px solid var(--line);margin-top:28px;padding-top:25px}.right{border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:14px}.right-head{display:flex;gap:10px;align-items:start;justify-content:space-between}.state{font-size:12px;white-space:nowrap;color:var(--warn);background:#faf0dc;border-radius:15px;padding:3px 9px}.state.ok{background:var(--soft);color:#46623d}.choices{border:0;padding:0;margin:16px 0 0;min-width:0}.choices legend{font-size:14px}.options{display:flex;flex-wrap:wrap;gap:5px 16px}.options label{display:flex;align-items:center;gap:7px;min-height:44px;font-size:14px}.history{background:var(--paper);padding:14px;border-radius:12px;margin-top:18px}.history legend{float:left;width:100%;margin-bottom:5px}.history .options{clear:both}.history-note{font-size:13px;color:var(--muted);margin-top:6px}.simple-row{display:flex;justify-content:space-between;gap:12px;margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}.simple-row small{display:block}.link-button{background:transparent;border:0;text-decoration:underline;text-underline-offset:4px;padding:8px 0;text-align:left}.result{position:sticky;top:20px}.result-top{background:var(--ink);color:#fff;border-radius:19px;padding:28px}.result-top .eyebrow,.result-top .hint{color:#cedbcd}.result-top h2{font-size:27px;margin-bottom:12px}.result-top p{font-size:15px}.issues{padding:8px 0 0;margin:0;list-style:none}.issues li{padding:18px 0;border-bottom:1px solid var(--line)}.issues strong{display:block;font-size:15px}.issues p{font-size:14px;color:var(--muted);margin-top:5px}.issues a{display:inline-flex;align-items:center;min-height:44px;font-size:14px}.summary{padding:22px 0 0}.summary h3{margin-bottom:12px}details{border-top:1px solid var(--line);margin-top:18px;padding-top:8px}summary{min-height:44px;display:list-item;padding:8px 0;font-size:15px}details p,details li{font-size:14px;color:var(--muted)}details ul{padding-left:22px}.placeholder{font-size:38px;line-height:1.4;margin:12px 0 4px;color:var(--accent)}.next{background:var(--soft);border-radius:14px;padding:18px;margin-top:22px}.next p{font-size:14px;color:var(--muted);margin-top:5px}.footer{padding:30px 0 40px;color:var(--muted);font-size:13px}.mobile-jump{display:none}.verify{font-size:13px;margin-top:16px;padding:12px;border-radius:10px;background:#fff3d8;color:#624a21}.reset{margin-left:auto}
+@media(max-width:760px){.wrap{padding:0 18px}.mast{align-items:flex-start}.hero{padding-top:30px}.layout{grid-template-columns:1fr;gap:20px}.panel{padding:20px}.result{position:static}.result-top{padding:23px}.right{padding:15px}.right-head{flex-wrap:wrap}.modes{gap:7px}.modes span{width:100%}.modes button{font-size:14px;padding:8px 12px}.reset{margin-left:0}.badge{max-width:155px;line-height:1.5}.mobile-jump{display:inline-flex;min-height:44px;align-items:center;margin-top:14px}h2{font-size:21px}.hero p{font-size:15px}.history{padding:12px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="mast"><div class="brand">TAX GPS <span aria-hidden="true">↗</span></div><span class="badge">ต้นแบบหน้าจอ · ปี 2569</span></header>
+<section class="hero"><p class="eyebrow">เริ่มจากสิ่งที่คุณมี</p><h1>ดูภาษีให้เข้าใจ<br>ทีละข้อมูล ทีละสิทธิ</h1><p>ระบุรายได้และสิทธิที่จ่ายไปแล้ว จากนั้นค่อยเปิดดูรายละเอียดที่อยากรู้</p><a class="mobile-jump" href="#overview">ไปดูภาพรวม ↓</a></section>
+<p class="notice"><strong>ตัวอย่างสำหรับลองหน้าจอ</strong> — ไม่มีการคำนวณภาษีจริง ไม่เชื่อมระบบคำนวณ และไม่บันทึกข้อมูล กรุณาใช้ข้อมูลสมมุติ</p>
+<div class="modes" role="group" aria-label="เลือกสถานการณ์ตัวอย่าง"><span>ลองดูเมื่อ…</span><button type="button" data-mode="missing" aria-pressed="true">ข้อมูลยังขาด</button><button type="button" data-mode="unsupported" aria-pressed="false">มีกรณีที่ยังไม่รองรับ</button><button type="button" data-mode="ready" aria-pressed="false">ตัวอย่างข้อมูลครบ</button><button type="button" class="reset" id="reset">เริ่มใหม่</button></div>
+<main class="layout">
+<section class="panel" aria-labelledby="inputs-title">
+<div class="heading"><span class="step">1</span><h2 id="inputs-title">รายได้ของคุณ</h2></div>
+<label class="field" for="salary"><span>รายได้จากการจ้างงานทั้งปี</span><div class="amount"><input id="salary" type="text" inputmode="decimal" autocomplete="off" aria-describedby="salary-hint"><b>บาท / ปี</b></div><small id="salary-hint">ใช้ข้อมูลสมมุติในต้นแบบนี้ · เว้นว่างหมายถึงยังไม่ทราบ</small></label>
+<section class="section" aria-labelledby="rights-title"><div class="heading"><span class="step">2</span><h2 id="rights-title">สิทธิที่จ่ายไปแล้ว</h2></div><p class="hint">เริ่มจากบอกว่ามีหรือไม่ แล้วกรอกเฉพาะข้อมูลที่เกี่ยวข้อง</p>
+<article class="right" id="pvd-card" tabindex="-1"><div class="right-head"><h3>กองทุนสำรองเลี้ยงชีพ <small>(PVD)</small></h3><span class="state" id="pvd-state">ยังไม่ได้ระบุ</span></div>
+<fieldset class="choices"><legend>ปีนี้คุณจ่ายเงินสะสมส่วนของคุณหรือไม่?</legend><div class="options"><label><input type="radio" name="pvd" value="yes">มี</label><label><input type="radio" name="pvd" value="no">ไม่มี</label><label><input type="radio" name="pvd" value="unknown">ยังไม่ทราบ</label></div></fieldset>
+<div id="pvd-fields" hidden><label class="field" for="pvd-paid"><span>เงินสะสมที่หักจากเงินเดือนคุณ</span><div class="amount"><input id="pvd-paid" type="text" inputmode="decimal" autocomplete="off" aria-describedby="pvd-paid-hint"><b>บาท / ปี</b></div><small id="pvd-paid-hint">ดูจากใบสรุปเงินสะสม · ไม่รวมเงินที่นายจ้างสมทบ</small></label><label class="field" for="pvd-wage"><span>ฐานค่าจ้างที่ใช้ส่ง PVD</span><div class="amount"><input id="pvd-wage" type="text" inputmode="decimal" autocomplete="off" aria-describedby="pvd-wage-hint"><b>บาท / ปี</b></div><small id="pvd-wage-hint">ฐานนี้อาจต่างจากรายได้รวม ดูจากข้อมูลกองทุนหรือนายจ้าง · ไม่ทราบให้เว้นว่าง</small></label></div>
+<p class="hint" id="pvd-no-note" hidden>ไม่มีเงินสะสมใหม่ ไม่ได้หมายความว่าไม่มีรายการจากกองทุนเดิม</p>
+<fieldset class="choices history"><legend>กองทุนเดิมมีการขาย โอน หรือสิทธิสืบเนื่องในปีนี้หรือไม่?</legend><div class="options"><label><input type="radio" name="history" value="yes">มี</label><label><input type="radio" name="history" value="no">ไม่มี</label><label><input type="radio" name="history" value="unknown">ยังไม่ทราบ</label></div><p class="history-note">ตอบส่วนนี้ได้ แม้ปีนี้ไม่มีเงินสะสมใหม่</p><p id="history-warning" class="verify" tabindex="-1" hidden>มีรายการจากกองทุนเดิม — ต้องตรวจประเภทและเงื่อนไขเพิ่มเติมก่อนคำนวณ ในต้นแบบนี้ยังไม่รับรายละเอียดดังกล่าว</p></fieldset>
+</article>
+<div class="simple-row"><div><strong>กองทุนรวมเพื่อการเลี้ยงชีพ (RMF)</strong><small>ยอดซื้อใหม่ แยกจากยอดที่ถืออยู่หรือรับโอน</small></div></div>
+<div class="simple-row"><div><strong>Thai ESG / สิทธิประเภทอื่น</strong><small>ตรวจปีซื้อ ชนิดสิทธิ และวงเงินร่วม</small></div></div>
+<p class="verify">ต้นแบบนี้ให้ลองกรอกเฉพาะ PVD เพื่อดูรูปแบบหน้าจอ รายการอื่นและเงื่อนไขทั้งหมดจะจัดทำหลังผ่านการตรวจหลักฐาน</p>
+</section>
+<details class="section"><summary><strong>3 ทดลองใช้เงินเพิ่ม</strong></summary><p>หลังจากเข้าใจฐานภาษีแล้ว จึงค่อยเปิดดูทางเลือกการใช้เงินเพิ่ม ส่วนนี้เป็นตำแหน่งตัวอย่าง ยังไม่มีการเปรียบเทียบหรือคำแนะนำ</p></details>
+</section>
+<section class="panel result" aria-labelledby="overview" id="result-panel">
+<div class="result-top"><p class="eyebrow">ภาพรวมจากข้อมูลล่าสุด</p><h2 id="overview" tabindex="-1">ยังแสดงภาษีไม่ได้</h2><p id="result-copy">เริ่มระบุข้อมูล แล้วดูได้ทันทีว่าต้องเติมอะไรต่อ</p><div class="placeholder" id="tax-placeholder" hidden>—</div><p class="hint" id="ready-note" hidden>ตำแหน่งยอดภาษีรายปี · ก่อนหักภาษี ณ ที่จ่าย</p></div>
+<p class="hint" id="status" role="status" aria-live="polite" style="margin-top:16px">เลือกสถานการณ์ตัวอย่างด้านบน หรือเริ่มกรอกข้อมูลสมมุติ</p>
+<ul class="issues" id="issues"></ul>
+<div class="summary" id="rights-summary" hidden><h3>สิทธิเดิมถูกนับอย่างไร</h3><p class="hint">นี่คือตำแหน่งแสดงผลเมื่อระบบจริงตรวจข้อมูลครบแล้ว ไม่มีผลคำนวณในต้นแบบ</p><details><summary>กองทุนสำรองเลี้ยงชีพ — ดูวิธีคิด</summary><ul><li>ยอดเงินสะสมที่คุณจ่าย</li><li>ยอดเข้าเงื่อนไข และส่วนที่เกินสิทธิ</li><li>ส่วนยกเว้นก่อนค่าใช้จ่าย</li><li>ส่วนลดหย่อนหลังค่าใช้จ่าย</li></ul><p>ระบบจริงจะแสดงตัวเลขและเหตุผลจากแกนคำนวณที่ตรวจแล้วเท่านั้น</p></details><details><summary>วงเงินร่วมและแหล่งอ้างอิง</summary><p>แสดงวงเงินตามกฎ ใช้แล้ว และคงเหลือร่วมกัน โดยไม่สร้างวงเงินใหม่ให้แต่ละกองทุน</p><p>ลิงก์กฎหมายและเวอร์ชันจะอยู่ในรายละเอียดนี้ ส่วนข้อมูลตรวจสอบเชิงเทคนิคแยกไว้อีกชั้น</p></details></div>
+<div class="next"><strong>ค่อย ๆ กรอกได้ ไม่ต้องเดาคำตอบ</strong><p>เลือก “ยังไม่ทราบ” เมื่อยังไม่มีข้อมูล ระบบจริงจะบอกว่าสิ่งใดต้องตรวจเพิ่ม แทนการเติมศูนย์ให้เอง</p></div>
+<p class="verify" id="prototype-note">สถานะและช่องในหน้านี้เป็นตัวอย่าง UX ไม่ใช่การตรวจสิทธิทางภาษี</p>
+</section>
+</main>
+<footer class="footer">ต้นแบบ C02 · ทำงานเฉพาะในหน้านี้ · รีเฟรชแล้วข้อมูลหาย · ไม่มีการส่งข้อมูลหรือคำนวณภาษี</footer>
+</div>
+<script>
+'use strict';
+const byId = id => document.getElementById(id);
+const chosen = name => document.querySelector(`input[name="${name}"]:checked`)?.value ?? null;
+const title = byId('overview'), copy = byId('result-copy'), issues = byId('issues');
+let mode = 'missing', previousPvd = null;
+function setRadio(name, value) { document.querySelectorAll(`input[name="${name}"]`).forEach(input => { input.checked = input.value === value; }); }
+function syncFields() {
+  const value = chosen('pvd');
+  byId('pvd-fields').hidden = value !== 'yes';
+  byId('pvd-no-note').hidden = value !== 'no';
+  byId('history-warning').hidden = chosen('history') !== 'yes';
+  byId('pvd-state').textContent = value === 'no' ? 'ไม่มีเงินสะสมใหม่' : value === 'yes' ? 'กรอกส่วนของคุณ' : value === 'unknown' ? 'ยังไม่ทราบ' : 'ยังไม่ได้ระบุ';
+  byId('pvd-state').classList.toggle('ok', value === 'no');
+}
+function issue(label, explanation, target) {
+  const li = document.createElement('li'), strong = document.createElement('strong'), p = document.createElement('p'), a = document.createElement('a');
+  strong.textContent = label; p.textContent = explanation; a.href = `#${target}`; a.textContent = 'ไปที่ข้อมูลนี้ →';
+  a.addEventListener('click', event => { event.preventDefault(); const field = byId(target); field.scrollIntoView({block:'center'}); field.focus(); });
+  li.append(strong, p, a); issues.append(li);
+}
+function render() {
+  syncFields(); issues.replaceChildren(); byId('rights-summary').hidden = mode !== 'ready';
+  byId('tax-placeholder').hidden = mode !== 'ready'; byId('ready-note').hidden = mode !== 'ready';
+  document.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
+  if (mode === 'ready') {
+    title.textContent = 'ตัวอย่างเมื่อข้อมูลครบ'; copy.textContent = 'ระบบจริงจะแสดงภาษีและสิทธิที่ผ่านการตรวจตรงนี้';
+    byId('status').textContent = 'สถานการณ์ตัวอย่างเท่านั้น ยังไม่ได้ตรวจข้อมูลหรือคำนวณภาษี'; return;
+  }
+  title.textContent = 'ยังแสดงภาษีไม่ได้';
+  if (mode === 'unsupported') {
+    copy.textContent = 'มีรายการที่ต้องใช้การคำนวณนอกขอบเขตที่รองรับ';
+    issue('สิทธิสืบเนื่องจากการสับเปลี่ยน LTF', 'ตัวอย่างกรณีที่ยังไม่รองรับ จึงยังแสดงภาษีไม่ได้ ไม่ควรลบรายการจริงเพื่อให้คำนวณผ่าน', 'history-warning');
+    byId('status').textContent = 'กรณีสมมุติ: มีสิทธิจากปีก่อน แม้ปีนี้ไม่ได้ซื้อเพิ่ม'; return;
+  }
+  copy.textContent = 'ระบุข้อมูลที่เกี่ยวข้องก่อน ระบบจริงจึงจะตรวจและแสดงภาษีได้';
+  if (!byId('salary').value.trim()) issue('รายได้ทั้งปี', 'ยังไม่ได้ระบุรายได้จากการจ้างงาน', 'salary');
+  if (chosen('pvd') === 'yes') {
+    if (!byId('pvd-paid').value.trim()) issue('PVD: เงินสะสมส่วนของคุณ', 'ยังไม่ทราบยอดที่หักจากเงินเดือน', 'pvd-paid');
+    if (!byId('pvd-wage').value.trim()) issue('PVD: ฐานค่าจ้าง', 'ยังไม่ทราบฐานค่าจ้างที่ใช้ส่งกองทุน', 'pvd-wage');
+  } else if (chosen('pvd') !== 'no') issue('PVD: เงินสะสมใหม่ปีนี้', 'ยังไม่ได้ยืนยันว่ามีหรือไม่มีเงินสะสม', 'pvd-card');
+  if (chosen('history') !== 'no') issue('กองทุนเดิมและรายการอื่น', chosen('history') === 'yes' ? 'มีรายการที่ต้องตรวจเพิ่ม แม้ไม่มีเงินสะสมใหม่' : 'ยังไม่ทราบว่ามีการขาย โอน หรือสิทธิสืบเนื่องหรือไม่', chosen('history') === 'yes' ? 'history-warning' : 'pvd-card');
+  const count = issues.children.length;
+  byId('status').textContent = count ? `ในส่วนที่ให้ลองกรอก ยังมี ${count} รายการให้ระบุหรือตรวจเพิ่ม` : 'กรอกส่วนทดลองแล้ว แต่ต้นแบบนี้ไม่ตรวจเงื่อนไขหรือแสดงภาษีจริง ลองกด “ตัวอย่างข้อมูลครบ” เพื่อดูรูปแบบผลลัพธ์';
+}
+function preset(next) {
+  mode = next; byId('salary').value = next === 'missing' ? '' : '990500';
+  setRadio('pvd', next === 'ready' ? 'yes' : next === 'unsupported' ? 'no' : null);
+  setRadio('history', next === 'ready' ? 'no' : next === 'unsupported' ? 'yes' : null);
+  byId('pvd-paid').value = next === 'ready' ? '100000' : ''; byId('pvd-wage').value = next === 'ready' ? '990500' : '';
+  previousPvd = chosen('pvd'); render();
+}
+document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => preset(button.dataset.mode)));
+byId('reset').addEventListener('click', () => preset('missing'));
+document.querySelectorAll('input').forEach(input => input.addEventListener(input.type === 'radio' ? 'change' : 'input', () => {
+  if (input.name === 'pvd') {
+    const value = chosen('pvd');
+    if (previousPvd === 'yes' && value === 'no' && (byId('pvd-paid').value || byId('pvd-wage').value)) {
+      if (!window.confirm('ต้องการนำเงินสะสมใหม่ออกจากตัวอย่างนี้ใช่ไหม? ประวัติกองทุนเดิมจะยังอยู่')) { setRadio('pvd', 'yes'); return; }
+      byId('pvd-paid').value = ''; byId('pvd-wage').value = '';
+    }
+    previousPvd = value;
+  }
+  mode = 'missing'; render();
+}));
+render();
+</script>
+</body>
+</html>

@@ -115,6 +115,12 @@ def activate_catalog(catalog: OpportunityCatalog) -> ActivatedOpportunityCatalog
         findings.append("CATALOG_JURISDICTION_UNSUPPORTED")
     present = {definition.opportunity_id for definition in catalog.definitions}
     for required in opportunity_ids.ALL_DEFINITION_IDS:
+        if required == opportunity_ids.RMF_OWN_2026 and catalog.version in {
+            "1.0.0",
+            "1.0.1",
+            "1.1.0",
+        }:
+            continue
         if required not in present:
             findings.append(f"REQUIRED_DEFINITION_MISSING:{required}")
     _validate_new_cash_rules(catalog, findings)

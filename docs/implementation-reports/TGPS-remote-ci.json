@@ -1,0 +1,32 @@
+{
+  "pr": 4,
+  "run_url": "https://github.com/nawariso/Tax-GPS/actions/runs/38765573860",
+  "runtime": {"os": "Ubuntu 24.04.5", "python": "3.12.15", "node": "22.23.3"},
+  "frontend": {"tests": 24, "pass": 24, "fail": 0, "skipped": 0},
+  "head_sha": "c4527c9e2a2c3b041ff72e96ac5f404c06a94170",
+  "merge_sha": "b9015a3ba9103664a2d143ec40677e029ab81214",
+  "run_id": 38765573860,
+  "job_id": 116527763633,
+  "conclusion": "success",
+  "lines": [
+    "2026-10-15T16:02:23.1928544Z Ubuntu",
+    "2026-10-15T16:02:23.1929181Z 24.04.5",
+    "2026-10-15T16:02:23.1933760Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+    "2026-10-15T16:02:24.1123632Z Complete job name: Python 3.12 quality gates",
+    "2026-10-15T16:02:24.4828322Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +b9015a3ba9103664a2d143ec40677e029ab81214:refs/remotes/pull/4/merge",
+    "2026-10-15T16:02:24.7678103Z  * [new ref]         b9015a3ba9103664a2d143ec40677e029ab81214 -> pull/4/merge",
+    "2026-10-15T16:02:24.7991176Z HEAD is now at b9015a3 Merge c4527c9e2a2c3b041ff72e96ac5f404c06a94170 into 92bc65b7e5140807f86a0caecfbebb5f6cc8fb54",
+    "2026-10-15T16:02:24.8068654Z b9015a3ba9103664a2d143ec40677e029ab81214",
+    "2026-10-15T16:02:27.6689315Z Using CPython 3.12.15 interpreter at: /opt/hostedtoolcache/Python/3.12.15/x64/bin/python3.12",
+    "2026-10-15T16:02:28.1169321Z Python 3.12.15 (main, Oct  1 2026, 02:35:59) [GCC 13.3.0]",
+    "2026-10-15T16:02:28.2066630Z All checks passed!",
+    "2026-10-15T16:02:28.2625994Z 147 files already formatted",
+    "2026-10-15T16:02:32.6359495Z Success: no issues found in 102 source files",
+    "2026-10-15T16:02:35.3302420Z platform linux -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0",
+    "2026-10-15T16:02:50.1713850Z TOTAL                                           2863      0    798      0   100%",
+    "2026-10-15T16:02:50.1714656Z ============================= 695 passed in 16.56s =============================",
+    "2026-10-15T16:02:53.0389252Z node: v22.23.3",
+    "2026-10-15T16:02:56.6367499Z Successfully built dist/tax_gps_core-0.2.0.tar.gz",
+    "2026-10-15T16:02:56.6368436Z Successfully built dist/tax_gps_core-0.2.0-py3-none-any.whl"
+  ]
+}

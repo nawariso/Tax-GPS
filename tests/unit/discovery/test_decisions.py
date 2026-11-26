@@ -28,6 +28,7 @@ from tax_gps.profile.models import (
     UserProfile,
 )
 from tests.support.catalog import production_catalog
+from tests.support.profiles import complete_benefits
 
 
 def context(planning_date: date) -> DiscoveryContext:
@@ -36,6 +37,7 @@ def context(planning_date: date) -> DiscoveryContext:
 
 def profile(facts: OpportunityFacts, salary: int = 800000) -> UserProfile:
     return UserProfile(
+        benefits=complete_benefits(),
         profile_id="p",
         version="1",
         tax_year=TaxYear(2026),

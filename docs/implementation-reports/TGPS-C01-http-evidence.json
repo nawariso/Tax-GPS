@@ -1,0 +1,111 @@
+{
+  "probes": {
+    "historical": {
+      "runtime": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+      "platform": "Windows-11-10.0.26300-SP0",
+      "engine": "tax-gps-core/0.1.1",
+      "pack": "1.0.0",
+      "catalog": "1.0.0",
+      "pit": "79000.00",
+      "replay_output_hash": "ef38a41f9760e1272a486c1daecc6731055722e232d0532f9a668476c4482650",
+      "requests": 100,
+      "errors": [],
+      "unread_bodies": 100,
+      "drained_bodies": 0,
+      "elapsed_seconds": 0.565
+    },
+    "current": {
+      "runtime": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+      "platform": "Windows-11-10.0.26300-SP0",
+      "engine": "tax-gps-core/0.2.0",
+      "pack": "1.0.1",
+      "catalog": "1.0.1",
+      "pit": null,
+      "replay_output_hash": "44861ab6d2238d72a1bb5ade16ed3e6dacbb68a9fd2711f7207215ac88c9d442",
+      "requests": 100,
+      "errors": [],
+      "unread_bodies": 0,
+      "drained_bodies": 100,
+      "elapsed_seconds": 0.454
+    }
+  },
+  "repetitions": [
+    {
+      "group": "targeted",
+      "iteration": 1,
+      "exit_code": 0,
+      "seconds": 1.307,
+      "output": ".                                                                        [100%]\n1 passed, 27 deselected in 0.66s\n"
+    },
+    {
+      "group": "targeted",
+      "iteration": 2,
+      "exit_code": 0,
+      "seconds": 1.29,
+      "output": ".                                                                        [100%]\n1 passed, 27 deselected in 0.68s\n"
+    },
+    {
+      "group": "targeted",
+      "iteration": 3,
+      "exit_code": 0,
+      "seconds": 1.271,
+      "output": ".                                                                        [100%]\n1 passed, 27 deselected in 0.67s\n"
+    },
+    {
+      "group": "targeted",
+      "iteration": 4,
+      "exit_code": 0,
+      "seconds": 1.273,
+      "output": ".                                                                        [100%]\n1 passed, 27 deselected in 0.65s\n"
+    },
+    {
+      "group": "targeted",
+      "iteration": 5,
+      "exit_code": 0,
+      "seconds": 1.335,
+      "output": ".                                                                        [100%]\n1 passed, 27 deselected in 0.67s\n"
+    },
+    {
+      "group": "targeted",
+      "iteration": 6,
+      "exit_code": 0,
+      "seconds": 1.279,
+      "output": ".                                                                        [100%]\n1 passed, 27 deselected in 0.67s\n"
+    },
+    {
+      "group": "targeted",
+      "iteration": 7,
+      "exit_code": 0,
+      "seconds": 1.271,
+      "output": ".                                                                        [100%]\n1 passed, 27 deselected in 0.66s\n"
+    },
+    {
+      "group": "targeted",
+      "iteration": 8,
+      "exit_code": 0,
+      "seconds": 1.376,
+      "output": ".                                                                        [100%]\n1 passed, 27 deselected in 0.69s\n"
+    },
+    {
+      "group": "targeted",
+      "iteration": 9,
+      "exit_code": 0,
+      "seconds": 1.319,
+      "output": ".                                                                        [100%]\n1 passed, 27 deselected in 0.66s\n"
+    },
+    {
+      "group": "targeted",
+      "iteration": 10,
+      "exit_code": 0,
+      "seconds": 1.293,
+      "output": ".                                                                        [100%]\n1 passed, 27 deselected in 0.67s\n"
+    },
+    {
+      "group": "full",
+      "iteration": 1,
+      "exit_code": 0,
+      "seconds": 8.735,
+      "output": "........................................................................ [ 10%]\n........................................................................ [ 21%]\n........................................................................ [ 31%]\n........................................................................ [ 42%]\n........................................................................ [ 52%]\n........................................................................ [ 63%]\n........................................................................ [ 73%]\n........................................................................ [ 84%]\n........................................................................ [ 94%]\n.....................................                                    [100%]\n685 passed in 8.08s\n"
+    }
+  ]
+}

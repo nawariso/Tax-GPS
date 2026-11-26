@@ -1,0 +1,60 @@
+{
+  "fixture_sha256": "b505ff74ffc7d82839f360bbbd90feeebbc9b6f9d749397bf251191a213c9734",
+  "method": "standalone Python Decimal60, no tax_gps imports or pack reads",
+  "cases": [
+    {
+      "id": "ZERO",
+      "passed": true
+    },
+    {
+      "id": "NORMAL",
+      "passed": true
+    },
+    {
+      "id": "PERCENT-BELOW",
+      "passed": true
+    },
+    {
+      "id": "PERCENT-AT",
+      "passed": true
+    },
+    {
+      "id": "PERCENT-ABOVE",
+      "passed": true
+    },
+    {
+      "id": "INDIVIDUAL-BELOW",
+      "passed": true
+    },
+    {
+      "id": "INDIVIDUAL-AT",
+      "passed": true
+    },
+    {
+      "id": "INDIVIDUAL-ABOVE",
+      "passed": true
+    },
+    {
+      "id": "LOW-WAGE-ORDER",
+      "passed": true
+    },
+    {
+      "id": "LOW-WAGE-FLOOR",
+      "passed": true
+    },
+    {
+      "id": "NO-PVD-SPLIT",
+      "passed": true
+    },
+    {
+      "id": "EXACT-DERIVED",
+      "passed": true
+    },
+    {
+      "id": "NO-INCOME-CAP",
+      "passed": true
+    }
+  ],
+  "passed": 13,
+  "legal_acceptance": false
+}

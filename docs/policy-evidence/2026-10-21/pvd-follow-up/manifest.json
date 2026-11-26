@@ -1,0 +1,28 @@
+[
+  {
+    "file": "sec-pvd-act-codified.pdf",
+    "url": "https://www.sec.or.th/TH/Documents/ActandRoyalEnactment/Act/act-pvd2530-codified.pdf",
+    "status": "FAILED",
+    "sha256": null,
+    "error_type": "HTTPError",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "file": "rd-mr183.html",
+    "url": "https://www.rd.go.th/2490.html",
+    "retrieved_date": "2026-10-21",
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 49707,
+    "sha256": "1d049dc78ad6bf9b52e71d924ce5cbaf213f8a1e1fdf560a6858dc7e2b2a48d4",
+    "status": "DOWNLOADED_FORMAT_VALIDATED"
+  },
+  {
+    "file": "rd-pit91-2568.pdf",
+    "url": "https://www.rd.go.th/fileadmin/tax_pdf/pit/2568/241268PIT91.pdf",
+    "retrieved_date": "2026-10-21",
+    "content_type": "application/pdf",
+    "bytes": 1463353,
+    "sha256": "8cb80f3b2392be6462c3b73cb31bd7b560578e81a84625b3938bb02d258e206b",
+    "status": "DOWNLOADED_FORMAT_VALIDATED"
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-22",
+  "head_sha": "950fd96e500dafd95aa787a8c351cddb80f6f38b",
+  "merge_sha": "6ecfcd2fb3f6bb62cd8b1d85fdbc1d5c3b12bfba",
+  "run_url": "https://github.com/nawariso/Tax-GPS/actions/runs/39780005899",
+  "run_id": 39780005899,
+  "job_id": 119828537296,
+  "conclusion": "success",
+  "evidence_lines": [
+    "2026-10-22T12:38:33.8266762Z HEAD is now at 6ecfcd2 Merge 950fd96e500dafd95aa787a8c351cddb80f6f38b into 92bc65b7e5140807f86a0caecfbebb5f6cc8fb54",
+    "2026-10-22T12:38:37.2851045Z Using CPython 3.12.15 interpreter at: /opt/hostedtoolcache/Python/3.12.15/x64/bin/python3.12",
+    "2026-10-22T12:38:37.3721891Z Python 3.12.15 (main, Oct  1 2026, 02:35:59) [GCC 13.3.0]",
+    "2026-10-22T12:38:41.9415566Z platform linux -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0",
+    "2026-10-22T12:38:54.7800317Z TOTAL                                           3015      0    852      0   100%",
+    "2026-10-22T12:38:54.7800665Z Required test coverage of 100.0% reached. Total coverage: 100.00%",
+    "2026-10-22T12:38:54.7801002Z ============================= 754 passed in 13.83s =============================",
+    "2026-10-22T12:38:57.8314394Z node: v22.23.4",
+    "2026-10-22T12:39:02.1866642Z # tests 45",
+    "2026-10-22T12:39:02.1866981Z # pass 45",
+    "2026-10-22T12:39:02.1867150Z # fail 0",
+    "2026-10-22T12:39:02.1867602Z # skipped 0",
+    "2026-10-22T12:39:02.8902631Z Successfully built dist/tax_gps_core-0.3.0.tar.gz",
+    "2026-10-22T12:39:02.8903088Z Successfully built dist/tax_gps_core-0.3.0-py3-none-any.whl"
+  ],
+  "acceptance": "NOT_CLAIMED"
+}

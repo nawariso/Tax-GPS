@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
+from tax_gps.calculation.availability import PlanningAvailability
+from tax_gps.calculation.pvd import PvdCalculation
+from tax_gps.calculation.rmf import RmfCalculation, RmfConditions
 from tax_gps.core.money import Money
 from tax_gps.core.percentage import Percentage
 from tax_gps.core.tax_year import TaxYear
@@ -14,6 +17,7 @@ from tax_gps.policy.models import RuleSource
 
 class TaxStatus(StrEnum):
     READY = "READY"
+    REQUIRES_INPUT = "REQUIRES_INPUT"
     UNSUPPORTED = "UNSUPPORTED"
     ADVANCED_TAX_PATH_REQUIRED = "ADVANCED_TAX_PATH_REQUIRED"
 
@@ -56,6 +60,8 @@ class CalculationTrace:
 @dataclass(frozen=True, slots=True)
 class IncomeCalculation:
     assessable_income: Money
+    gross_income: Money | None = None
+    pvd_exemption: Money = field(default_factory=Money.zero)
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,6 +76,7 @@ class AllowanceCalculation:
     parents: Money
     children: Money
     mortgage_interest: Money
+    pvd: Money = field(default_factory=Money.zero)
 
     @property
     def total(self) -> Money:
@@ -80,6 +87,7 @@ class AllowanceCalculation:
                 self.parents,
                 self.children,
                 self.mortgage_interest,
+                self.pvd,
             )
         )
 
@@ -143,9 +151,22 @@ class TaxState:
     unsupported_reasons: tuple[str, ...]
     output_hash: str
     _activated_pack: ActivatedRulePack = field(repr=False, compare=False)
+    planning_availability: PlanningAvailability = PlanningAvailability.AVAILABLE
+    pvd: PvdCalculation | None = None
+    rmf: RmfCalculation | None = None
+    rmf_conditions: RmfConditions | None = None
+    reason_codes: tuple[str, ...] = ()
+    missing_fact_ids: tuple[str, ...] = ()
+    calculation_scope: str = "EMPLOYEE_40_1_SUPPORTED_RIGHTS_2026"
 
     def tax_impact(self, additional_deduction: Money) -> TaxImpact:
-        if self.taxable_income is None:
+        if (
+            self.status is not TaxStatus.READY
+            or self.taxable_income is None
+            or self.planning_availability is not PlanningAvailability.AVAILABLE
+            or (self.rmf is not None and self.rmf.own_purchase_paid.is_positive())
+            or (self.pvd is not None and self.pvd.employee_paid.is_positive())
+        ):
             raise ValueError("tax impact is unavailable for unsupported tax state")
         from tax_gps.calculation.rules import calculate_tax_saving  # noqa: PLC0415
 
@@ -154,8 +175,25 @@ class TaxState:
     def material_dict(self) -> dict[str, object]:
         return {
             "status": self.status.value,
+            "planning_availability": self.planning_availability.value,
+            "reason_codes": list(self.reason_codes),
+            "missing_fact_ids": list(self.missing_fact_ids),
+            "calculation_scope": self.calculation_scope,
             "tax_year": self.tax_year.gregorian,
-            "income": {"assessable_income": self.income.assessable_income.canonical()},
+            "rmf": self.rmf.to_dict() if self.rmf is not None else None,
+            "rmf_conditions": self.rmf_conditions.to_dict()
+            if self.rmf_conditions is not None
+            else None,
+            "pvd": self.pvd.to_dict() if self.pvd is not None else None,
+            "income": {
+                "assessable_income": self.income.assessable_income.canonical(),
+                "gross_income": (
+                    self.income.gross_income
+                    if self.income.gross_income is not None
+                    else self.income.assessable_income
+                ).canonical(),
+                "pvd_exemption": self.income.pvd_exemption.canonical(),
+            },
             "expenses": {"section_40_1": self.expenses.section_40_1.canonical()},
             "allowances": {
                 "personal": self.allowances.personal.canonical(),
@@ -163,6 +201,7 @@ class TaxState:
                 "parents": self.allowances.parents.canonical(),
                 "children": self.allowances.children.canonical(),
                 "mortgage_interest": self.allowances.mortgage_interest.canonical(),
+                "pvd": self.allowances.pvd.canonical(),
                 "total": self.allowances.total.canonical(),
             },
             # Explicit `is not None`: a zero PIT is a real, material result and must serialize

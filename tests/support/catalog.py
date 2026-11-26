@@ -8,15 +8,19 @@ from typing import Any
 
 from tax_gps.opportunity import opportunity_ids
 from tax_gps.opportunity.activation import ActivatedOpportunityCatalog, activate_catalog
-from tax_gps.opportunity.loader import BUNDLED_CATALOG_ID_2026, parse_catalog
+from tax_gps.opportunity.loader import (
+    BUNDLED_CATALOG_ID_2026,
+    BUNDLED_CATALOG_VERSION_2026,
+    parse_catalog,
+)
 
 CatalogDict = dict[str, Any]
 
 
 @cache
 def _bundled_text() -> str:
-    resource = files("tax_gps.opportunity.catalogs").joinpath(f"{BUNDLED_CATALOG_ID_2026}.json")
-    return resource.read_text(encoding="utf-8")
+    name = f"{BUNDLED_CATALOG_ID_2026}@{BUNDLED_CATALOG_VERSION_2026}.json"
+    return files("tax_gps.opportunity.catalogs").joinpath(name).read_text(encoding="utf-8")
 
 
 def bundled_catalog_dict() -> CatalogDict:

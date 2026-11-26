@@ -1,0 +1,56 @@
+[
+  {
+    "file": "rd-code.html",
+    "url": "https://www.rd.go.th/5937.html",
+    "retrieved_at": "2026-10-21T18:04:57.689969+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 241403,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "8e7968587d5aaa020f54896c0dd15199ccbd2472c5a7b077e4333e745d79984d"
+  },
+  {
+    "file": "rd-mr126.html",
+    "url": "https://www.rd.go.th/2502.html",
+    "retrieved_at": "2026-10-21T18:04:57.690637+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 216006,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "15de91cdc56133bb4cf8f31190dedf349722e08d58353a8db3908daeaa1a1722"
+  },
+  {
+    "file": "rd-mr183.html",
+    "url": "https://www.rd.go.th/2490.html",
+    "retrieved_at": "2026-10-21T18:04:57.691007+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 49707,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "1d049dc78ad6bf9b52e71d924ce5cbaf213f8a1e1fdf560a6858dc7e2b2a48d4"
+  },
+  {
+    "file": "rd-ministerial-index.html",
+    "url": "https://www.rd.go.th/6160.html",
+    "retrieved_at": "2026-10-21T18:04:57.962363+00:00",
+    "status": "DOWNLOADED_FORMAT_VALIDATED",
+    "bytes": 270059,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "adfccfb65da283307f9bcb11e49ed5ce4161458370a3b6edd068beca2de7cc18"
+  },
+  {
+    "file": "sec-pvd-assessment.html",
+    "url": "https://www.sec.or.th/TH/Pages/News_Detail.aspx?SECID=13162",
+    "retrieved_at": "2026-10-21T18:04:57.988542+00:00",
+    "status": "FAILED",
+    "sha256": null,
+    "error_type": "HTTPError",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "file": "sec-pvd-draft.html",
+    "url": "https://www.sec.or.th/TH/Pages/News_Detail.aspx?SECID=13302",
+    "retrieved_at": "2026-10-21T18:04:58.013602+00:00",
+    "status": "FAILED",
+    "sha256": null,
+    "error_type": "HTTPError",
+    "error": "HTTP Error 403: Forbidden"
+  }
+]

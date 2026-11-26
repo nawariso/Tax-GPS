@@ -24,6 +24,7 @@ from tax_gps.policy.activation import ActivatedRulePack
 from tax_gps.profile.models import IncomeProfile, OpportunityFacts, UserProfile
 from tests.support.catalog import activate_catalog_dict, bundled_catalog_dict, production_catalog
 from tests.support.policy import activate_dict, bundled_pack_dict, production_pack
+from tests.support.profiles import complete_benefits
 
 
 def profile(salary: int = 800000) -> UserProfile:
@@ -33,6 +34,7 @@ def profile(salary: int = 800000) -> UserProfile:
         TaxYear(2026),
         IncomeProfile(Money.of(salary)),
         opportunity_facts=OpportunityFacts(shared_limit_usage=()),
+        benefits=complete_benefits(),
     )
 
 

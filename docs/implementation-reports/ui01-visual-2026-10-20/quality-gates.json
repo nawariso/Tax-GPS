@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-20",
+  "base_head": "da8e5c9",
+  "scope": "one-line style.css overflow fix; local Windows",
+  "note": "pytest output yielded mid-run; completion summary records remaining output rather than a full transcript",
+  "results": [
+    {
+      "cmd": "uv sync --locked",
+      "chunk_id": "90c546",
+      "wall_time_seconds": 0.1603764,
+      "exit_code": 0,
+      "original_token_count": 15,
+      "output": "Resolved 16 packages in 0.90ms\nChecked 16 packages in 1ms\n"
+    },
+    {
+      "cmd": "uv run --locked ruff check .",
+      "chunk_id": "655126",
+      "wall_time_seconds": 0.6541172,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    },
+    {
+      "cmd": "uv run --locked ruff format --check .",
+      "chunk_id": "35a411",
+      "wall_time_seconds": 0.224043,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "148 files already formatted\n"
+    },
+    {
+      "cmd": "uv run --locked mypy --strict",
+      "chunk_id": "ebe57e",
+      "wall_time_seconds": 0.8886208,
+      "exit_code": 0,
+      "original_token_count": 12,
+      "output": "Success: no issues found in 102 source files\r\n"
+    },
+    {
+      "cmd": "uv run --locked pytest --cov=tax_gps --cov-branch --cov-report=term-missing -q",
+      "chunk_id": "4f9be0",
+      "wall_time_seconds": 10.0054469,
+      "session_id": 81771,
+      "original_token_count": 64,
+      "output": "........................................................................ [ 10%]\r\n........................................................................ [ 20%]\r\n........................................................................ [ 31%]\r\n.............",
+      "exit_code": 0,
+      "completion": {
+        "tests": 695,
+        "seconds": 11.61,
+        "statements": 2846,
+        "branches": 798,
+        "coverage_percent": 100,
+        "misses": 0
+      }
+    },
+    {
+      "cmd": "uv run --locked python -m examples.check_web_demo",
+      "chunk_id": "3c2958",
+      "wall_time_seconds": 3.4384599,
+      "exit_code": 0,
+      "original_token_count": 542,
+      "output": "✔ comparison starts with pinned NO_ACTION and no selected cash candidates (97.5704ms)\n✔ selection renders authoritative fields without mutating engine output (64.8391ms)\n✔ baseline and unknown candidate IDs cannot become user selections (61.3405ms)\n✔ selection reset binds to result identity even for repeated candidate IDs (118.2739ms)\n✔ recalculating an unchanged profile also clears presentation selections (119.2344ms)\n✔ zero tax benefit remains selectable and is not ranked away (59.9559ms)\n✔ NO_ACTION-only and partial financial results do not create alternatives (121.8466ms)\n✔ missing lockup metadata is not described as no constraints (67.8922ms)\n✔ export keeps engine material intact and identifies user-selected presentation (62.6092ms)\n✔ late real response cannot replace selections made on a newer result (109.2209ms)\n✔ a detached selector from an unchanged earlier calculation cannot restore selection (108.3387ms)\n✔ latest scenario wins when an earlier real response arrives later (128.3228ms)\n✔ an older request cannot clear the latest pending UI state (120.6498ms)\n✔ an older failure cannot overwrite the latest successful result (86.728ms)\n✔ invalid input cancels publication of an already pending response (65.9614ms)\n✔ editing financial input invalidates displayed and exported results (132.9577ms)\n✔ extended coverage fields reach the real engine (66.6518ms)\n✔ adding a debt invalidates results and blocks tax-motivated allocation (140.0066ms)\n✔ unsupported retirement input hides results and publishes an explicit error (101.4402ms)\n✔ C01 prior usage clears tax, selection and export and cannot be restored by an old selector (118.2362ms)\n✔ C01 unknown usage cannot publish a baseline after a late earlier response (102.4523ms)\n✔ family scenario maps its records and normal scenario clears them (181.9054ms)\n✔ removing a debt clears its guardrail effect after recalculation (120.7202ms)\n✔ C01 malformed amount names its field and clears output without echoing the amount (92.664ms)\nℹ tests 24\nℹ suites 0\nℹ pass 24\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2516.5145\n"
+    },
+    {
+      "cmd": "uv build",
+      "chunk_id": "ef772e",
+      "wall_time_seconds": 0.2662251,
+      "exit_code": 0,
+      "original_token_count": 47,
+      "output": "Building source distribution...\nBuilding wheel from source distribution...\nSuccessfully built dist\\tax_gps_core-0.2.0.tar.gz\nSuccessfully built dist\\tax_gps_core-0.2.0-py3-none-any.whl\n"
+    },
+    {
+      "cmd": "uv run --locked python -VV",
+      "chunk_id": "7dbcaf",
+      "wall_time_seconds": 0.1906723,
+      "exit_code": 0,
+      "original_token_count": 23,
+      "output": "Python 3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]\r\n"
+    }
+  ]
+}

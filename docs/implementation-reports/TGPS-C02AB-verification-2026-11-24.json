@@ -1,0 +1,70 @@
+{
+  "observed_on": "2026-11-24 (Asia/Bangkok)",
+  "source_commit": "e3babbb3ed48cec308cf0745474307ebdcb1c7f7",
+  "local_tested_head": "5b94c3d9427bed563928516655b453c13b5b05ce",
+  "local": {
+    "platform": "Windows",
+    "python": "3.14.3",
+    "node": "24.3.0",
+    "gates": {
+      "uv sync --locked": {"exit": 0, "packages": 16},
+      "uv run --locked ruff check .": {"exit": 0},
+      "uv run --locked ruff format --check .": {"exit": 0, "files": 195},
+      "uv run --locked mypy --strict": {"exit": 0, "source_files": 122},
+      "uv run --locked pytest --cov=tax_gps --cov-branch --cov-report=term-missing -q": {
+        "exit": 0, "passed": 814, "seconds": 12.88,
+        "statements": 3175, "branches": 928, "uncovered_statements": 0, "uncovered_branches": 0
+      },
+      "uv run --locked python -m examples.check_web_demo": {
+        "exit": 0, "passed": 52, "failed": 0, "skipped": 0, "duration_ms": 5206.6834
+      },
+      "uv build": {"exit": 0, "version": "0.4.0", "artifacts": ["sdist", "wheel"]}
+    }
+  },
+  "github": {
+    "pull_request": "https://github.com/nawariso/Tax-GPS/pull/4",
+    "pull_request_head": "5b94c3d9427bed563928516655b453c13b5b05ce",
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "evidence": "GitHub Actions job conclusions and checkout/test logs",
+    "python": "3.12.15",
+    "runs": [
+      {
+        "number": 22,
+        "url": "https://github.com/nawariso/Tax-GPS/actions/runs/39800026973",
+        "job_id": 119897761523,
+        "head": "acbe3932ede477131ebf287131119547df58bd76",
+        "tested_merge": "cd8d32adae2d5e16a358afeaf6621d82bd62ec39",
+        "node": "22.23.4",
+        "conclusion": "success",
+        "python_passed": 814, "coverage_percent": 100, "frontend_passed": 52, "frontend_failed": 0, "frontend_skipped": 0
+      },
+      {
+        "number": 23,
+        "url": "https://github.com/nawariso/Tax-GPS/actions/runs/39800567659",
+        "job_id": 119899744501,
+        "head": "5b94c3d9427bed563928516655b453c13b5b05ce",
+        "tested_merge": "a44e3e60e132b94a1ce50015af3ad947fa8aa22c",
+        "node": "22.23.3",
+        "conclusion": "success",
+        "python_passed": 814, "coverage_percent": 100, "frontend_passed": 52, "frontend_failed": 0, "frontend_skipped": 0
+      }
+    ]
+  },
+  "reduced_motion": {
+    "result": "PASS",
+    "browser": "Chrome Headless 158.0.8127.37",
+    "viewport_css_px": [390, 844],
+    "method": "Chrome DevTools Protocol Emulation.setEmulatedMedia on a fresh loopback DemoHandler, using a separate temporary browser profile and synthetic sample data",
+    "no_preference": {"hero_animation": "ui02-enter", "metric_animation": "ui02-number", "button_transition": "background, box-shadow", "scroll_behavior": "smooth"},
+    "reduce": {"match_media": true, "hero_animation": "none", "metric_animation": "none", "button_transition": "none", "scroll_behavior": "auto"},
+    "both_flows": "Pending state hid the result and disabled export. Auto-calculation published the updated baseline and re-enabled export, with comparison still disabled. An unknown required fact hid the result and disabled export; the error link focused the affected field.",
+    "c02a": {"pvd_exemption_before_expenses_before": "17000.00", "pvd_exemption_before_expenses_after": "15000.00", "error_focus": "pvd_registered_fund"},
+    "c02b": {"rmf_claimed_before": "100000.00", "rmf_claimed_after": "110000.00", "error_focus": "rmf_declaration_completed", "reporting_status_cleared_and_explicitly_reselected": true},
+    "emulation_cleared": true,
+    "attempt_note": "Initial probe timed out because it expected populated rights on page load. The observed initial HTTP 400 was the expected unknown-rights state. The passing probe explicitly selected the normal demo scenario before entering synthetic PVD/RMF facts.",
+    "limits": "One emulated viewport on the current integrated build. No OS setting change or user visual acceptance. Earlier normal-mode screenshot checks are separate evidence."
+  },
+  "remaining": ["explicit user acceptance", "parent C02 legal G1-G6", "C01 F09"]
+}

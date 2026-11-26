@@ -12,23 +12,25 @@ from tax_gps.core.tax_year import TaxYear
 from tax_gps.engine import ENGINE_VERSION, calculate_tax
 from tax_gps.profile.models import (
     Child,
-    ExistingTaxBenefits,
     IncomeProfile,
+    OpportunityFacts,
     Parent,
     RetirementContribution,
     UnsupportedIncome,
     UserProfile,
 )
 from tests.support.policy import production_pack
+from tests.support.profiles import complete_benefits
 
 
 def profile(salary: int, sso: int = 10500) -> UserProfile:
     return UserProfile(
+        opportunity_facts=OpportunityFacts(shared_limit_usage=()),
         profile_id="persona",
         version="1",
         tax_year=TaxYear(2026),
         income=IncomeProfile(section_40_1=Money.of(salary)),
-        benefits=ExistingTaxBenefits(social_security_paid=Money.of(sso)),
+        benefits=complete_benefits(social_security_paid=Money.of(sso)),
     )
 
 
@@ -98,7 +100,7 @@ def test_profile_rejects_wrong_tax_year_and_negative_inputs() -> None:
     with pytest.raises(ValueError, match="negative"):
         IncomeProfile(section_40_1=Money.of(-1))
     with pytest.raises(ValueError, match="negative"):
-        ExistingTaxBenefits(social_security_paid=Money.of(-1))
+        complete_benefits(social_security_paid=Money.of(-1))
     with pytest.raises(ValueError, match="negative"):
         UnsupportedIncome("40(8)", Money.of(-1))
 
@@ -183,8 +185,8 @@ def test_capacity_serialization_covers_shared_limits() -> None:
 
 @pytest.mark.golden
 @pytest.mark.mandatory
-def test_existing_rights_and_shared_retirement_capacity_flow_through_engine() -> None:
-    benefits = ExistingTaxBenefits(
+def test_supported_family_rights_have_independent_tax_golden() -> None:
+    benefits = complete_benefits(
         social_security_paid=Money.of(10500),
         parents=(Parent("father", True), Parent("mother", True)),
         children=(
@@ -193,30 +195,38 @@ def test_existing_rights_and_shared_retirement_capacity_flow_through_engine() ->
         ),
         mortgage_interest_paid=Money.of(125000),
         mortgage_eligible=True,
-        retirement_contributions=(
-            RetirementContribution("PVD", Money.of(400000)),
-            RetirementContribution("eligible_retirement_pension", Money.of(100000)),
-        ),
     )
     user = replace(profile(2800000), benefits=benefits)
     state = calculate_tax(user, production_pack())
     assert state.allowances.parents == Money.of(60000)
     assert state.allowances.children == Money.of(90000)
     assert state.allowances.mortgage_interest == Money.of(100000)
-    assert state.deduction_capacities[0].shared_remaining == Money.zero()
-    assert state.deduction_capacities[0].usable_amount == Money.zero()
-    retirement_steps = [
-        step
-        for step in state.calculation_trace.steps
-        if step.rule_id == "TH-PIT-LIMIT-RETIREMENT-SHARED"
-    ]
-    assert len(retirement_steps) == 1
-    assert retirement_steps[0].input_amount == Money.of(500000)
-    assert retirement_steps[0].output_amount == Money.zero()
+    assert state.taxable_income == Money.of(2379500)
+    assert state.pit == Money.of(478850)
+    assert state.deduction_capacities == ()
     assert {right.category for right in state.existing_rights} >= {
         "parent",
         "child",
         "mortgage_interest",
-        "PVD",
-        "eligible_retirement_pension",
     }
+
+
+def test_retirement_capacity_does_not_authorize_an_incomplete_baseline() -> None:
+    benefits = complete_benefits(
+        retirement_contributions=(
+            RetirementContribution("PVD", Money.of(400000)),
+            RetirementContribution("eligible_retirement_pension", Money.of(100000)),
+        ),
+    )
+    state = calculate_tax(replace(profile(2800000), benefits=benefits), production_pack())
+    assert state.status is TaxStatus.UNSUPPORTED
+    assert state.pit is None
+    capacity = calculate_deduction_capacity(
+        category="RETIREMENT_SHARED_GROUP",
+        standalone_limit=Money.of(500000),
+        amount_used=Money.of(500000),
+        shared_group="RETIREMENT",
+        shared_amount_used=Money.of(500000),
+        pack=production_pack(),
+    )
+    assert capacity.usable_amount == Money.zero()

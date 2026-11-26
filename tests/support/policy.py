@@ -3,19 +3,17 @@
 import copy
 import json
 from functools import cache
-from importlib.resources import files
 from typing import Any
 
 from tax_gps.policy.activation import ActivatedRulePack, activate_rule_pack
-from tax_gps.policy.loader import BUNDLED_PACK_ID_2026, parse_rule_pack
+from tax_gps.policy.loader import load_bundled_rule_pack, parse_rule_pack, rule_pack_to_dict
 
 PackDict = dict[str, Any]
 
 
 @cache
 def _bundled_text() -> str:
-    resource = files("tax_gps.policy.packs").joinpath(f"{BUNDLED_PACK_ID_2026}.json")
-    return resource.read_text(encoding="utf-8")
+    return json.dumps(rule_pack_to_dict(load_bundled_rule_pack()))
 
 
 def bundled_pack_dict() -> PackDict:

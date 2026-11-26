@@ -1,0 +1,217 @@
+{
+  "date": "2026-10-15",
+  "base_head": "80afe5ae49423b77494ca516ec7c9aee0e9bb888",
+  "code_diff_sha256": "301208734b53ff793a90f8d516a73a21317d0a3519e05c4e765bc6a6648b6542",
+  "local_314": {
+    "runtime": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "gates": [
+      {
+        "command": [
+          "uv",
+          "sync",
+          "--locked"
+        ],
+        "exit_code": 0,
+        "seconds": 0.029,
+        "output": "Resolved 16 packages in 0.88ms\nChecked 16 packages in 1ms\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "ruff",
+          "check",
+          "."
+        ],
+        "exit_code": 0,
+        "seconds": 0.134,
+        "output": "All checks passed!\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "ruff",
+          "format",
+          "--check",
+          "."
+        ],
+        "exit_code": 0,
+        "seconds": 0.067,
+        "output": "145 files already formatted\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "mypy",
+          "--strict"
+        ],
+        "exit_code": 0,
+        "seconds": 0.589,
+        "output": "Success: no issues found in 102 source files\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "pytest",
+          "--cov=tax_gps",
+          "--cov-branch",
+          "--cov-report=term-missing",
+          "-q"
+        ],
+        "exit_code": 0,
+        "seconds": 12.426,
+        "output": "........................................................................ [ 10%]\n........................................................................ [ 20%]\n........................................................................ [ 31%]\n........................................................................ [ 41%]\n........................................................................ [ 51%]\n........................................................................ [ 62%]\n........................................................................ [ 72%]\n........................................................................ [ 82%]\n........................................................................ [ 93%]\n...............................................                          [100%]\n=============================== tests coverage ================================\n_______________ coverage: platform win32, python 3.14.3-final-0 _______________\n\nName                                           Stmts   Miss Branch BrPart  Cover   Missing\n------------------------------------------------------------------------------------------\nsrc\\tax_gps\\__init__.py                            0      0      0      0   100%\nsrc\\tax_gps\\audit.py                              37      0      8      0   100%\nsrc\\tax_gps\\calculation\\__init__.py                0      0      0      0   100%\nsrc\\tax_gps\\calculation\\models.py                115      0      2      0   100%\nsrc\\tax_gps\\calculation\\readiness.py              37      0     18      0   100%\nsrc\\tax_gps\\calculation\\rules.py                 139      0     46      0   100%\nsrc\\tax_gps\\candidate\\__init__.py                  0      0      0      0   100%\nsrc\\tax_gps\\candidate\\activation.py              121      0     58      0   100%\nsrc\\tax_gps\\candidate\\audit.py                    24      0      2      0   100%\nsrc\\tax_gps\\candidate\\engine.py                  132      0     64      0   100%\nsrc\\tax_gps\\candidate\\models.py                   91      0     10      0   100%\nsrc\\tax_gps\\core\\__init__.py                       0      0      0      0   100%\nsrc\\tax_gps\\core\\canonical.py                     44      0     20      0   100%\nsrc\\tax_gps\\core\\decimal_context.py               35      0     16      0   100%\nsrc\\tax_gps\\core\\errors.py                         5      0      0      0   100%\nsrc\\tax_gps\\core\\money.py                         93      0     26      0   100%\nsrc\\tax_gps\\core\\percentage.py                    33      0      8      0   100%\nsrc\\tax_gps\\core\\tax_year.py                      30      0      8      0   100%\nsrc\\tax_gps\\discovery\\__init__.py                  0      0      0      0   100%\nsrc\\tax_gps\\discovery\\audit.py                    52      0     20      0   100%\nsrc\\tax_gps\\discovery\\capacity.py                 33      0     14      0   100%\nsrc\\tax_gps\\discovery\\context.py                   7      0      0      0   100%\nsrc\\tax_gps\\discovery\\effective_period.py          9      0      0      0   100%\nsrc\\tax_gps\\discovery\\eligibility.py              18      0      4      0   100%\nsrc\\tax_gps\\discovery\\engine.py                  118      0     44      0   100%\nsrc\\tax_gps\\discovery\\facts.py                    16      0      4      0   100%\nsrc\\tax_gps\\discovery\\intent.py                   14      0      4      0   100%\nsrc\\tax_gps\\discovery\\models.py                   91      0      0      0   100%\nsrc\\tax_gps\\engine.py                             62      0     18      0   100%\nsrc\\tax_gps\\financial\\__init__.py                  0      0      0      0   100%\nsrc\\tax_gps\\financial\\audit.py                    57      0     20      0   100%\nsrc\\tax_gps\\financial\\decisions.py                68      0     28      0   100%\nsrc\\tax_gps\\financial\\engine.py                   40      0     14      0   100%\nsrc\\tax_gps\\financial\\models.py                   46      0      0      0   100%\nsrc\\tax_gps\\financial\\policy.py                  115      0     32      0   100%\nsrc\\tax_gps\\financial\\profile.py                 115      0     34      0   100%\nsrc\\tax_gps\\financial\\reason_codes.py             17      0      0      0   100%\nsrc\\tax_gps\\financial\\state.py                   136      0     24      0   100%\nsrc\\tax_gps\\opportunity\\__init__.py                2      0      0      0   100%\nsrc\\tax_gps\\opportunity\\activation.py             63      0     30      0   100%\nsrc\\tax_gps\\opportunity\\catalogs\\__init__.py       0      0      0      0   100%\nsrc\\tax_gps\\opportunity\\loader.py                163      0     52      0   100%\nsrc\\tax_gps\\opportunity\\models.py                 99      0      4      0   100%\nsrc\\tax_gps\\opportunity\\opportunity_ids.py        17      0      0      0   100%\nsrc\\tax_gps\\opportunity\\readiness.py              73      0     40      0   100%\nsrc\\tax_gps\\policy\\__init__.py                     0      0      0      0   100%\nsrc\\tax_gps\\policy\\activation.py                  26      0      2      0   100%\nsrc\\tax_gps\\policy\\loader.py                     132      0     38      0   100%\nsrc\\tax_gps\\policy\\models.py                      71      0      2      0   100%\nsrc\\tax_gps\\policy\\packs\\__init__.py               0      0      0      0   100%\nsrc\\tax_gps\\policy\\readiness.py                   77      0     36      0   100%\nsrc\\tax_gps\\policy\\rule_ids.py                     9      0      0      0   100%\nsrc\\tax_gps\\profile\\__init__.py                    0      0      0      0   100%\nsrc\\tax_gps\\profile\\models.py                    164      0     48      0   100%\n------------------------------------------------------------------------------------------\nTOTAL                                           2846      0    798      0   100%\nRequired test coverage of 100.0% reached. Total coverage: 100.00%\n695 passed in 11.28s\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "examples.check_web_demo"
+        ],
+        "exit_code": 0,
+        "seconds": 3.448,
+        "output": "✔ comparison starts with pinned NO_ACTION and no selected cash candidates (132.8731ms)\n✔ selection renders authoritative fields without mutating engine output (59.8837ms)\n✔ baseline and unknown candidate IDs cannot become user selections (61.029ms)\n✔ selection reset binds to result identity even for repeated candidate IDs (122.0846ms)\n✔ recalculating an unchanged profile also clears presentation selections (125.3256ms)\n✔ zero tax benefit remains selectable and is not ranked away (62.2378ms)\n✔ NO_ACTION-only and partial financial results do not create alternatives (122.6412ms)\n✔ missing lockup metadata is not described as no constraints (62.3902ms)\n✔ export keeps engine material intact and identifies user-selected presentation (63.2552ms)\n✔ late real response cannot replace selections made on a newer result (123.0406ms)\n✔ a detached selector from an unchanged earlier calculation cannot restore selection (123.6232ms)\n✔ latest scenario wins when an earlier real response arrives later (125.5929ms)\n✔ an older request cannot clear the latest pending UI state (123.9906ms)\n✔ an older failure cannot overwrite the latest successful result (92.2595ms)\n✔ invalid input cancels publication of an already pending response (60.8211ms)\n✔ editing financial input invalidates displayed and exported results (123.6484ms)\n✔ extended coverage fields reach the real engine (61.0271ms)\n✔ adding a debt invalidates results and blocks tax-motivated allocation (125.3372ms)\n✔ unsupported retirement input hides results and publishes an explicit error (109.2694ms)\n✔ C01 prior usage clears tax, selection and export and cannot be restored by an old selector (107.4551ms)\n✔ C01 unknown usage cannot publish a baseline after a late earlier response (109.5672ms)\n✔ family scenario maps its records and normal scenario clears them (186.7763ms)\n✔ removing a debt clears its guardrail effect after recalculation (141.3083ms)\n✔ C01 malformed amount names its field and clears output without echoing the amount (108.1936ms)\nℹ tests 24\nℹ suites 0\nℹ pass 24\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2612.9448\n"
+      },
+      {
+        "command": [
+          "uv",
+          "build"
+        ],
+        "exit_code": 0,
+        "seconds": 0.116,
+        "output": "Building source distribution...\nBuilding wheel from source distribution...\nSuccessfully built dist\\tax_gps_core-0.2.0.tar.gz\nSuccessfully built dist\\tax_gps_core-0.2.0-py3-none-any.whl\n"
+      }
+    ]
+  },
+  "local_312": {
+    "environment": "isolated local Windows Python 3.12; not GitHub Actions",
+    "gates": [
+      {
+        "command": [
+          "uv",
+          "sync",
+          "--locked",
+          "--python",
+          "3.12"
+        ],
+        "exit_code": 0,
+        "seconds": 6.227,
+        "output": "warning: `VIRTUAL_ENV=.venv` does not match the project environment path `tmp\\ci312-venv` and will be ignored; use `--active` to target the active environment instead\nUsing CPython 3.12.14\nCreating virtual environment at: tmp\\ci312-venv\nResolved 16 packages in 1ms\nDownloading mypy (10.7MiB)\n Downloaded mypy\nPrepared 3 packages in 3.89s\nInstalled 16 packages in 2.05s\n + ast-serialize==0.11.2\n + colorama==0.4.6\n + coverage==7.16.1\n + iniconfig==2.3.0\n + librt==0.15.0\n + mypy==2.3.1\n + mypy-extensions==1.1.0\n + packaging==26.3\n + pathspec==1.1.1\n + pluggy==1.6.0\n + pygments==2.21.0\n + pytest==9.1.1\n + pytest-cov==7.1.0\n + ruff==0.16.7\n + tax-gps-core==0.2.0 (from file:///C:/Users/mickey/Desktop/Mickey%E2%84%A2/Git/Tax-GPS)\n + typing-extensions==4.16.0\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "python",
+          "-VV"
+        ],
+        "exit_code": 0,
+        "seconds": 0.903,
+        "output": "Python 3.12.14 (main, Sep  1 2026, 14:17:39) [MSC v.1944 64 bit (AMD64)]\nwarning: `VIRTUAL_ENV=.venv` does not match the project environment path `tmp\\ci312-venv` and will be ignored; use `--active` to target the active environment instead\n"
+      },
+      {
+        "command": [
+          "node",
+          "--version"
+        ],
+        "exit_code": 0,
+        "seconds": 0.078,
+        "output": "v24.3.0\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "ruff",
+          "check",
+          "."
+        ],
+        "exit_code": 0,
+        "seconds": 0.328,
+        "output": "All checks passed!\nwarning: `VIRTUAL_ENV=.venv` does not match the project environment path `tmp\\ci312-venv` and will be ignored; use `--active` to target the active environment instead\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "ruff",
+          "format",
+          "--check",
+          "."
+        ],
+        "exit_code": 0,
+        "seconds": 0.095,
+        "output": "145 files already formatted\nwarning: `VIRTUAL_ENV=.venv` does not match the project environment path `tmp\\ci312-venv` and will be ignored; use `--active` to target the active environment instead\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "mypy",
+          "--strict"
+        ],
+        "exit_code": 0,
+        "seconds": 3.543,
+        "output": "Success: no issues found in 102 source files\nwarning: `VIRTUAL_ENV=.venv` does not match the project environment path `tmp\\ci312-venv` and will be ignored; use `--active` to target the active environment instead\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "pytest",
+          "--cov=tax_gps",
+          "--cov-branch",
+          "--cov-report=term-missing",
+          "-q"
+        ],
+        "exit_code": 0,
+        "seconds": 18.522,
+        "output": "........................................................................ [ 10%]\n........................................................................ [ 20%]\n........................................................................ [ 31%]\n........................................................................ [ 41%]\n........................................................................ [ 51%]\n........................................................................ [ 62%]\n........................................................................ [ 72%]\n........................................................................ [ 82%]\n........................................................................ [ 93%]\n...............................................                          [100%]\n=============================== tests coverage ================================\n______________ coverage: platform win32, python 3.12.14-final-0 _______________\n\nName                                           Stmts   Miss Branch BrPart  Cover   Missing\n------------------------------------------------------------------------------------------\nsrc\\tax_gps\\__init__.py                            0      0      0      0   100%\nsrc\\tax_gps\\audit.py                              37      0      8      0   100%\nsrc\\tax_gps\\calculation\\__init__.py                0      0      0      0   100%\nsrc\\tax_gps\\calculation\\models.py                115      0      2      0   100%\nsrc\\tax_gps\\calculation\\readiness.py              40      0     18      0   100%\nsrc\\tax_gps\\calculation\\rules.py                 139      0     46      0   100%\nsrc\\tax_gps\\candidate\\__init__.py                  0      0      0      0   100%\nsrc\\tax_gps\\candidate\\activation.py              121      0     58      0   100%\nsrc\\tax_gps\\candidate\\audit.py                    24      0      2      0   100%\nsrc\\tax_gps\\candidate\\engine.py                  132      0     64      0   100%\nsrc\\tax_gps\\candidate\\models.py                   91      0     10      0   100%\nsrc\\tax_gps\\core\\__init__.py                       0      0      0      0   100%\nsrc\\tax_gps\\core\\canonical.py                     44      0     20      0   100%\nsrc\\tax_gps\\core\\decimal_context.py               35      0     16      0   100%\nsrc\\tax_gps\\core\\errors.py                         5      0      0      0   100%\nsrc\\tax_gps\\core\\money.py                         93      0     26      0   100%\nsrc\\tax_gps\\core\\percentage.py                    33      0      8      0   100%\nsrc\\tax_gps\\core\\tax_year.py                      30      0      8      0   100%\nsrc\\tax_gps\\discovery\\__init__.py                  0      0      0      0   100%\nsrc\\tax_gps\\discovery\\audit.py                    52      0     20      0   100%\nsrc\\tax_gps\\discovery\\capacity.py                 38      0     14      0   100%\nsrc\\tax_gps\\discovery\\context.py                   9      0      0      0   100%\nsrc\\tax_gps\\discovery\\effective_period.py          9      0      0      0   100%\nsrc\\tax_gps\\discovery\\eligibility.py              23      0      4      0   100%\nsrc\\tax_gps\\discovery\\engine.py                  118      0     44      0   100%\nsrc\\tax_gps\\discovery\\facts.py                    18      0      4      0   100%\nsrc\\tax_gps\\discovery\\intent.py                   14      0      4      0   100%\nsrc\\tax_gps\\discovery\\models.py                   91      0      0      0   100%\nsrc\\tax_gps\\engine.py                             62      0     18      0   100%\nsrc\\tax_gps\\financial\\__init__.py                  0      0      0      0   100%\nsrc\\tax_gps\\financial\\audit.py                    57      0     20      0   100%\nsrc\\tax_gps\\financial\\decisions.py                68      0     28      0   100%\nsrc\\tax_gps\\financial\\engine.py                   40      0     14      0   100%\nsrc\\tax_gps\\financial\\models.py                   46      0      0      0   100%\nsrc\\tax_gps\\financial\\policy.py                  115      0     32      0   100%\nsrc\\tax_gps\\financial\\profile.py                 115      0     34      0   100%\nsrc\\tax_gps\\financial\\reason_codes.py             17      0      0      0   100%\nsrc\\tax_gps\\financial\\state.py                   136      0     24      0   100%\nsrc\\tax_gps\\opportunity\\__init__.py                2      0      0      0   100%\nsrc\\tax_gps\\opportunity\\activation.py             63      0     30      0   100%\nsrc\\tax_gps\\opportunity\\catalogs\\__init__.py       0      0      0      0   100%\nsrc\\tax_gps\\opportunity\\loader.py                163      0     52      0   100%\nsrc\\tax_gps\\opportunity\\models.py                 99      0      4      0   100%\nsrc\\tax_gps\\opportunity\\opportunity_ids.py        17      0      0      0   100%\nsrc\\tax_gps\\opportunity\\readiness.py              73      0     40      0   100%\nsrc\\tax_gps\\policy\\__init__.py                     0      0      0      0   100%\nsrc\\tax_gps\\policy\\activation.py                  26      0      2      0   100%\nsrc\\tax_gps\\policy\\loader.py                     132      0     38      0   100%\nsrc\\tax_gps\\policy\\models.py                      71      0      2      0   100%\nsrc\\tax_gps\\policy\\packs\\__init__.py               0      0      0      0   100%\nsrc\\tax_gps\\policy\\readiness.py                   77      0     36      0   100%\nsrc\\tax_gps\\policy\\rule_ids.py                     9      0      0      0   100%\nsrc\\tax_gps\\profile\\__init__.py                    0      0      0      0   100%\nsrc\\tax_gps\\profile\\models.py                    164      0     48      0   100%\n------------------------------------------------------------------------------------------\nTOTAL                                           2863      0    798      0   100%\nRequired test coverage of 100.0% reached. Total coverage: 100.00%\n695 passed in 15.68s\nwarning: `VIRTUAL_ENV=.venv` does not match the project environment path `tmp\\ci312-venv` and will be ignored; use `--active` to target the active environment instead\n"
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "examples.check_web_demo"
+        ],
+        "exit_code": 0,
+        "seconds": 3.453,
+        "output": "✔ comparison starts with pinned NO_ACTION and no selected cash candidates (116.5034ms)\n✔ selection renders authoritative fields without mutating engine output (61.7106ms)\n✔ baseline and unknown candidate IDs cannot become user selections (77.5252ms)\n✔ selection reset binds to result identity even for repeated candidate IDs (122.406ms)\n✔ recalculating an unchanged profile also clears presentation selections (124.0763ms)\n✔ zero tax benefit remains selectable and is not ranked away (62.2135ms)\n✔ NO_ACTION-only and partial financial results do not create alternatives (121.7251ms)\n✔ missing lockup metadata is not described as no constraints (61.8495ms)\n✔ export keeps engine material intact and identifies user-selected presentation (62.408ms)\n✔ late real response cannot replace selections made on a newer result (123.34ms)\n✔ a detached selector from an unchanged earlier calculation cannot restore selection (122.9838ms)\n✔ latest scenario wins when an earlier real response arrives later (123.362ms)\n✔ an older request cannot clear the latest pending UI state (123.2465ms)\n✔ an older failure cannot overwrite the latest successful result (93.3284ms)\n✔ invalid input cancels publication of an already pending response (62.617ms)\n✔ editing financial input invalidates displayed and exported results (125.2194ms)\n✔ extended coverage fields reach the real engine (62.0996ms)\n✔ adding a debt invalidates results and blocks tax-motivated allocation (124.724ms)\n✔ unsupported retirement input hides results and publishes an explicit error (107.7617ms)\n✔ C01 prior usage clears tax, selection and export and cannot be restored by an old selector (108.2422ms)\n✔ C01 unknown usage cannot publish a baseline after a late earlier response (108.4233ms)\n✔ family scenario maps its records and normal scenario clears them (186.0756ms)\n✔ removing a debt clears its guardrail effect after recalculation (125.2466ms)\n✔ C01 malformed amount names its field and clears output without echoing the amount (108.5414ms)\nℹ tests 24\nℹ suites 0\nℹ pass 24\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2596.3008\nwarning: `VIRTUAL_ENV=.venv` does not match the project environment path `tmp\\ci312-venv` and will be ignored; use `--active` to target the active environment instead\n"
+      },
+      {
+        "command": [
+          "uv",
+          "build"
+        ],
+        "exit_code": 0,
+        "seconds": 0.135,
+        "output": "Building source distribution...\nBuilding wheel from source distribution...\nSuccessfully built dist\\tax_gps_core-0.2.0.tar.gz\nSuccessfully built dist\\tax_gps_core-0.2.0-py3-none-any.whl\n"
+      }
+    ]
+  },
+  "limits": [
+    "Windows local only; remote GitHub Actions not run",
+    "Node 24.3.0 locally; CI selects Node 22",
+    "Rendered visual QA unavailable: CUA apps=[] browsers=[]",
+    "C01 F09 OPEN; C01/UI01 not ACCEPTED"
+  ]
+}

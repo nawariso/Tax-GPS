@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-21",
+  "head_sha": "951732e864685a69ef7c2d33e84c40b8852e9b3d",
+  "merge_sha": "c404f7a2116601d259da408d63680d8efa2d8526",
+  "base_sha": "92bc65b7e5140807f86a0caecfbebb5f6cc8fb54",
+  "run_id": 39628740428,
+  "run_number": 13,
+  "job_id": 119320875789,
+  "url": "https://github.com/nawariso/Tax-GPS/actions/runs/39628740428",
+  "conclusion": "success",
+  "runtime": {
+    "os": "Ubuntu 24.04.5",
+    "python": "3.12.15",
+    "node": "22.23.3"
+  },
+  "results": {
+    "python_passed": 695,
+    "coverage_percent": 100,
+    "statements": 2863,
+    "branches": 798,
+    "frontend_passed": 37,
+    "frontend_failed": 0,
+    "frontend_skipped": 0,
+    "lint": "clean",
+    "format_files": 155,
+    "mypy_source_files": 102,
+    "build": "sdist and wheel 0.2.0"
+  },
+  "evidence_lines": [
+    "2026-10-21T15:46:39.9558816Z Ubuntu",
+    "2026-10-21T15:46:39.9559377Z 24.04.5",
+    "2026-10-21T15:46:39.9564122Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261018.339/images/ubuntu/Ubuntu2404-Readme.md",
+    "2026-10-21T15:46:41.6138715Z HEAD is now at c404f7a Merge 951732e864685a69ef7c2d33e84c40b8852e9b3d into 92bc65b7e5140807f86a0caecfbebb5f6cc8fb54",
+    "2026-10-21T15:46:43.7571734Z Using CPython 3.12.15 interpreter at: /opt/hostedtoolcache/Python/3.12.15/x64/bin/python3.12",
+    "2026-10-21T15:46:43.8785963Z Python 3.12.15 (main, Oct  1 2026, 02:35:59) [GCC 13.3.0]",
+    "2026-10-21T15:46:43.9658957Z All checks passed!",
+    "2026-10-21T15:46:44.0207200Z 155 files already formatted",
+    "2026-10-21T15:46:48.0603090Z Success: no issues found in 102 source files",
+    "2026-10-21T15:46:50.5268180Z platform linux -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0",
+    "2026-10-21T15:47:04.9445306Z TOTAL                                           2863      0    798      0   100%",
+    "2026-10-21T15:47:04.9446113Z ============================= 695 passed in 16.00s =============================",
+    "2026-10-21T15:47:05.5368027Z node: v22.23.3",
+    "2026-10-21T15:47:09.8353527Z # tests 37",
+    "2026-10-21T15:47:09.8354411Z # pass 37",
+    "2026-10-21T15:47:09.8354991Z # fail 0",
+    "2026-10-21T15:47:09.8355574Z # cancelled 0",
+    "2026-10-21T15:47:09.8356116Z # skipped 0",
+    "2026-10-21T15:47:10.3294006Z Successfully built dist/tax_gps_core-0.2.0.tar.gz",
+    "2026-10-21T15:47:10.3294970Z Successfully built dist/tax_gps_core-0.2.0-py3-none-any.whl"
+  ],
+  "limitations": [
+    "Applies only to recorded head/merge SHA, not subsequent documentation commits",
+    "F09 OPEN; independent C01 and user visual acceptance pending",
+    "C02 implementation NOT_STARTED"
+  ]
+}

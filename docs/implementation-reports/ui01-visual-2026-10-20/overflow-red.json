@@ -1,0 +1,16 @@
+[
+  {
+    "ac": "UI01-AC05",
+    "clientWidth": 345,
+    "scrollWidth": 355,
+    "viewport": 360,
+    "pass": false
+  },
+  {
+    "ac": "UI01-AC05",
+    "clientWidth": 375,
+    "scrollWidth": 385,
+    "viewport": 390,
+    "pass": false
+  }
+]
