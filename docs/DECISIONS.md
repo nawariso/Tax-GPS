@@ -373,3 +373,12 @@ AUTHORING_DETAIL หมายถึงรายละเอียดที่ผ
 - Decision: D1 เปิดการทดลอง Thai ESG ให้โปรไฟล์ PVD บวก เฉพาะ Thai ESG และยังห้ามสร้างวงเงิน RMF/เกษียณที่เหลือจากการลบยอด PVD (เป็น revision ของ C02A-AC06 สำหรับเส้นทาง C04A เท่านั้น) · D2 v0.1 ต้องยืนยันยอดซื้อ Thai ESG/ESGX ปีนี้เป็นศูนย์ ยอดบวกเป็น `UNSUPPORTED` · D3 เพิ่มข้อมูล guardrail ในเส้นทาง C03 ช่องว่างปิดเฉพาะส่วนทดลอง · D4 จำนวนเกินวงเงินสิทธิหรือเงินที่ใช้ได้ไม่คำนวณ แสดงสถานะและวงเงินสูงสุด
 - Reason: ให้ผู้ใช้ที่มี PVD ใช้ตัวทดลองได้ทันสิ้นปี โดยไม่เพิ่ม deduction treatment ใน baseline
 - Boundary: D1 ขึ้นกับผล E1 ว่า Thai ESG ไม่อยู่ในวงเงินเกษียณร่วม ถ้ายืนยันไม่ได้ให้คงปิดสำหรับ PVD บวก (fail closed) เส้นทางเดโมเดิมและ candidate engine เดิมคง C02A-AC06 ตามเดิม แผน C04A ต้องได้รับอนุมัติก่อน implementation
+
+## DEC-039 — C04A D5–D7 agreed, plan approved and Native implementation started
+
+- Date: `2026-11-27`
+- Status: `AGREED` / C04A `IN_PROGRESS`.
+- Evidence: ผู้ใช้ตอบ "ผมโอเครกับคุณทุกข้อครับ ลุยได้เลย!" ต่อคำขอให้ตัดสิน D5–D7, อนุมัติ [แผน C04A](superpowers/plans/2026-11-26-c04a-thai-esg-what-if.md) และอนุญาต push ครั้งแรก
+- Decision: D5 ปรับข้อความช่อง "สิทธิสืบเนื่องจาก LTF" ให้ระบุสิทธิสับเปลี่ยน LTF เป็น Thai ESGX โดยไม่เปลี่ยน readiness · D6 v0.1 ไม่แสดงเงื่อนไขแจ้ง บลจ. และไม่ออก catalog version ใหม่ · D7 ฐาน 30% ของ PVD บวกใช้ `assessable_income` หลังหักส่วนยกเว้น PVD และแสดงว่าเป็นวงเงินแบบระมัดระวัง · อนุมัติแผนและเริ่ม Task 1 แบบ Native (RED → GREEN) · อนุญาต push branch feature ไป origin
+- Reason: ให้ตัวทดลองพร้อมก่อนสิ้นปีภาษี 2569 โดยไม่แสดงภาษีที่ลดลงเกินจริง
+- Boundary: D7 ยังไม่ใช่ข้อยืนยันทางกฎหมาย ต้องหาหลักฐานต่อ RMF บวกยังปิดใน v0.1 การรับงาน C03/C04A และ merge เข้า main ต้องรีวิวแยก

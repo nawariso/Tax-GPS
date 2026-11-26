@@ -10,7 +10,7 @@
 
 **Spec:** [C04A v0.1](../../requirements/TGPS-C04A-thai-esg-year-end-what-if.md), [DEC-037](../../DECISIONS.md#dec-037--open-c04a-thai-esg-year-end-what-if-requirement-review), [DEC-038](../../DECISIONS.md#dec-038--c04a-review-decisions-d1d4-agreed), [หลักฐาน E1](../../policy-evidence/2026-11-26/README.md), [ตัวอย่างอ้างอิง](../../implementation-reports/TGPS-C04A-acceptance-reference.md)
 
-**สถานะแผน:** `DRAFT_FOR_REVIEW` · D5 (Task 1B), D6, D7 รอผู้ใช้ตัดสิน · implementation `NOT_STARTED`
+**สถานะแผน:** `APPROVED` / Native ตาม [DEC-039](../../DECISIONS.md#dec-039--c04a-d5d7-agreed-plan-approved-and-native-implementation-started) · D5 (ก), D6 (ข), D7 (ก) · implementation `IN_PROGRESS`
 
 ## ข้อกำหนดร่วม
 
