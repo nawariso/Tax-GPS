@@ -46,5 +46,7 @@ Current task: `REQUIREMENT_REVIEW` (D5–D7) + plan `DRAFT_FOR_REVIEW` · implem
 
 - [x] Task 3 DONE (AC01–10): HTTP RED 15/16 fail (1 characterization: ไม่มี block = response C03 เดิม) → GREEN 16/16; frontend RED 7 fail → GREEN 66/66 ผ่าน `examples.check_web_demo` request C03 รับ block `thai_esg_what_if` แบบ optional, error ภาษาไทยไม่สะท้อนค่าที่กรอก, export what-if ฝัง C03 snapshot ช่องการเงินในหัวข้อ 3 ใช้ร่วมกับเส้นทางเดิม (ซ่อนงบทดลองในโหมดทั้งปี) ตรวจครบ 7 gates: ruff 216 ไฟล์, format, mypy strict 133 ไฟล์, Python 943 ผ่านใน 14.29s, coverage 3,558 statements / 1,024 branches 100%, frontend 66/66 (0 fail/0 skip), build wheel/sdist 0.4.0
 
-Current task: Task 4 (Chrome + review)
+- [x] Task 4 Chrome: headless Chrome 158 ผ่าน CDP บน server ใหม่ ตรวจ 1440/390, over-cap, ยอดว่าง, reduced motion และ keyboard ผลตรงตัวอย่างอ้างอิง overflow 0 ([receipt](TGPS-C04A-chrome-2026-11-27.json)) รอบแรกสคริปต์ไม่ได้ตอบคำถามสิทธิ จึงถูกปิดผลตามกฎ (ไม่ใช่ bug) และ Chrome ที่สคริปต์เปิดเองเปิดไม่ขึ้นในรอบหลัง จึงเปิด Chrome เองแล้วให้สคริปต์ต่อ ปิด Chrome และ server ที่เปิดไว้แล้ว
+
+Current task: Task 4 (review)
 

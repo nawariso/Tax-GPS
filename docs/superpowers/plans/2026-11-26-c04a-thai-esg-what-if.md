@@ -93,6 +93,7 @@
 ## Task 4 — ตรวจรวมและส่งรีวิว
 
 - [ ] `tgps-verify` ครบ 7 gates บันทึกตัวเลขจริง
-- [ ] Chrome 1440/390, keyboard, reduced motion บน server ใหม่พอร์ตว่าง
+- [x] Chrome 1440/390, keyboard, reduced motion บน server ใหม่พอร์ตว่าง
+  ↳ ทำแล้ว: Chrome headless 158 ผ่าน CDP บน server ใหม่ (พอร์ตว่าง) ตัวเลขตรงตัวอย่างอ้างอิงทั้ง 1440 และ 390, over-cap แสดงวงเงินและไม่คำนวณ, ยอดว่างแจ้งช่องที่ขาด, overflow 0, reduced motion = animation `none`, Enter เปิดหัวข้อ 3 แล้ว Tab ถึงช่องจำนวน ([receipt](../../implementation-reports/TGPS-C04A-chrome-2026-11-27.json)) รอบแรกสคริปต์ไม่ได้ตอบสิทธิ จึงถูกปิดผลตามกฎ และ Chrome จากสคริปต์เปิดไม่ขึ้นในรอบหลัง จึงเปิดเองแล้วให้สคริปต์ต่อ
 - [ ] Independent review เทียบกับ `b825c5a`; แก้ผลด้วย RED→GREEN
 - [ ] `tgps-mark-progress` + DEC สถานะ IMPLEMENTED; user acceptance เปิดไว้
