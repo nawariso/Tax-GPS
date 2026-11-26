@@ -44,5 +44,7 @@ Current task: `REQUIREMENT_REVIEW` (D5–D7) + plan `DRAFT_FOR_REVIEW` · implem
 
 - [x] Task 2 DONE (AC10): RED collection ขาดโมดูล audit → GREEN 17/17 แล้วเพิ่ม malformed cases ปิด coverage → 20/20; Python 927 ผ่านใน 13.87s, coverage 3,558 statements / 1,024 branches 100%, ruff 215 ไฟล์, mypy strict 132 ไฟล์ผ่าน Snapshot schema `tax-gps-thai-esg-what-if/1` ผูก engine `tax-gps-thai-esg-what-if/0.1.0`, catalog และ financial policy hash, ฝัง C03 snapshot ทั้งชุด สถานะไม่ READY ไม่มี export
 
-Current task: Task 3 (HTTP + demo)
+- [x] Task 3 DONE (AC01–10): HTTP RED 15/16 fail (1 characterization: ไม่มี block = response C03 เดิม) → GREEN 16/16; frontend RED 7 fail → GREEN 66/66 ผ่าน `examples.check_web_demo` request C03 รับ block `thai_esg_what_if` แบบ optional, error ภาษาไทยไม่สะท้อนค่าที่กรอก, export what-if ฝัง C03 snapshot ช่องการเงินในหัวข้อ 3 ใช้ร่วมกับเส้นทางเดิม (ซ่อนงบทดลองในโหมดทั้งปี) ตรวจครบ 7 gates: ruff 216 ไฟล์, format, mypy strict 133 ไฟล์, Python 943 ผ่านใน 14.29s, coverage 3,558 statements / 1,024 branches 100%, frontend 66/66 (0 fail/0 skip), build wheel/sdist 0.4.0
+
+Current task: Task 4 (Chrome + review)
 

@@ -38,7 +38,7 @@
 | 1 | Domain what-if (AC01–05, 07–09) | เสร็จ · 25 tests (14 functions) · Python 907 · coverage 100% |
 | 1B | ปรับข้อความช่องสิทธิ LTF ใน C03 (D5) | เสร็จ · frontend 59/59 |
 | 2 | Snapshot, export, replay (AC10) | เสร็จ · 20 tests · Python 927 · coverage 100% |
-| 3 | HTTP และเดโมภาษาไทย (AC01–10) | ยังไม่เริ่ม |
+| 3 | HTTP และเดโมภาษาไทย (AC01–10) | เสร็จ · HTTP 16 tests · frontend 66/66 |
 | 4 | ตรวจรวม, Chrome, independent review | ยังไม่เริ่ม |
 
 ## Task 1 — Domain what-if
@@ -85,9 +85,10 @@
 
 **ไฟล์:** `examples/annual_estimate_adapter.py` (block `thai_esg_what_if` ที่เป็น optional ใน request เดิม), `examples/web/annual-estimate.js`, `examples/web/index.html`, `examples/web/profile.css`, `examples/demo_errors.py`, `tests/acceptance/test_c04a_thai_esg_what_if_demo.py`, `tests/web/test_app.cjs`
 
-- [ ] RED HTTP: request ไม่มี block = response C03 เดิม byte-for-byte ในส่วน C03; block ครบ = ผลก่อน/หลังตามตัวอย่าง; ช่องผิด = error ระบุช่องโดยไม่สะท้อนค่า
-- [ ] RED frontend: ส่วน "ทดลองซื้อ Thai ESG" แสดงหลัง C03 READY เท่านั้น; ช่องจำนวน, ยืนยันยอดซื้อเดิมปีนี้, เงินสดคงเหลือ, ค่าใช้จ่ายจำเป็นต่อเดือน, หนี้/ภาระจ่าย (ใช้ component เดิมของเดโม); ผลคู่ก่อน/หลัง; เงื่อนไขจาก catalog; แก้ข้อมูลแล้วผลและ export เก่าหาย; response ค้างไม่เผยผล
-- [ ] Implement แล้วรัน `uv run --locked python -m examples.check_web_demo` (ห้ามรัน node ตรง)
+- [x] RED HTTP: request ไม่มี block = response C03 เดิม byte-for-byte ในส่วน C03; block ครบ = ผลก่อน/หลังตามตัวอย่าง; ช่องผิด = error ระบุช่องโดยไม่สะท้อนค่า
+- [x] RED frontend: ส่วน "ทดลองซื้อ Thai ESG" แสดงหลัง C03 READY เท่านั้น; ช่องจำนวน, ยืนยันยอดซื้อเดิมปีนี้, เงินสดคงเหลือ, ค่าใช้จ่ายจำเป็นต่อเดือน, หนี้/ภาระจ่าย (ใช้ component เดิมของเดโม); ผลคู่ก่อน/หลัง; เงื่อนไขจาก catalog; แก้ข้อมูลแล้วผลและ export เก่าหาย; response ค้างไม่เผยผล
+- [x] Implement แล้วรัน `uv run --locked python -m examples.check_web_demo` (ห้ามรัน node ตรง)
+  ↳ ทำแล้ว: HTTP RED 15 fail / 1 ผ่าน (ข้อที่ผ่านคือ request ไม่มี block = characterization ของ contract เดิม) → GREEN 16/16; frontend RED 7 fail → GREEN 66/66; ใช้ช่องเงินสด/ค่าใช้จ่าย/หนี้/ภาระจ่าย/ความคุ้มครองเดิมในหัวข้อ 3 (แสดงในโหมดประมาณการทั้งปี ซ่อนช่องงบทดลอง) ช่องจำนวน Thai ESG ไม่มี `name` เพื่อไม่ให้หลุดเข้า request เส้นทางเดิม; export ในโหมดทั้งปีเป็น snapshot what-if เมื่อ READY มิฉะนั้นเป็น snapshot C03 เดิม; 7 gates ผ่าน: Python 943, coverage 3,558/1,024 = 100%, frontend 66/66, ruff 216 ไฟล์, mypy 133 ไฟล์, build 0.4.0
 
 ## Task 4 — ตรวจรวมและส่งรีวิว
 

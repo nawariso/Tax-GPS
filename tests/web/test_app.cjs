@@ -181,6 +181,81 @@ test('C03 handles year-end and missing withholding',async()=>{
   assert.match(app.get('annualMissing').textContent,/หัก.*ช่วงที่เหลือ/);
   assert.equal(app.export().outputs.settlement_amount,null);
 });
+function setWhatIf(app, amount='100000') {
+  Object.entries({thai_esg_amount:amount, assets:'1000000', expenses:'30000'}).forEach(([k,v])=>{app.get(k).value=v;});
+}
+test('C04A what-if shows before and after for the chosen amount',async()=>{
+  const app=harness();setAnnualEstimate(app);setWhatIf(app);
+  app.get('confirmCutoff').click();await app.advanceTimers();
+  const body=JSON.parse(app.calls.at(-1).options.body);
+  assert.equal(body.thai_esg_what_if.amount,'100000');
+  assert.deepEqual(body.thai_esg_what_if.debts,[]);
+  assert.equal(body.thai_esg_what_if.assets,'1000000');
+  await app.resolve(app.calls.length-1);
+  assert.equal(app.get('annualPit').textContent,'81,100.00 บาท');
+  assert.equal(app.get('thaiEsgResult').hidden,false);
+  assert.equal(app.get('thaiEsgPitAfter').textContent,'62,075.00 บาท');
+  assert.equal(app.get('thaiEsgSaving').textContent,'19,025.00 บาท');
+  assert.match(app.get('thaiEsgSettlementLabel').textContent,/คืน/);
+  assert.equal(app.get('thaiEsgSettlement').textContent,'12,925.00 บาท');
+  assert.equal(app.get('thaiEsgCapacity').textContent,'297,150.00 บาท');
+  assert.match(app.get('thaiEsgConditions').textContent,/5 ปี/);
+  assert.match(app.get('thaiEsgConditions').textContent,/ไม่ใช่คำแนะนำ/);
+  assert.equal(app.get('thaiEsgStatus').textContent,'');
+  assert.equal(app.export().schema,'tax-gps-thai-esg-what-if/1');
+});
+test('C04A unknown amount keeps C03 visible and names the missing amount',async()=>{
+  const app=harness();setAnnualEstimate(app);setWhatIf(app,'');
+  app.get('confirmCutoff').click();await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.equal(app.get('annualPit').textContent,'81,100.00 บาท');
+  assert.match(app.get('thaiEsgStatus').textContent,/จำนวนเงินที่จะลองซื้อ Thai ESG/);
+  assert.equal(app.get('thaiEsgPitAfter').textContent,'—');
+  assert.equal(app.export().schema,'tax-gps-annual-estimate/1');
+});
+test('C04A over-capacity amount is not computed and shows the limit',async()=>{
+  const app=harness();setAnnualEstimate(app);setWhatIf(app,'297150.01');
+  app.get('confirmCutoff').click();await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.match(app.get('thaiEsgStatus').textContent,/เกินวงเงินสิทธิ/);
+  assert.equal(app.get('thaiEsgCapacity').textContent,'297,150.00 บาท');
+  assert.equal(app.get('thaiEsgPitAfter').textContent,'—');
+  assert.equal(app.get('thaiEsgSaving').textContent,'—');
+});
+test('C04A PVD capacity is labelled conservative',async()=>{
+  const app=harness();setAnnualEstimate(app);setWhatIf(app);
+  app.get('pvd_presence').value='true';
+  for(const [key,value] of Object.entries({employee_paid:'30000',wage_basis:'600000',fund_name:'Test fund',
+    registered_fund:'true',credited_in_tax_year:'true',single_employer:'true',single_fund:'true',
+    ordinary_article_rate:'true',normal_remittance:'true'}))app.get('pvd_'+key).value=value;
+  app.get('pvd_forecast_single_employer').value='true';
+  app.get('confirmCutoff').click();await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.equal(app.get('thaiEsgCapacity').textContent,'291,150.00 บาท');
+  assert.match(app.get('thaiEsgCapacityNote').textContent,/แบบระมัดระวัง/);
+  assert.equal(app.get('thaiEsgPitAfter').textContent,'57,575.00 บาท');
+});
+test('C04A edits and stale responses cannot publish an old what-if',async()=>{
+  const app=harness();setAnnualEstimate(app);setWhatIf(app);
+  app.get('confirmCutoff').click();await app.advanceTimers();
+  const pending=app.calls.length-1;
+  app.get('thai_esg_amount').value='50000';app.get('planner').listeners.input();
+  await app.resolve(pending);
+  assert.equal(app.export(),null);
+  await app.advanceTimers();await app.resolve(app.calls.length-1);
+  assert.equal(app.export().material.amount,'50000.00');
+});
+test('C04A amount field only appears in the annual route',async()=>{
+  const app=harness();
+  assert.equal(app.get('thaiEsgAmountField').hidden,true);
+  assert.equal(app.get('budgetField').hidden,false);
+  setAnnualEstimate(app);
+  assert.equal(app.get('thaiEsgAmountField').hidden,false);
+  assert.equal(app.get('budgetField').hidden,true);
+  assert.equal(app.get('financeGroup').hidden,false);
+});
+test('C04A page states the what-if is not a recommendation',async()=>{
+  const html=await (await fetch(base+'/')).text();
+  assert.match(html,/id="thaiEsgResult"/);
+  assert.match(html,/<input id="thai_esg_amount"(?![^>]*\bname=)[^>]*>/);
+});
 test('C02B conditional baseline shows every continuing obligation',async()=>{
   const app=harness();setRmf(app);app.recalculate();await app.resolve(app.calls.length-1);
   assert.equal(app.latest().planning_availability,'RMF_BASELINE_ONLY');

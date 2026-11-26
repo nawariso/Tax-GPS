@@ -230,21 +230,79 @@ def _parse_profile(
         if retirement.is_positive()
         else (),
     )
-    financial = FinancialProfile(
+    financial = _financial_profile(
+        assets=assets,
+        expenses=expenses,
+        debts=lists["debts"],
+        commitments=lists["commitments"],
+        required=scalars["required_coverage"],
+        existing=scalars["existing_coverage"],
+    )
+    return benefits, financial
+
+
+def _financial_profile(
+    *,
+    assets: Money | None,
+    expenses: Money | None,
+    debts: list[object],
+    commitments: list[object],
+    required: str,
+    existing: str,
+) -> FinancialProfile:
+    return FinancialProfile(
         liquid_assets=assets,
         monthly_essential_expenses=expenses,
-        debts=_debts(lists["debts"]),
-        committed_cash_needs=_commitments(lists["commitments"]),
+        debts=_debts(debts),
+        committed_cash_needs=_commitments(commitments),
         protection=ProtectionProfile(
-            required_life_coverage=amount(scalars["required_coverage"], "required_coverage")
-            if scalars["required_coverage"] != ""
+            required_life_coverage=amount(required, "required_coverage")
+            if required != ""
             else None,
-            existing_life_coverage=amount(scalars["existing_coverage"], "existing_coverage")
-            if scalars["existing_coverage"] != ""
+            existing_life_coverage=amount(existing, "existing_coverage")
+            if existing != ""
             else None,
         ),
     )
-    return benefits, financial
+
+
+WHAT_IF_FIELDS = frozenset(
+    {
+        "amount",
+        "assets",
+        "expenses",
+        "debts",
+        "commitments",
+        "required_coverage",
+        "existing_coverage",
+    }
+)
+
+
+def parse_thai_esg_what_if(value: object) -> tuple[Money | None, FinancialProfile]:
+    """Parse the optional C04A block; blank amounts stay unknown, never zero."""
+    if (
+        not isinstance(value, dict)
+        or set(value) != WHAT_IF_FIELDS
+        or not all(isinstance(value[key], list) for key in ("debts", "commitments"))
+    ):
+        raise invalid_input("thai_esg_what_if")
+    scalars = _strings(
+        {key: value[key] for key in WHAT_IF_FIELDS - {"debts", "commitments"}},
+        WHAT_IF_FIELDS - {"debts", "commitments"},
+        "thai_esg_what_if",
+    )
+    chosen = (
+        None if scalars["amount"] == "" else amount(scalars["amount"], "thai_esg_what_if.amount")
+    )
+    return chosen, _financial_profile(
+        assets=optional_amount(scalars["assets"], "assets"),
+        expenses=optional_amount(scalars["expenses"], "expenses"),
+        debts=cast(list[object], value["debts"]),
+        commitments=cast(list[object], value["commitments"]),
+        required=scalars["required_coverage"],
+        existing=scalars["existing_coverage"],
+    )
 
 
 def parse_profile(

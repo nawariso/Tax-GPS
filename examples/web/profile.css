@@ -50,3 +50,6 @@
 .annual-period .field:last-child { margin-bottom: 0; }
 #annualResult h2 { margin-bottom: 6px; }
 #annualResult .metrics { margin-top: 14px; }
+.what-if-facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 14px 0 0; }
+.what-if-facts dd { margin: 0; font-weight: 650; }
+.what-if-conditions { margin: 10px 0 0; padding-left: 1.2rem; }

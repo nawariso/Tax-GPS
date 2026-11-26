@@ -72,7 +72,7 @@ function selectComparison(id, checked, resultHash) {
   renderComparison(latest);return true;
 }
 function comparisonExport() {
-  if (annualMode()) return latest?.export ?? null;
+  if (annualMode()) return latest?.thai_esg_what_if?.export ?? latest?.export ?? null;
   if(['PVD_BASELINE_ONLY','RMF_BASELINE_ONLY'].includes(latest?.planning_availability))return {...latest,comparison_view:{version:'1',kind:'BASELINE_ONLY',result_hash:latest.tax_state.output_hash}};
   if (!latest || !latest.outcomes || latest.outcomes.result_hash !== comparisonResultHash) return null;
   return {...latest,comparison_view:{version:'1',kind:'USER_SELECTED_COMPARISON',result_hash:latest.outcomes.result_hash,selected_candidate_ids:comparisonRows(latest).filter(c => c.allocations.length > 0).map(c => c.candidate_id)}};
@@ -323,7 +323,8 @@ $('download').addEventListener('click', () => {
   const url = URL.createObjectURL(new Blob([JSON.stringify(exported,null,2)], {type:'application/json'}));
   const link = el('a');
   link.href = url;
-  link.download = annualMode() ? 'tax-gps-annual-estimate-2026.json' : 'tax-gps-demo-2026.json';
+  link.download = !annualMode() ? 'tax-gps-demo-2026.json'
+    : latest?.thai_esg_what_if?.export ? 'tax-gps-thai-esg-what-if-2026.json' : 'tax-gps-annual-estimate-2026.json';
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
